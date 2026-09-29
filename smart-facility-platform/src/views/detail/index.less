@@ -1,0 +1,376 @@
+.drawerPage {
+
+  .el-dialog__wrapper {
+    position: absolute;
+  }
+
+  .detail-handle {
+    .status {
+      margin-right: 22px;
+      height: 20px;
+      line-height: 20px;
+      display: inline-block;
+
+      i,
+      em {
+        display: inline-block;
+        font-style: normal;
+      }
+
+      em {
+        font-weight: 600;
+      }
+
+      .icon {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background-color: #000;
+        margin-right: 5px;
+        vertical-align: bottom;
+      }
+    }
+  }
+
+  .box {
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #444444;
+      line-height: 30px;
+      margin-bottom: 30px;
+
+      /deep/ .el-button {
+        float: right;
+        margin-right: 10px;
+        &:first-child{
+          margin-right: 0;
+        }
+      }
+      .icon-edit{
+        margin-right: 0;
+      }
+    }
+  }
+
+  .dateFilter {
+    .el-range-editor.el-input__inner {
+      height: 40px;
+      width: 220px;
+    }
+  }
+
+  .baseInfo {
+    .content,
+    /deep/ .content {
+      position: relative;
+      padding-left: 210px;
+      background-color: initial;
+      height: initial;
+
+      .equipmentIcon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 180px;
+        height: 100%;
+        border-radius: 3px;
+        text-align: center;
+        line-height: 1.5;
+
+        .iconfont {
+          font-size: 100px;
+        }
+      }
+
+      .pic {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 180px;
+        height: 100%;
+        // border: 1px solid #e5e5e5;
+        border-radius: 3px;
+
+        .equipmentImage {
+          width: 100%;
+          height: 100%;
+        }
+
+        .el-skeleton__image {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .desc {
+        .el-skeleton__text {
+          height: 20px;
+        }
+
+        .row {
+          display: flex;
+          justify-content: flex-start;
+          margin-top: 12px;
+
+          &:first-child {
+            margin: 0;
+          }
+
+          .col {
+            width: 300px;
+            color: #888888;
+            position: relative;
+
+            span {
+              color: #555555;
+            }
+
+            .cover-qrcodeNo{
+              width: 300px;
+              height: 18px;
+              background-color: #fff;
+              position: absolute;
+              bottom: 0;
+              right: 0;
+            }
+
+            .el-button{
+              span{
+                color: #1890ff;
+              }
+            }
+          }
+          .col-1{
+            width: 360px;
+          }
+        }
+      }
+    }
+  }
+
+  .equipmentBinded {
+    margin-top: 30px;
+    a {
+      margin-right: 20px;
+
+      i {
+        font-style: normal;
+        font-size: 14px;
+      }
+    }
+
+    .label {
+      width: 200px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #444444;
+    }
+  }
+
+  .useStatistics-box {
+    margin: 20px 0;
+    background-color: #ecf2f1;
+    border-radius: 3px;
+    padding: 20px;
+
+    .box {
+      margin: 0;
+
+      .box-item {
+        background-color: #fff;
+        height: 220px;
+        padding: 13px 20px;
+        border-radius: 3px;
+        box-shadow: 0 0 6px 0 rgba(172, 190, 218, 0.72);
+        position: relative;
+
+        .status {
+          width: 80px;
+          height: 80px;
+          line-height: 80px;
+          text-align: center;
+          border: 3px solid;
+          border-radius: 50%;
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          transform: rotate(30deg);
+
+          &.running {
+            color: #13ce66;
+            border-color: #13ce66;
+          }
+
+          &.standBy {
+            color: #e5e5e5;
+            border-color: #ff4949;
+          }
+        }
+
+        .box-item-header {
+          .name {
+            font-weight: 700;
+          }
+        }
+
+        .box-item-content {
+          .status-box {
+            padding: 40px 0 20px;
+            justify-content: space-between;
+
+            .status-box-item {
+              flex: 1;
+              text-align: center;
+              border-right: 1px solid #e5e5e5;
+
+              &:last-child {
+                border: none;
+              }
+
+              .item_header {
+                margin-bottom: 25px;
+              }
+
+              .item_content {
+                .text {
+                  color: #db943b;
+                  font-weight: 600;
+
+                  .value {
+                    font-size: 12px;
+                  }
+                }
+              }
+            }
+          }
+
+          .dateTime {
+            text-align: center;
+          }
+        }
+
+        &.history {
+          padding: 70px 0 30px;
+
+          .status-box-item {
+            flex: 1;
+
+            .name {
+              text-align: center;
+            }
+
+            border-right: 1px solid #e5e5e5;
+
+            &:last-child {
+              border: none;
+            }
+
+            .row {
+              position: relative;
+              margin: 0;
+              height: 40px;
+              line-height: 40px;
+              text-align: center;
+
+              .icon {
+                color: #db943b;
+                font-size: 16px;
+                margin-right: 5px;
+              }
+
+              .text {
+                margin-top: 15px;
+                color: #db943b;
+                font-weight: 600;
+
+                .value {
+                  font-size: 12px;
+                }
+              }
+            }
+          }
+        }
+
+        &.query {
+          .handleTool {
+            flex-wrap: nowrap;
+
+            .btn {
+              margin-right: 20px;
+              background-color: #db943b;
+              border-color: #db943b;
+            }
+
+            .el-range-editor.el-input__inner {
+              width: auto;
+            }
+          }
+
+          .box-item-content {
+            padding: 30px 10px;
+          }
+        }
+      }
+    }
+  }
+
+  .stateMonitor {
+    padding: 20px 30px;
+
+    .monitorBoxGroup {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      .monitorBox-item {
+        width: 240px;
+        padding: 12px 20px;
+        border-radius: 3px;
+        color: #fff;
+        background-color: #ff4949;
+        margin-left: 20px;
+        margin-top: 20px;
+
+        .header {
+          height: 20px;
+          line-height: 20px;
+          font-size: 12px;
+
+          .name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+          }
+        }
+
+        .num {
+          height: 60px;
+          line-height: 60px;
+          text-align: center;
+          font-size: 32px;
+          font-weight: bold;
+        }
+
+        .range {
+          font-size: 12px;
+          height: 32px;
+          line-height: 20px;
+        }
+
+        .unit {
+          float: right;
+
+          i {
+            font-style: normal;
+            color: #fff;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+}

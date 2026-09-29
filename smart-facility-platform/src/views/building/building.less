@@ -1,0 +1,310 @@
+@blue: #0170ED;
+.building{
+    position: relative;
+    background-color: #022e47;
+
+    .canvans-loading{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: #00000078;
+        z-index: 1;
+        .inner{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-align: center;
+            /deep/ .el-progress{
+                width: 200px;
+                .el-progress-bar__inner{
+                    background-color: @blue;
+                }
+                .el-progress__text{
+                    color: #fff;
+                    margin-left: 0;
+                    float: right;
+                    width: 48px;
+                }
+            }
+            p {
+                margin-top: 6px
+            };
+        }
+    }
+    .dv-loading{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #fff;
+    }
+    .header{
+        position: absolute;
+        top: 20px;
+        left: 10px;
+        .logo{
+            float: left;
+            cursor: pointer;
+            img{
+                height: 36px;
+                float: left;
+            }
+            h4{
+                color: #fff;
+                float: left;
+                line-height: 34px;
+                font-size: 24px;
+                margin: 0 0 0 10px;
+            }
+        }
+        .el-select{
+            float: left;
+            margin-left: 10px;
+            /deep/ .el-input__inner{
+                height: 34px;
+                // background-color: #6c8baa;
+                // border-color: #9e9e9e;
+                // color: #fff;
+            }
+            // /deep/ .el-scrollbar{
+            //     .el-scrollbar__wrap{
+            //         background-color: #6c8baa;
+            //         .el-select-dropdown__item.selected{
+            //             color: #fff;
+            //         }
+            //         .el-select-dropdown__item.hover{
+            //             color: #6c8baa;
+            //             background-color: #d9ecff;
+            //         }
+            //     }
+            // }
+        }
+
+    }
+    .datav-button {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        z-index: 1;
+        .el-button{
+            //width: 124px;
+            height: 40px;
+            line-height: 1;
+            background-image: url(../../assets/centerControl/dataV-btn.png);
+            background-color: initial;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            color: #fff;
+            border: none;
+            &:hover{
+                color: #00ffff;
+            }
+        }
+    }
+
+    .right-bg{
+        width: 200px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        background: initial; /* 针对不支持渐变的浏览器 */
+        background: -webkit-linear-gradient(left, #082d4700, #00243eb5, #00243e);
+        background: -o-linear-gradient(right, #082d4700, #00243eb5, #00243e);
+        background: -moz-linear-gradient(right, #082d4700, #00243eb5, #00243e);
+        background: linear-gradient(to right,#082d4700, #00243eb5, #00243e);
+        .right-btn{
+            position: absolute;
+            right: 5%;
+            bottom: 10%;
+            .floor-btn{
+                position: relative;
+                padding: 14% 44px 10% 0;
+                &::after{
+                    content: "";
+                    width: 2px;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    right: 44px;
+                    background-color: #ffffff4d;
+                    background: -webkit-linear-gradient(#ffffff24, #ffffff4d);
+                    background: -o-linear-gradient(#ffffff24, #ffffff4d);
+                    background: -moz-linear-gradient(#ffffff24, #ffffff4d);
+                    background: linear-gradient(#ffffff24, #ffffff4d);
+                }
+                .time{
+                    position: relative;
+                    .el-button{
+                        min-width: 108px;
+                        width: 100%;
+                        height: 54px;
+                        line-height: 20px;
+                        background-color: initial!important;
+                        border: none;
+                        color: #ffffffde!important;
+                        font-size: 16px;
+                        margin: 0 0 1% 0;
+                        padding-left: 10px;
+                        padding-right: 35px;
+                        text-align: right;
+                        &:hover{
+                            background-image: url(../../assets/centerControl/floor-btn-active.png);
+                            background-size: 100% 100%;
+                            color: #fff!important;
+                            &::after{
+                                width: 0;
+                            }
+                            &::before{
+                                content: "";
+                                width: 20px;
+                                height: 20px;
+                                background-image: url(../../assets/centerControl/floor-btn-circular.png);
+                                background-size: contain;
+                                position: absolute;
+                                bottom: -8px;
+                                right: -8px;
+                            }
+                        }
+                    }
+                    .dotted-line{
+                        width: 24px;
+                        height: 2px;
+                        background-image: url(../../assets/centerControl/dottedLine.png);
+                        background-size: 100% 100%;
+                        position: absolute;
+                        top: 50%;
+                        right: 0;
+                        transform: translateY(-50%);
+                    }
+                }
+            }
+            .icon{
+                text-align: right;
+                cursor: pointer;
+                img{
+                    width: 90px;
+                }
+            }
+            .building-btn{
+                position: absolute;
+                bottom: 16px;
+                right: 100px;
+                display: flex;
+                .el-button{
+                    min-width: 100px;
+                    height: 40px;
+                    background-image: url(../../assets/centerControl/building-btn.png);
+                    background-size: 100% 100%;
+                    background-repeat: no-repeat;
+                    background-color: initial!important;
+                    color: #fff!important;
+                    border: none;
+                    border-radius: 0;
+                    &:hover,
+                    &.active{
+                        color: #0FEAFE!important;
+                    }
+                }
+            }
+        }
+    }
+
+    // .buildingNum-btn{
+    //     background-color: rgba(255, 255, 255, 0.3);
+    //     border: 1px rgba(255, 255, 255, 0.44) solid;
+    //     position: absolute;
+    //     bottom: 6%;
+    //     left: 50%;
+    //     transform: translateX(-50%);
+    //     display: flex;
+    //     justify-content: center;
+    //     padding: 10px;
+    //     border-radius: 5px;
+    //     .el-button{
+    //         min-width: 80px;
+    //         height: 40px;
+    //         line-height: 1;
+    //         font-size: 14px;
+    //         border-radius: 4px;
+    //         background-color: #fff;
+    //         color: #555;
+    //         border-width: 0;
+    //         margin-right: 10px;
+    //         &:last-child{
+    //             margin-right: 0;
+    //         }
+    //         &:hover{
+    //             color: #fff!important;
+    //         }
+    //     }
+    //     .el-button+.el-button{
+    //         margin-left: 0;
+    //     }
+    //     .el-button:focus,
+    //     .el-button:hover,
+    //     .active{
+    //         color: #fff!important;
+    //         background-color: @blue;
+    //     }
+    //     &:hover{
+    //         opacity: 1;
+    //     }
+    // }
+
+    // .floor-btn{
+    //     position: absolute;
+    //     top: 50%;
+    //     right: 2%;
+    //     transform: translateY(-50%);
+    //     background-color: rgba(255, 255, 255, 0.3);
+    //     border: 1px rgba(255, 255, 255, 0.44) solid;
+    //     padding: 10px;
+    //     border-radius: 5px;
+    //     display: flex;
+    //     flex-direction: column;
+    //     .el-button{
+    //         min-width: 90px;
+    //         height: 30px;
+    //         line-height: 12px;
+    //         border-radius: 4px;
+    //         margin: 0 0 10px 0;
+    //         border: 0;
+    //         background-color: #fff;
+    //         color: #555;
+    //         &:last-child{
+    //             margin-bottom: 0;
+    //         }
+    //         &:hover{
+    //             color: #fff!important;
+    //         }
+    //     }
+    //     .el-button:focus,
+    //     .el-button:hover,
+    //     .active{
+    //         color: #fff;
+    //         background-color: @blue;
+    //         color: #fff!important;
+    //     }
+    //     &:hover{
+    //         opacity: 1;
+    //     }
+    // }
+}
+
+.building-fade-enter-active {
+    transition: all .3s ease;
+}
+.building-fade-leave-active {
+    transition: all .1s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.building-fade-enter, .building-fade-leave-to
+  /* .slide-fade-leave-active for below version 2.1.8 */ {
+    transform: translateX(10px);
+    opacity: 0;
+}

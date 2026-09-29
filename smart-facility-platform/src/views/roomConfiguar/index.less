@@ -1,0 +1,327 @@
+.errorTxt {
+    color:#EF4D4E!important;
+}
+.successTxt {
+    color: #11D3B1!important;
+}
+.offlineTxt{
+    color: #658CCD!important;
+}
+/deep/ .drawer-overview {
+    &.el-drawer{
+        min-width: initial;
+        background-color: transparent;
+    }
+    .el-drawer__body::-webkit-scrollbar {
+        width: 5px;
+    }
+
+      /* 滚动槽 */
+    .el-drawer__body::-webkit-scrollbar-track {
+        border-radius: 10px;
+    }
+
+    .el-drawer__body::-webkit-scrollbar-track-piece{
+        background-color: #0c7bae;
+    }
+
+      /* 滚动条滑块 */
+    .el-drawer__body::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: #00C5FD;
+    }
+    .roomOverview {
+        padding: 11px 18px;
+        background: #192552;
+        border-radius: 0 10px 10px 0;
+        color: #fff;
+        min-height: 100%;
+        .roomOverview-title {
+            line-height: 52px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 900;
+            background-image: url(../../assets/centerControl/roomOverview-title.png);
+            background-position: center;
+            background-size: 204px 52px;
+            background-repeat: no-repeat;
+            margin-top: 26px;
+            margin-bottom: 30px;
+        }
+        .box {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            padding-bottom: 18px;
+            margin-bottom: 24px;
+            font-size: 16px;
+            font-weight: 700;
+            flex-wrap: wrap;
+            position: relative;
+            color: #7987B9;
+            border-radius: 3px;
+            &::after {
+                display: block;
+            content: "";
+                position: absolute;
+                height: 1px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: #273567;
+            }
+            .item .status{
+                color: #B5CDEA;
+                font-size: 14px;
+            }
+        }
+        .statistics {
+            .num {
+                font-size: 28px;
+                margin-bottom: 5px;
+                span{
+                    font-size: 12px;
+                    color: #B5CDEA;
+                }
+            }
+        }
+        .statusSet {
+            .status-item {
+                margin: 0 20px 20px 0;
+            }
+            .name {
+                margin-bottom: 5px;
+            }
+        }
+        .roomList {
+            .roomList-item {
+                cursor: pointer;
+            }
+            .box {
+                display: block;
+                font-size: 14px;
+            }
+            .content {
+                margin-bottom: 8px;
+            }
+            .boxPadding{
+                padding: 0 20px;
+            }
+            .flexBox {
+                display: flex;
+                div:last-child {
+                    flex: 1;
+                    text-align: right;
+                }
+                .title {
+                    font-size: 18px;
+                    margin-bottom: 20px;
+                    color: #00C5FD;
+                }
+                .name{
+                    font-size: 14px;
+                    em{
+                        color: #fff;
+                    }
+                }
+                em,
+                span {
+                    margin-left: 5px;
+                    font-style: normal;
+                    font-size: 18px;
+                }
+            }
+        }
+    }
+}
+
+.desinerLayout {
+    &.designer_fullScreen {
+        position: fixed;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(155deg, #041520 0%, #1b4460 100%)
+        // background: url("../../assets/centerControl/floor-bg.png") no-repeat;
+        // background-size: 100%;
+    }
+    .designerHeader {
+        height: 80px;
+        color: #42def5;
+        font-size: 24px;
+        font-weight: 600;
+        position: relative;
+        line-height: 80px;
+        text-align: center;
+    }
+    .unfolder {
+        position: absolute;
+        width: 26px;
+        height: 22px;
+        background: url(../../assets/centerControl/unfold.png) no-repeat;
+        background-size: contain;
+        left: 10px;
+        top: 24px;
+        cursor: pointer;
+        &.folderUp {
+            transform: rotate(180deg);
+        }
+    }
+    .tab{
+        position: absolute;
+        top: 20px;
+        left: 60px;
+        div{
+            float: left;
+            font-size: 14px;
+            width: 96px;
+            height: 32px;
+            line-height: 32px;
+            background-image: url(../../assets/centerControl/right-top-btn.png);
+            background-repeat: no-repeat;
+            background-size: contain;
+            color: #70d8ff;
+            cursor: pointer;
+            margin-right: 10px;
+            &.active,
+            &:hover{
+                color: #0fedd5;
+                background-image: url(../../assets/centerControl/right-top-btn-hover.png);
+            }
+            &:first-child{
+                width: 60px;
+                background-image: url(../../assets/centerControl/room-all.png);
+            }
+        }
+    }
+    .nav {
+        position: absolute;
+        font-size: 14px;
+        top: 24px;
+        right: 0;
+        color: #fff;
+        overflow: hidden;
+        box-sizing: border-box;
+        display: flex;
+        border-radius: 3px;
+
+        .navItem {
+            width: 100px;
+            height: 34px;
+            line-height: 34px;
+            background-image: url(../../assets/centerControl/right-top-btn.png);
+            background-repeat: no-repeat;
+            background-size: 100%;
+            margin-right: 10px;
+            cursor: pointer;
+            color: #70d8ff;
+
+            &:hover{
+                color: #0fedd5;
+                background-image: url(../../assets/centerControl/right-top-btn-hover.png);
+            }
+
+            &:last-child {
+                border: none;
+            }
+
+            &.back{
+                background: initial;
+                width: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #FFFFFF;
+                &:hover{
+                    color: #0fedd5;
+                    i{
+                      background-image: url(../../assets/centerControl/icon-back-hover.svg);
+                    }
+                }
+                i{
+                    width: 16px;
+                    height: 16px;
+                    display: block;
+                    background-image: url(../../assets/centerControl/icon-back.svg);
+                    background-repeat: no-repeat;
+                    background-size: 100%;
+                    margin-right: 6px;
+                }
+            }
+        }
+    }
+  }
+  .layout {
+        height: calc(100% - 80px);
+        position: relative;
+        overflow: auto;
+        /deep/ .konvajs-content{
+            position: absolute !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.12);
+        }
+        .dragVirtualdom {
+            height: 115px;
+            position: absolute;
+            user-select: none;
+            z-index: 999;
+        .icon {
+            height: 85px;
+        }
+        .name {
+            margin-top: 8px;
+            text-align: center;
+        }
+    }
+
+    .layout-left {
+        position: absolute;
+        width: 200px;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        border-right: 1px solid #e5e5e5;
+        .title {
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .container {
+            height: calc(100% - 45px);
+            padding-right: 8px;
+            /deep/.el-scrollbar__wrap {
+                overflow-x: hidden;
+            }
+            .designerGroup {
+                padding: 0 2px 0 10px;
+                .designerItemWrap {
+                    margin-top: 20px;
+                    height: 115px;
+                    position: relative;
+                    user-select: none;
+                }
+                .designerItem {
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    cursor: grab;
+                    .icon {
+                        height: 85px;
+                    }
+                    .name {
+                        margin-top: 8px;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+    .layout-right {
+        height: 100%;
+    }
+  }

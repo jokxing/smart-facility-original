@@ -1,0 +1,417 @@
+@import "../../style/variable.less";
+
+.pipetteGun{
+    /deep/ .tab-1{
+        display: flex;
+        justify-content: space-between;
+        .el-button{
+            // padding: 8px 16px;
+            width: 60px;
+            height: 30px;
+            padding: 0;
+        }
+        .el-date-editor{
+            width: 280px;
+            height: 30px;
+            //padding-top: 0;
+            //padding-bottom: 0;
+            margin-left: 10px;
+        }
+    }
+    /deep/ .tab-2{
+        display: flex;
+        div{
+            line-height: 30px;
+            margin-right: 16px;
+            cursor: pointer;
+            &:last-child{
+                margin-right: 0;
+            }
+            &.active{
+                color: @subjectColor;
+                position: relative;
+                &::after{
+                    content: '';
+                    width: 100%;
+                    height: 2px;
+                    background-color: @subjectColor;
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    border-radius: 5px;
+                }
+            }
+        }
+    }
+
+    /deep/ .title-h3{
+        color: @subjectColor;
+        font-size: 18px;
+        line-height: 40px;
+        position: relative;
+        padding-left: 12px;
+        &::after{
+            content: '';
+            width: 4px;
+            height: 18px;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 5px;
+            background-color: @subjectColor;
+        }
+    }
+
+    /deep/ .el-button{
+        &.is-active{
+            background-color: @subjectColor!important;
+            color: #fff!important;
+        }
+    }
+
+    .pipetteGun-top{
+        /deep/ .device-right-icon{
+            right: 10px!important;
+        }
+
+        /deep/ .device-normal{
+            background-color: #F1F5FF;
+            .type-list-num .num{
+                color: #3078F0!important;
+            }
+            &.is-active .type-list-num .num{
+                color: #fff!important;
+            }
+        }
+        /deep/ .device-normal-icon{
+            background-color: #D7E6FF;
+            i{
+                color: #3078F0;
+            }
+        }
+
+        /deep/ .device-alarm{
+            background-color: #FFF6ED;
+            .type-list-num .num{
+                color: #FA9B43!important;
+            }
+            &.is-active .type-list-num .num{
+                color: #fff!important;
+            }
+        }
+        /deep/ .device-alarm-icon{
+            background-color: #FFE6CF;
+            i{
+                color: #FA9B43;
+            }
+        }
+
+        /deep/ .device-offline{
+            background-color: #FFE9E9;
+            .type-list-num .num{
+                color: #EF4D4E!important;
+            }
+            &.is-active .type-list-num .num{
+                color: #fff!important;
+            }
+        }
+        /deep/ .device-offline-icon{
+            background-color: #FDD5D5;
+            i{
+                color: #EF4D4E;
+            }
+        }
+
+        /deep/ .bottom-type-list{
+            .type-list-num{
+                color: #666!important;
+            }
+        }
+
+        /deep/ .device-right-icon i{
+            font-size: 30px!important;
+        }
+
+        /deep/ .total .total-type .is-active .type-list-num{
+            color: #fff!important;
+        }
+    }
+
+    .statistics{
+        display: flex;
+        justify-content: space-between;
+        /deep/ .more{
+            color: #888888;
+        }
+        .session-half{
+            width: 49%;
+            padding-top: 10px;
+        }
+        /deep/ h3{
+            line-height: 40px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        /deep/ .echarts-box{
+            margin-top: 20px;
+            height: 200px
+        }
+
+        /deep/ .not-returned{
+            width: 85%!important;
+            margin: 50px auto 0;
+            p{
+                color: #555555;
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+            .box{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                .el-progress{
+                    width: 88%;
+                    display: flex;
+                    align-items: center;
+                    .el-progress-bar__outer{
+                        border-radius: initial;
+                    }
+                    .el-progress-bar__inner{
+                        background-color: #EF4D4E;
+                        border-radius: initial;
+                    }
+                    .el-progress__text{
+                        color: #EF4D4E;
+                        font-size: 18px!important;
+                        margin-left: 20px;
+                    }
+                }
+                span{
+                    font-size: 14px;
+                }
+            }
+        }
+
+        // /deep/ .el-date-editor{
+        //     width: 280px;
+        //     margin-left: 10px;
+        // }
+        
+        /deep/ .query-date{
+            display: flex;
+            .num{
+                display: inline-block;
+                span{
+                    font-size: 12px;
+                    margin: 0 6px;
+                }
+                .el-input-number--medium{
+                    width: 124px;
+                }
+            }
+            .el-button{
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+    }
+    .next-card{
+        margin-bottom: 28px;
+    }
+    .operation{
+        .el-button{
+            padding: 0
+        }
+    }
+
+    /deep/ .gun-card{
+        display: flex;
+        justify-content: space-around;
+        & > div{
+            width: 144px;
+            height: 174px;
+            background-image: url(../../assets/gun/yellow-bg.png);
+            background-repeat: no-repeat;
+            background-size: 100%;
+            p{
+                margin-top: 30px;
+                text-align: center;
+                font-size: 16px;
+                color: #555;
+            }
+            h1{
+                font-size: 40px;
+                color: #FE9700;
+                text-align: center;
+                font-weight: initial;
+                margin-top: 5px;
+                span{
+                    font-size: 14px;
+                    color: #555;
+                }
+            }
+            .detail{
+                color: #FE9700;
+                text-align: center;
+                margin-top: 15px;
+                cursor: pointer;
+            }
+        }
+        &.blue{
+            & > div{
+                background-image: url(../../assets/gun/blue-bg.png);
+                h1{
+                    color: @subjectColor;
+                }
+                .detail{
+                    color: @subjectColor;
+                }
+            }
+        }
+    }
+}
+
+/deep/ .pipetteGun-dialog{
+    .el-form-item{
+        margin-bottom: 12px;
+    }
+    .el-dialog__body{
+        padding: 10px 20px;
+    }
+}
+
+.tab-2{
+    display: flex;
+    div{
+        line-height: 30px;
+        margin-right: 28px;
+        cursor: pointer;
+        &:last-child{
+            margin-right: 0;
+        }
+        &.active{
+            color: @subjectColor;
+            position: relative;
+            &::after{
+                content: '';
+                width: 100%;
+                height: 2px;
+                background-color: @subjectColor;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                border-radius: 5px;
+            }
+        }
+    }
+}
+
+/deep/ .pipetteGun-drawer{
+    .detail-switch{
+        position: absolute;
+        top: 0;
+    }
+    .layout-row{
+        display: flex;
+        align-items: center;
+        .pic{
+            width: 120px;
+            height: 125px;
+            background-color: #EAF2FE;
+            border-radius: 5px;
+            margin-right: 40px;
+        }
+        
+        .gun-rack-pic{
+            width: 238px;
+            text-align: center;
+            margin-right: 10px;
+            & > div{
+                width: 140px;
+                margin: 0 auto;
+                position: relative;
+                .gun-rack-img{
+                    width: 100%;
+                }
+                .gun-img{
+                    width: 20px;
+                    position: absolute;
+                    top: -14px;
+                    -webkit-animation: scaleout 2s infinite ease-in-out;
+                    animation: scaleout 2s infinite ease-in-out;
+                    &.cardNo-1{
+                        left: 0;
+                    }
+                    &.cardNo-2{
+                        left: 18px;
+                    }
+                    &.cardNo-3{
+                        left: 34px;
+                    }
+                    &.cardNo-4{
+                        left: 50px;
+                    }
+                    &.cardNo-5{
+                        left: 66px;
+                    }
+                    &.cardNo-6{
+                        left: 82px;
+                    }
+                    &.cardNo-7{
+                        left: 98px;
+                    }
+                    &.cardNo-8{
+                        left: 114px;
+                    }
+                }
+                @-webkit-keyframes scaleout {
+                    0% {
+                        opacity: 0;
+                    }
+                    50% {
+                        opacity: 1;
+                    }
+                    100% {
+                        opacity: 0;
+                    }
+                }
+                    
+                @keyframes scaleout {
+                    0% {
+                        opacity: 0;
+                    }
+                    50% {
+                        opacity: 1;
+                    }
+                    100% {
+                        opacity: 0;
+                    }
+                }
+            }
+            p{
+                font-size: 12px;
+                line-height: 20px;
+            }
+        }
+    }
+
+    .el-table td.el-table__cell div.blue{
+        color: #3078F0;
+    }
+
+    .el-descriptions-row{
+        td:last-child{
+            width: 400px;
+        }
+        .el-descriptions-item__label:not(.is-bordered-label){
+            width: 70px;
+            line-height: 26px;
+            &.big-width{
+                width: 100px;
+            }
+        }
+    }
+
+}

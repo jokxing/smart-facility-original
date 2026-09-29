@@ -1,0 +1,199 @@
+.systemPage {
+  position: absolute;
+  top: 60px;
+  bottom: 0;
+  left: 240px;
+  right: 0;
+  overflow-y: auto;
+  .page-content {
+    height: calc(100% - 63px);
+    position: relative;
+    padding: 30px;
+    .systemPage_left {
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 200px;
+      overflow: hidden;
+      padding:  0  0 60px;
+
+      .btn-group {
+        height: 60px;
+        margin: 0 auto;
+      }
+      .affix {
+        position: absolute;
+        left: 0;
+        right: 0;
+        padding: 10px 10px;
+        .el-button {
+          i {
+            font-size: 14px;
+            color: #ffffff;
+          }
+        }
+        &.top {
+          color: aqua;
+          top: 0;
+
+          .companyBtn {
+            background-color: #c79f7e;
+            color: #ffffff;
+            border-color: #c79f7e;
+            padding: 0 3px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+
+            &:hover {
+              background-color: rgba(199, 159, 126, 0.7);
+            }
+          }
+          &.btn-group {
+            color: red;
+            &::after {
+              display: block;
+              content: "";
+              height: 1px;
+              position: absolute;
+              background-color: #e5e5e5;
+              bottom: 0;
+              left: 0;
+              right: 0;
+            }
+          }
+        }
+        &.bottom {
+          bottom: 0;
+          &.btn-group {
+            &::before {
+              display: block;
+              content: "";
+              height: 1px;
+              background-color: #e5e5e5;
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+            }
+          }
+        }
+      }
+
+      &::after {
+        display: block;
+        content: "";
+        width: 1px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background-color: #e5e5e5;
+      }
+      .el-scrollbar__wrap {
+        overflow-x: hidden;
+      }
+      .el-menu {
+        border: none;
+      }
+    }
+    .systemPage_right {
+      padding: 20px 30px;
+      height: 100%;
+      position: relative;
+      overflow: auto;
+      .systemPage_right_header {
+        height: 40px;
+        line-height: 40px;
+        .title {
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .icon {
+          margin: 0 5px 0 20px;
+        }
+      }
+      .systemPage_right_content{
+        height: calc(100% - 80px);
+        .el-scrollbar__wrap {
+          overflow-x: hidden;
+        }
+      }
+      .systemPage_right_footer{
+        position: absolute;
+        height: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10px 0;
+        .btn-group{
+          width: 200px;
+          margin: 0 auto;
+        }
+        &::before{
+          display: block;
+          content: '';
+          background-color:#e5e5e5;
+          height: 1px;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+        }
+      }
+    }
+  }
+  .page-content-left{
+    padding-left: 200px;
+  }
+}
+
+.department {
+  margin-top: 10px;
+  width: 100%;
+  .page-content {
+    display: flex;
+
+    .system-page-left {
+      width: 250px;
+      height: calc(100vh - 180px);
+      margin-right: 20px;
+
+      .scrollbar {
+        height: calc(100% - 150px);
+        margin-bottom: 40px;
+        overflow: auto;
+      }
+
+      h4 {
+        line-height: 30px;
+        margin-bottom: 10px;
+      }
+      p {
+        width: 100%;
+        font-weight: bold;
+        color: #303F9F;
+        line-height: 30px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+    }
+
+    .system-page-right {
+      width: calc(100% - 270px);
+    }
+  }
+}
+
+.system-input-address {
+  width: 50% !important;
+}
+
+.system-input {
+  width: 80%;
+}
+
+

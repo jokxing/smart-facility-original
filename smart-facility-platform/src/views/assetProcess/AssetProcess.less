@@ -1,0 +1,39 @@
+@import "../../style/variable.less";
+.asset-process{
+    /deep/ .el-tabs{
+        padding: 0 40px;
+        background-color: #fff;
+        margin-top: 20px;
+        .el-tabs__header{
+            margin-bottom: 0;
+            .el-tabs__nav{
+                line-height: 50px;
+            }
+            .el-tabs__nav-wrap::after{
+                background-color: initial;
+            }
+        }
+    }
+}
+
+/deep/ .approval-status{
+    padding: 5px 12px;
+    border-radius: 20px;
+    background-color: #eee;
+    display: inline-block;
+    &.naColor{
+        background-color: @naBgColor;
+    }
+    &.abnormal{
+        background-color: @abnormalBg;
+    }
+    &.normal{
+        background-color: @normalBg;
+    }
+    &.withdraw{
+        background-color: @withdrawBg;
+    }
+    &.completed{
+        background-color: @completedBg;
+    }
+}

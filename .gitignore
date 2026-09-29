@@ -1,0 +1,41 @@
+# Dependencies and generated output (all projects)
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.temp/
+.tmp/
+unpackage/
+
+# Local environment files; only the reviewed demo config is tracked
+.env
+.env.*
+!/smart-facility-platform/.env.demo
+
+# Credentials and developer-specific miniapp settings
+.npmrc
+.yarnrc
+.yarnrc.yml
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+project.private.config.json
+
+# Logs and local editor / OS metadata
+*.log
+*.tsbuildinfo
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Legacy backup utilities are not part of the demo source
+/smart-facility-platform/public/backupSuite/

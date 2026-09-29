@@ -1,0 +1,249 @@
+@import "variable";
+
+.el-table th.el-table__cell {
+  color: #444444;
+  font-size: @font14;
+  background-color: #F1F6FF !important;
+
+}
+.el-cascader {
+  .el-cascader__tags {
+    width: 66% !important;
+    flex-wrap: nowrap !important;
+  }
+}
+.el-table th.el-table__cell>.cell {
+  white-space: nowrap;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-input-group--append {
+  .el-input__inner {
+    border-right: 0;
+  }
+}
+.el-input__inner {
+  height: 40px !important;
+}
+.el-pagination {
+  .el-input__inner {
+    height: 28px !important;
+  }
+  .el-button {
+    height: 28px !important;
+  }
+}
+//.el-input__inner {
+//  border: none !important;
+//  background: #F4F4F9;
+//}
+//
+//.el-input--medium .el-input__inner,
+//.select-change .el-input__inner,
+//.el-range-editor--medium .el-range-input,
+//.el-range-editor--medium.el-input__inner {
+//  background: #F4F4F9 !important;
+//}
+//.el-textarea__inner{
+//  background: #F4F4F9!important;
+//  border: none !important;
+//}
+
+.el-tree[data-v-e8604a26] .is-current .el-tree-node__label {
+  color: @subjectColor !important;
+}
+.el-select-dropdown__item.selected {
+  color: @subjectColor !important;
+
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+  color: @subjectColor !important;
+}
+
+.el-tabs__item.is-active {
+  color: @subjectColor !important;
+}
+
+.el-tabs__item.is-top:hover {
+  color: @subjectColor;  //修改鼠标移动到表头时候字体颜色，默认淡蓝色
+  cursor: pointer;  //鼠标移动到表头时候鼠标样式，默认小手
+}
+
+.el-tabs__active-bar {
+  background-color: @subjectColor !important;
+}
+
+.el-button--default{
+  border-color: #EEF1FF !important;
+  background-color: #EEF1FF!important;
+  color: @subjectColor !important;
+}
+
+.el-radio-button__orig-radio:checked + .el-radio-button__inner {
+  background: @subjectColor !important;
+  border-color: @subjectColor !important;
+}
+
+.el-row {
+  width: 100% !important;
+}
+
+.el-drawer.btt, .el-drawer.ttb, .el-drawer__container {
+  min-width: 1140px;
+}
+
+.el-button--primary {
+  background: @subjectColor !important;
+  border-color: @subjectColor !important;
+  color: @white !important;
+}
+
+.el-input-group__append {
+  padding: 0 20px !important;
+  color: @white !important;
+  background: @subjectColor !important;
+  border-right: 0;
+  .el-button {
+    height: 35px;
+  }
+
+  i {
+    color: @white;
+  }
+}
+
+.el-textarea__inner {
+  font-family: "Microsoft YaHei", "微软雅黑" !important;
+}
+
+.el-switch__core {
+  width: 40px !important;
+}
+
+.el-divider--horizontal {
+  margin: 16px 0 16px !important;
+}
+
+.el-switch.is-checked .el-switch__core {
+  border-color: @subjectColor !important;
+  background-color: @subjectColor !important;
+}
+
+/deep/ .el-dropdown-link {
+  line-height: 2.5 !important;
+  text-align: center;
+  cursor: pointer;
+  color: @blue;
+  font-size: 28px !important;
+}
+
+
+.el-dialog__wrapper .el-dialog {
+  width: 550px;
+}
+
+.el-dialog__title {
+  position: relative;
+  color: @subjectColor !important;
+  line-height: 15px;
+  font-weight: 400;
+
+  &::before {
+    content: "";
+    width: 4px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 2px;
+    background: @subjectColor;
+    position: absolute;
+    left: -20px;
+    top: 5px;
+  }
+}
+
+.el-message-box__title {
+  position: relative;
+  color: @subjectColor !important;
+  line-height: 15px;
+  font-weight: 400;
+
+  &::before {
+    content: "";
+    width: 4px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 2px;
+    background: @subjectColor;
+    position: absolute;
+    left: -16px;
+    top: 1px;
+  }
+
+}
+
+.el-form-item__label {
+  width: 100px;
+}
+
+.el-drawer {
+  min-width: 1042px;
+}
+
+.el-switch__label.is-active {
+  color: #303133 !important;
+}
+
+
+/deep/ .el-drawer__header > :first-child {
+  font-weight: 600;
+  font-size: 18px;
+  color: #303133;
+}
+
+/deep/ .el-table .el-table__cell {
+  padding: 9.5px 0 9.5px 0;
+}
+
+/deep/ .el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+}
+
+.el-descriptions-item__label:not(.is-bordered-label) {
+  width: 100px;
+  font-size: 14px;
+  color: #666666;
+  margin-right: 0 !important;
+  display: inline-block !important;
+  &.label-big{
+    width: 110px;
+  }
+}
+
+.el-descriptions-item__content {
+  font-size: 16px;
+  color: #666666;
+}
+
+.el-range-separator {
+  width: 20px !important;
+}
+
+.el-descriptions__title {
+  font-size: @font18 !important;
+  font-weight: @fwbold !important;
+  color: #444444 !important;
+  line-height: 30px;
+}
+
+.el-dialog__body {
+  border-bottom: 1px #F0F2FC solid;
+}
+
+.el-dialog__footer {
+  padding: 20px !important;
+}

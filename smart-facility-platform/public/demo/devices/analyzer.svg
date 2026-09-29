@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="144" viewBox="0 0 128 144" role="img" aria-label="台式检测仪">
+<title>台式检测仪</title>
+<!-- Original demo artwork. Front/control edge faces down. No live values or status. -->
+<defs><linearGradient id="case" x2=".8" y2="1"><stop stop-color="#edf4f5"/><stop offset="1" stop-color="#adc3cc"/></linearGradient><linearGradient id="glass" x2="1" y2="1"><stop stop-color="#173f54"/><stop offset="1" stop-color="#357087"/></linearGradient></defs>
+<rect x="16" y="17" width="100" height="116" rx="11" fill="#0b2233" opacity=".22"/>
+<path d="M12 28Q12 16 24 16H102Q112 16 112 28V116L102 128H23L12 116Z" fill="#668897" stroke="#294b60" stroke-width="3"/>
+<rect x="12" y="12" width="100" height="108" rx="10" fill="url(#case)" stroke="#294b60" stroke-width="3"/>
+<path d="M21 20H103" stroke="#fff" stroke-opacity=".8" stroke-width="2"/>
+<rect x="23" y="25" width="45" height="54" rx="5" fill="#7698a7" stroke="#547686" stroke-width="2"/>
+<circle cx="45.5" cy="51" r="16" fill="#193f52" stroke="#c6d9df" stroke-width="3"/>
+<circle cx="45.5" cy="51" r="8" fill="#6f95a4"/><path d="M45 39v24M33 51h24" stroke="#b6ced6" stroke-width="2"/>
+<path d="M82 30h17M82 37h17M82 44h17M82 51h17M82 58h17" stroke="#7897a5" stroke-width="3" stroke-linecap="round"/>
+<rect x="24" y="89" width="53" height="20" rx="3" fill="url(#glass)" stroke="#557887" stroke-width="2"/>
+<path d="M29 94h20" stroke="#6b9ead" stroke-width="2"/><circle cx="94" cy="99" r="8" fill="#dce7e9" stroke="#668b9d" stroke-width="3"/>
+<path d="M94 94v4" stroke="#456d81" stroke-width="2"/>
+</svg>

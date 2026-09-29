@@ -1,0 +1,212 @@
+.page{
+  .page-header{
+    height: 63px;
+    // line-height: 63px;
+    // padding: 0 36px;
+    // border-bottom: 1px solid #e5e5e5;
+    position: relative;
+    z-index: 3001;
+    .page-title{
+      font-size: 18px;
+      font-weight: 600;
+    }
+    &::before{
+      // display: inline-block;
+      // content: '';
+      height: 18px;
+      width: 4px;
+      background-color: #00c1de;
+      position: absolute;
+      top: 50%;
+      left:20px;
+      transform: translateY(-50%);
+    }
+    .icon{
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      line-height: 40px;
+      text-align: center;
+      cursor: pointer;
+      i{
+        color:#1890ff;
+      }
+    }
+  }
+}
+
+
+.select-mutiple-default{
+  .el-tag{
+    height: 32px;
+    line-height: 32px;
+  }
+}
+
+
+//弹窗基础样式
+.modal-default{
+  color: #252629;
+  .el-dialog__body{
+    padding: 0 0;
+  }
+  .el-dialog__footer{
+    position: relative;
+    padding: 15px 15px;
+
+    .el-button{
+      padding: 0 20px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 3px;
+    }
+    &::before{
+      display: block;
+      content: '';
+      height: 1px;
+      background-color:#e5e5e5;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 999;
+    }
+  }
+
+  .modal-default-body{
+    // height: 460px;
+    position: relative;
+    .el-input__inner,.el-textarea__inner{
+      border-radius: 3px;
+    }
+
+    .el-scrollbar__wrap{
+      overflow-x: hidden;
+      max-height: 460px;
+      .modal-default-content{
+        padding: 20px 30px;
+        .el-form-item__label{
+          color: #252629;
+          font-weight: 600;
+          line-height: 40px;
+        }
+        .el-form-item__content{
+          line-height: 40px;
+        }
+        .el-range-editor{
+          &.el-input__inner{
+            height: 40px;
+            .el-range-separator{
+              line-height: 32px;
+            }
+          }
+        }
+
+        .el-select{
+          width: 200px;
+          height: 40px;
+          .el-input__inner{
+            height: 40px;
+            line-height: 40px;
+          }
+        }
+        .el-input{
+          width: 200px;
+          .el-input__inner{
+            height: 40px;
+            line-height: 40px;
+          }
+        }
+        .input-block{
+          .el-input{
+            width: 100%;
+          }
+        }
+
+
+        .el-input-number{
+          width: 200px;
+          line-height: 40px;
+          .el-input-number__decrease,.el-input-number__increase{
+            height: 38px;
+          }
+        }
+
+        .input-row-block{
+          .el-input, .el-select, .el-input-number{
+            width: 100%;
+          }
+        }
+
+        .avatar-uploader{
+          .el-upload{
+            border: 1px solid #e5e5e5;
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            &:hover{
+              border-color:#409EFF;
+            }
+            .avatar-uploader-icon{
+              width:90px;
+              height: 90px;
+              line-height: 90px;
+              font-size: 32px;
+              color: #252629;
+            }
+            .avatar{
+              width: 90px;
+              height: 90px;
+            }
+          }
+
+        }
+
+      }
+    }
+      &::before{
+        display: block;
+        content: '';
+        height: 1px;
+        background-color:#e5e5e5;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 999;
+      }
+
+  }
+}
+
+//模拟表单label
+.input-row-label{
+  color: #252629;
+  font-weight: 600;
+  line-height: 40px;
+}
+
+//按钮基础样式
+.btn-default{
+  height: 40px;
+  line-height: 40px;
+  padding: 0 15px;
+  border-radius: 3px;
+}
+.btn-default-block{
+  display: block;
+  width: 100%;
+}
+.gap-default-left{
+  margin-left: 20px;
+}
+.system-edit {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  z-index: 6;
+}

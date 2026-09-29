@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="144" viewBox="0 0 128 144" role="img" aria-label="实验室冷藏柜">
+<title>实验室冷藏柜</title>
+<!-- Original demo artwork. Front/control edge faces down. No live values or status. -->
+<defs><linearGradient id="case" x2=".8" y2="1"><stop stop-color="#edf4f5"/><stop offset="1" stop-color="#adc3cc"/></linearGradient><linearGradient id="glass" x2="1" y2="1"><stop stop-color="#173f54"/><stop offset="1" stop-color="#357087"/></linearGradient></defs>
+<rect x="16" y="17" width="100" height="116" rx="11" fill="#0b2233" opacity=".22"/>
+<rect x="19" y="14" width="90" height="115" rx="7" fill="#648595" stroke="#294b60" stroke-width="3"/>
+<rect x="16" y="10" width="90" height="112" rx="7" fill="url(#case)" stroke="#294b60" stroke-width="3"/>
+<rect x="24" y="18" width="74" height="68" rx="4" fill="#cadbe0" stroke="#8eabb8" stroke-width="2"/>
+<path d="M31 28h60M31 37h60M31 46h60M31 55h60M31 64h60M31 73h60" stroke="#9db6c0" stroke-width="2"/>
+<path d="M17 92h88" stroke="#53788b" stroke-width="3"/>
+<rect x="26" y="99" width="29" height="13" rx="2" fill="url(#glass)"/>
+<path d="M72 101h21" stroke="#53788b" stroke-width="6" stroke-linecap="round"/><path d="M72 99h21" stroke="#e6f0f2" stroke-width="3" stroke-linecap="round"/>
+<path d="M33 123v6M88 123v6" stroke="#284b61" stroke-width="5"/>
+<path d="M110 29v32M110 78v22" stroke="#b9cfd7" stroke-width="3"/>
+</svg>

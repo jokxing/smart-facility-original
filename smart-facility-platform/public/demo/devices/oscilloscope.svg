@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="144" viewBox="0 0 128 144" role="img" aria-label="示波器">
+<title>示波器</title>
+<!-- Original stylized demo artwork, no live readings or status indicators. -->
+<defs><linearGradient id="case" x2=".8" y2="1"><stop stop-color="#edf4f5"/><stop offset="1" stop-color="#adc3cc"/></linearGradient><linearGradient id="glass" x2="1" y2="1"><stop stop-color="#173f54"/><stop offset="1" stop-color="#357087"/></linearGradient></defs>
+<rect x="10" y="29" width="112" height="98" rx="9" fill="#0b2233" opacity=".22"/>
+<path d="M30 25V15h66v10" fill="none" stroke="#486c7f" stroke-width="7" stroke-linejoin="round"/>
+<rect x="7" y="25" width="112" height="96" rx="8" fill="#668797" stroke="#294b60" stroke-width="3"/>
+<rect x="7" y="21" width="112" height="91" rx="8" fill="url(#case)" stroke="#294b60" stroke-width="3"/>
+<rect x="17" y="33" width="64" height="58" rx="4" fill="url(#glass)" stroke="#628697" stroke-width="3"/>
+<path d="M22 46h54M22 60h54M22 74h54M35 38v48M49 38v48M63 38v48" stroke="#6090a2" stroke-width="1" opacity=".55"/>
+<path d="M22 69h9l6-19 8 27 8-34 9 26h14" fill="none" stroke="#a2c4cf" stroke-width="2" stroke-linejoin="round"/>
+<g fill="#d8e5e8" stroke="#63899b" stroke-width="2"><circle cx="99" cy="43" r="8"/><circle cx="93" cy="67" r="5"/><circle cx="107" cy="67" r="5"/><circle cx="93" cy="85" r="5"/><circle cx="107" cy="85" r="5"/></g>
+<path d="M24 100h16M49 100h16M88 101h21" stroke="#476f84" stroke-width="4" stroke-linecap="round"/>
+<path d="M25 117v7M99 117v7" stroke="#284b61" stroke-width="5"/>
+</svg>
+

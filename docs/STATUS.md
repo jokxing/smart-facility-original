@@ -1,0 +1,578 @@
+# 工作状态
+
+更新时间：2026-09-23。
+
+## 当前状态：任务 3B 已完成并停止
+
+本轮完成：**本地自建 GLB + 受限模型解析 + 有限开放 `/building`**。未接入楼层平面图、大屏、设计器。运行说明见 `docs/demo-guide.md`；下一项提示词见 `docs/next-task-prompt.md`。
+
+当前演示开放：`/login`、`/dashboard`、`/building`。账号 `demo` / `Demo1234` / 验证码 `2468`（合成）。
+
+### 本轮修改文件（任务 3B）
+
+以下平台路径相对 `smart-facility-platform/`：
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `scripts/generate-demo-models.cjs`、`public/demo/models/*` | 自包含合成楼体 GLB（蓝/绿/琥珀差异）；README 说明来源 |
+| `src/utils/demoModelUrl.js` | 演示仅允许登记键/路径；非 demo 仍用 `BASE_URL + url`；不放开 `/api` 文件服务 |
+| `src/mock/fixtures/space.js` | 三栋楼 `url` 映射 `demo-building-a/b/c`；`DEMO_MODEL_PENDING.buildingUrlReady=true`，`floorMapUrlReady` 仍 false |
+| `src/views/building/Building.vue` | 经解析模块加载；空态/失败收尾；请求与模型竞态 token；组件内释放；demo 禁用楼层/大屏跳转 |
+| `src/permission.js` | 额外放行 `/building`；楼宇导航不重跑登录 bootstrap、不清 building Vuex |
+| `tests/unit/demo/map.spec.js` | 改为断言登记本地模型；保留空 mapUrl 与未知接口拒绝 |
+| `scripts/check-demo-browser.cjs` | 验证进入楼宇、模型入场景、园区切换、回首页；未开放路由仍拦截 |
+| `package.json` | 增加 `demo:models` 脚本 |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 本轮状态与下一项楼层只读契约提示 |
+
+未改：平面图/大屏业务、全局 `BASE_URL`、`config/demo.js` 对 `/api` 的阻断、依赖升级、批量脱敏。未下载原客户模型、未连原服务、未推 Git。
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：3 文件 / **12** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：登录回归 + **楼宇页打开、模型挂到 scene、园区切换、回首页、未开放大屏路由仍挡回、CSP/直连 API 阻断**；`externalAttempts: 0`，`uncaughtExceptions: 0`。
+- 本地静态资源：`GET /demo/models/building-a.glb` → 200（浏览器脚本已断言）。
+- 本轮未声称 GPU 像素级「视觉精美验收」；以 canvas 存在、`glbScene` 非空、切换后楼栋 ID/url 一致、无异常作为 3D 最小可用证据。headless Edge 下软件渲染可用。
+
+### 模型来源
+
+- 生成：`node scripts/generate-demo-models.cjs`（或 `npm run demo:models`）。
+- 资产：纯几何盒子 + PBR 颜色，无纹理、无外链 buffer；**非**原客户模型。
+- 种子 `url` 为登记键；运行时解析为 `/demo/models/*.glb`，不经过被阻断的文件 API。
+
+### 未验证 / 遗留风险
+
+- 楼层 `mapUrl`、平面图、房间/楼层大屏仍未接入。
+- 未做全工程 WebGL 性能审计；仅 Building 组件内 dispose。
+- 品牌/客户定制未批量脱敏；公开部署前仍不可用。
+- 快速切换的人为延迟竞态未单独加网络延迟注入用例（有 token 防护，浏览器做了园区切换）。
+
+### 下一步最小任务（未开始）
+
+执行 `docs/next-task-prompt.md`：**一个楼层的只读平面图契约**（不展开房间编辑器与大屏）。完成后停止再复盘。
+
+---
+
+## 任务 3A 与复盘（历史摘要）
+
+园区/楼栋只读 Mock 与合成空间种子已交付并复盘通过；详见 `docs/review-task-3a.md`。3B 已按复盘接缝接入受限模型解析，未放开文件 API。
+
+---
+
+## 任务 1–2 完成记录（历史）
+
+隔离演示启动、统一 Mock、账号登录与原首页仍有效。
+
+---
+
+## 追加：任务 4A 已完成并停止（2026-09-24）
+
+> 约定：后续 STATUS 更新在文末追加，不覆盖上方历史段落。
+
+本轮完成：**一个楼层的只读平面图契约**（演示一号楼 1F）。未开放楼层/房间设计器与大屏。说明见 `docs/demo-guide.md`；下一项见 `docs/next-task-prompt.md`。
+
+当前演示开放：`/login`、`/dashboard`、`/building`、`/floor/view`。账号同前（合成）。
+
+### 本轮修改文件（任务 4A）
+
+路径相对 `smart-facility-platform/`：
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `public/demo/floors/floor-a-1f.svg`、`README.md`、`scripts/write-floor-svg.cjs` | 合成只读平面 SVG |
+| `src/utils/demoFloorMapUrl.js` | 平面图登记解析；不放开文件 API |
+| `src/mock/fixtures/space.js` | 930001 的 `mapUrl=demo-floor-a-1f`；`floorMapUrlReady=true` |
+| `src/mock/fixtures/floor.js`、`handlers/floor.js`、`mock/index.js` | `GET /map/floor/overview`；空 `labList` |
+| `src/permission.js` | 额外放行 `/floor/view` |
+| `src/views/building/Building.vue` | 有 mapUrl 的楼层可进预览；无 mapUrl 仍提示 |
+| `src/views/floorConfiguar/index.vue` | 经 `resolveFloorMapUrl` 加载背景；demo 禁用设计器/大屏 |
+| `tests/unit/demo/floor.spec.js`、`map.spec.js` | 平面契约与种子断言 |
+| `scripts/check-demo-browser.cjs` | 进楼层、平面图、回楼宇、设计器仍拦截 |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 本轮追加状态与下一项提示词 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：4 文件 / **15** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：含楼层只读预览与平面图背景；`floorView`/`floorPlanImage`/`designerBlocked` 通过；外网 0、异常 0。
+- 静态：`/demo/floors/floor-a-1f.svg` → 200。
+
+### 契约判断
+
+| 项 | 判断 |
+| --- | --- |
+| `/floor/view` + query `floorId/mapUrl/mapId/floorName` | 源码确认（Building.goFloorView） |
+| 背景 `Image` 原为 `BASE_URL+mapUrl`；demo 改为登记本地路径 | 资源边界按 3B 同策略 |
+| `GET /map/floor/overview?floorId=` → `items.labList` | 源码确认；本轮空列表，房间点位后续 |
+| 仅一层有 mapUrl | 有意最小切片 |
+
+### 未验证 / 遗留
+
+- 其余楼层 mapUrl、房间标记、设计器保存、大屏。
+- 品牌脱敏、GPU 精修。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`：**房间只读列表/点位的最小读取切片**（仍不开放设计器与大屏）。
+
+---
+
+## 追加：任务 4B 已完成并停止（2026-09-24）
+
+本轮完成：在演示一号楼 1F 平面上展示 **3 个合成房间标记**（overview.labList）。未开放设计器、房间抽屉详情写操作、大屏。
+
+### 本轮修改文件（任务 4B）
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `src/mock/fixtures/floor.js` | `DEMO_FLOOR_ROOMS`（950001–950003）；`listFloorOverview` 返回确认字段 |
+| `tests/unit/demo/floor.spec.js` | 断言 labList 名称/字段；未接线楼层仍空；设计器 API 拒绝 |
+| `scripts/check-demo-browser.cjs` | 断言 `deviceList` 含「演示房间 A」等标记 |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 文末追加与下一项提示 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：4 文件 / **15** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：`roomMarkers: true`；外网 0、异常 0。
+
+### 契约判断
+
+| 项 | 判断 |
+| --- | --- |
+| `labList[].id/name/x/y/width/fontSize/color/senorStatus/equipments` | 源码确认（floorConfiguar 渲染与 overview 展开） |
+| `equipments` 可为空数组 | 源码要求可遍历；本轮无探头 |
+| 房间坐标/文案 | 暂定演示值，对齐合成 SVG 区域 |
+| `isEdit: false` | 演示避免打开房间抽屉；非后端规范 |
+
+### 未验证 / 遗留
+
+- 探头/设备状态图标、房间详情抽屉、设计器保存、其余楼层、大屏。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`：**一张大屏的最小只读切片**（或按提示词；不自动展开监控闭环）。
+
+---
+
+## 追加：任务 5A 已完成并停止（2026-09-24）
+
+本轮完成：**FloorDataV（楼层/房间大屏）最小只读切片**。未接 RoomDataV、设计器、进房间详情。
+
+### 本轮修改文件（任务 5A）
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `src/mock/fixtures/dataV.js`、`handlers/dataV.js`、`mock/index.js` | `POST /map/floor/screenV1` 及依赖：`GET /map/garden`、设备类型、告警统计空集、`PUT showRoom/batch` |
+| `src/permission.js` | 额外放行 `/floorDataV` |
+| `src/views/building/Building.vue` | demo 可进楼层大屏并带 `floorId` |
+| `src/views/floorConfiguar/index.vue` | demo 仅允许跳转 `floorDataV` |
+| `tests/unit/demo/dataV.spec.js` | screenV1 契约与 room 大屏仍拒绝 |
+| `scripts/check-demo-browser.cjs` | 打开 FloorDataV、房间卡片、返回楼宇；RoomDataV 仍拦截 |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 文末追加与下一项 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：5 文件 / **18** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：`floorDataV: true`；外网 0、异常 0。
+
+### 契约判断
+
+| 项 | 判断 |
+| --- | --- |
+| `POST /map/floor/screenV1` → roomList/roomData/floorDetail/roomCount/alarmCount | 源码确认（FloorDataV） |
+| roomList[].data 探头字段 | 源码确认消费；数值为暂定演示 |
+| `GET /map/garden` 树形 subDivisions | 源码确认（与 `/map/garden/list` 不同路径） |
+| 告警统计空数组 | 合法空态，避免组件挂死 |
+
+### 未验证 / 遗留
+
+- RoomDataV、点房间进详情抽屉、真实告警曲线、15s 轮询业务含义、语音播报观感。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`（建议：房间只读详情，或另一张大屏）。
+
+---
+
+## 追加：任务 5B 已完成并停止（2026-09-24）
+
+本轮完成：**平面图点房间打开 RoomDrawer 只读详情**。未接 RoomDataV、设计器保存、写操作。
+
+### 本轮修改文件（任务 5B）
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `src/mock/fixtures/room.js`、`handlers/room.js`、`mock/index.js` | `GET /room/detail` 及关联只读：things/monitor/roomReport/thingsUser |
+| `src/mock/fixtures/floor.js` | 演示房间 `isEdit: true`（可点开抽屉） |
+| `tests/unit/demo/room.spec.js` | 详情契约、空关联列表、写接口仍拒绝 |
+| `scripts/check-demo-browser.cjs` | 点房间开抽屉、断言详情、关闭回平面 |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 文末追加与下一项 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：6 文件 / **21** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：`roomDrawer: true`；外网 0、异常 0。
+
+### 契约判断
+
+| 项 | 判断 |
+| --- | --- |
+| `GET /room/detail` → name/no/floorName/senorStatus/departmentName/createDate/status/id | 源码确认（RoomModule） |
+| 关联列表可为空 | 源码可空态；本轮空数组/分页 |
+| `isEdit: true` | 演示放开点开；非后端规范 |
+| 走 RoomDrawer（非 New） | `openTwoSystem` 未置，源码分支确认 |
+
+### 未验证 / 遗留
+
+- RoomDataV、房间内写操作、巡查/硬件真实数据、设计器。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`（RoomDataV 或监控/告警切片）。
+
+---
+
+## 追加：5B 修复 — 单击房间名误跳首页（2026-09-24）
+
+根因：平面图房间名单击走 `handleMouseDown` → `RoomView`（`/room/view`），demo 未放行该路由，被 `permission` 拦回 `/dashboard` 并提示「其他功能将分步接入」。状态图标/双击才走抽屉，演示房间无状态图标，用户单击文案必中此路径。
+
+修复：demo 下 `handleMouseDown` 改为打开 RoomDrawer（与 5B 一致）；浏览器回归改为模拟房间名单击路径。
+
+验证：`test:demo` 21 通过；`roomDrawer: true` 且停留在 `#/floor/view`。
+
+---
+
+## 追加：任务 6A 已完成并停止（2026-09-24）
+
+本轮完成：**RoomDataV（设备监控大屏）最小只读切片**。未开放设计器、写操作、告警闭环。
+
+### 本轮修改文件（任务 6A）
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `src/mock/fixtures/dataV.js`、`handlers/dataV.js` | `POST /map/room/screenV1` → instrumentCount/instrumentList/roomDetail |
+| `src/permission.js` | 放行 `/roomDataV`、`/roomDataV/` |
+| `src/views/building/Building.vue` | demo 可进设备大屏并带 `buildingId` |
+| `src/views/floorConfiguar/index.vue` | demo 允许跳转 `roomDataV` |
+| `tests/unit/demo/dataV.spec.js` | room screenV1 契约；设计器 API 仍拒绝 |
+| `scripts/check-demo-browser.cjs` | 打开 RoomDataV、设备卡片、返回；未开放路由改断言 `/rm/room` |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 文末追加与下一项 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：6 文件 / **22** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：`roomDataV: true`；外网 0、异常 0。
+
+### 契约判断
+
+| 项 | 判断 |
+| --- | --- |
+| `POST /map/room/screenV1` → instrumentCount/instrumentList/roomDetail | 源码确认（RoomDataV） |
+| instrumentList[].data 探头字段 | 源码确认消费；数值为暂定演示 |
+| 告警统计空、设备类型空 | 复用 5A；合法空态 |
+| 入口 buildingId / floorId | 源码确认 query 分支 |
+
+### 未验证 / 遗留
+
+- 房间筛选弹层 `/room/selectList`、真实告警曲线、语音播报观感、设计器。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`（监控/告警只读，或设计器只读预览）。
+
+---
+
+## 追加：全量 docs 进度复盘（2026-09-24）
+
+- 当前实际进度：6A 最小展示切片；顶部 3B 为历史记录。详细结论见 `docs/progress-review-2026-09-24.md`。
+- 本轮修改文件：新增上述报告，追加本 STATUS；未修改业务源码或 next-task-prompt。
+- 验证：本轮重跑 demo 单测，6 文件 / 22 用例通过；核对关键 Mock、页面与浏览器脚本。根目录和平台均不是 Git 仓库。
+- 未验证：本轮未重跑 Edge；历史外网 0 / 异常 0 不作为本轮观测。视觉、真实点击、筛选、竞态、长时间轮询、完整脱敏和生产构建未验收。
+- 发现：showRoom/batch 空成功、roomIds 按数量截取、非法空间 ID 回落默认空间、跨页房间状态不一致；现有测试未覆盖这些行为。
+- 设计决定：保留统一 Mock 与原接口消费结构，逐切片接页面；不整体重写 Vue 2，不将最小可展示等同完整业务。
+- 下一步最小任务：先收口大屏只读边界，demo 禁用未实现控件、移除假成功保存并验证原展示路径；完成后停止。旧 next-task-prompt 的 6B 暂缓，待交接时按复盘重新限定。
+
+## 追加：四项问题修复完成，移交 6B（2026-09-24）
+
+用户本轮授权一次处理复盘四项问题；已完成，未开始 6B 或素材替换。
+
+### 修改文件与结果
+
+- `src/mock/handlers/dataV.js`：删除 PUT showRoom/batch 的空成功处理，统一拒绝未知写接口。
+- `src/views/dataV/FloorDataV.vue`：demo 房间展示保存改为明确禁用入口；方法增加 demo 防护。`RoomDataV.vue`：禁用尚未接入的房间筛选弹层。非 demo 保持原入口与逻辑。
+- `src/mock/fixtures/dataV.js`：设备卡片明确关联 roomId/floorId，按 ID 过滤而非数量截取；楼栋范围汇总楼层；非法 ID/冲突范围返回空集合，仅缺省参数使用默认空间；房间大屏状态读取 floor 共享种子，不按索引伪造异常。
+- `tests/unit/demo/dataV.spec.js`：改为断言保存被拒绝；新增不同房间/重复或未知 ID/空选择、非法空间/范围冲突、跨页面状态和计数一致性测试。
+- `scripts/check-demo-browser.cjs`：增加两个大屏禁用控件的 DOM 检查，保留全部隔离及主路径回归。
+- 文档：更新 `docs/demo-guide.md`、`docs/next-task-prompt.md`，追加本 STATUS。复盘报告保留为修复前历史记录。
+
+### 实际验证
+
+- 单测：6 文件 / 25 用例通过。
+- `npm run demo` 编译成功，本次分配本地端口 8090。
+- 首次沙箱 Edge 回归 CDP Page.enable 超时；经提权重跑通过。登录、模型、平面、抽屉、双大屏、禁用控件、未开放路由和 API 拦截通过；外部请求尝试 0、未捕获异常 0。
+- 未安装依赖、未连接原服务、未执行生产构建或部署、未推 Git。
+
+### 设计决定与未验证项
+
+- 演示只读保存应明确不可用，不伪造成功；房间筛选 API 语义已修正，但房间选择弹层及其 selectList 依赖仍未接入，因此保持禁用。
+- 无效空间使用成功空集合的演示约定，非原后端规范；当前共享种子三个房间均正常，不在页面另造告警状态。
+- 浏览器为路径烟测及 DOM 禁用检查，不等于完整视觉验收；仍未验证长时间轮询、模型竞态、所有筛选、全量脱敏及生产构建。
+- GLB/SVG 仍是自建占位素材，本轮只提供选材建议。素材增强另开独立小任务。
+
+### 下一步最小任务
+
+6B 仅实现现有 AlarmThingStatistics 的合成历史告警排行：两条已存在统计接口，同源种子、类型/日期/探头筛选，明确计数验收。完整可复制提示词见 `docs/next-task-prompt.md`。不同时接告警处理、曲线、设计器或视觉美化；完成后停止。
+
+---
+
+## 追加：任务 6B 已完成并停止（2026-09-24）
+
+本轮完成：**双大屏 AlarmThingStatistics 合成历史告警排行**。未接告警处理、曲线、设计器、素材美化。
+
+### 本轮修改文件（任务 6B）
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `src/mock/fixtures/alarm.js` | 固定锚点 `2026-09-24` 同源历史事件；按 thingsType/日期/探头聚合 |
+| `src/mock/fixtures/dataV.js`、`handlers/dataV.js` | 两个统计接口传入 body；去掉空数组桩 |
+| `tests/unit/demo/alarm.spec.js` | 类型隔离、日期边界、探头过滤、空结果、同源计数（不自回显） |
+| `tests/unit/demo/dataV.spec.js` | HTTP 排行/探头契约与认证；仍拒绝写接口 |
+| `scripts/check-demo-browser.cjs` | Floor 排行名称/计数 + 近一周切换；Room 培养箱计数 |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 文末追加与下一项 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：7 文件 / **30** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：`alarmRank: true`；外网 0、异常 0。
+
+### 契约与设计决定
+
+| 项 | 判断 |
+| --- | --- |
+| `POST /alarm/thing/statistics` → alarmStatistics[].thingsName/alarmCount | 源码确认 |
+| `POST /alarm/thing/sensors/statistics` → sensors[].sensorId/sensorName | 源码确认 |
+| thingsType 11 / 4 | FloorDataV / RoomDataV 源码确认 |
+| 历史事件 ≠ 当前 senorStatus | 房间/设备仍全部正常；排行仅读历史种子 |
+| 相对日期锚点 | UI 近墙钟 end 映射到固定锚点，避免过几天近七天变空 |
+
+### 未验证
+
+- 自定义日期选择器完整交互、告警处理写闭环、图表视觉精细验收、长时间 15s 轮询、生产构建、GLB/SVG 换装。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`（设计器只读预览，或公共素材增强；二选一单独切片）。
+
+---
+
+## 追加：任务 7A 已完成并停止（2026-09-24）
+
+本轮完成：**楼层平面设计器只读预览**。保存/拖拽配置禁用；`POST /map/element/config` 仍拒绝。未做房间设计器、素材换装、告警处理。
+
+### 本轮修改文件（任务 7A）
+
+| 文件 | 修改内容 |
+| --- | --- |
+| `src/permission.js` | 放行 `/floor/designer` |
+| `src/router/index.js` | FloorDesigner 提到顶层（避免 SaaS 壳层未 Mock 接口） |
+| `src/views/floorConfiguar/index.vue` | demo 可进入配置 |
+| `src/views/floorConfiguar/Layout.vue` | demo 禁用保存/多选；拖拽提示只读；list 失败收尾 |
+| `src/views/floorConfiguar/components/Designer.vue` | `resolveFloorMapUrl` 加载平面；demo 关闭画布拖拽 |
+| `src/mock/handlers/floor.js` | `POST /room/list` 空列表（侧栏） |
+| `tests/unit/demo/floor.spec.js` | room/list 空态；写接口仍拒绝 |
+| `scripts/check-demo-browser.cjs` | 进设计器、见标记、保存禁用；`designerPreview` |
+| `docs/STATUS.md`、`docs/demo-guide.md`、`docs/next-task-prompt.md` | 文末追加与下一项 |
+
+### 验证结果
+
+- `npm run test:demo -- --watch=false`：7 文件 / **30** 用例通过。
+- `DEMO_PORT=8089 npm run test:demo:browser`：`designerPreview: true`；外网 0、异常 0。
+
+### 设计决定
+
+- 设计器与 `/floor/view` 同为顶层路由，避免主 Layout 轮询 logo/待办/消息等未接入接口。
+- 只读：按钮 disabled + `handleSave` 早退 + 画布/侧栏不可改；写接口保持 MOCK_NOT_IMPLEMENTED。
+- 侧栏 `room/list` 空列表合法（演示房间已在 overview.labList 上图）。
+
+### 未验证
+
+- 非 demo 保存全链路、房间设计器、自定义拖拽交互视觉、生产构建、GLB/SVG 换装。
+
+### 下一步（未开始）
+
+执行 `docs/next-task-prompt.md`（公共素材增强，或告警只读列表）。
+
+## 追加：6B / 7A 复盘，7A 尚未通过只读验收（2026-09-24）
+
+- 详细报告：`docs/review-task-7a.md`。新增该报告并追加本 STATUS，未修改业务源码。
+- 本轮验证：7 文件 / 30 单测通过；内存固定 Date.now 复现自定义日期回映到九月历史事件。
+- 发现：Designer 的 draggable=false 未用于实际 group（仍绑定 item.isEdit），拖动/缩放/编辑/删除缺少 demo 防护；顶层设计器路由无条件影响非 demo；告警 48 小时时间启发式会改写自定义绝对日期。
+- 未验证：本轮未重跑浏览器、真实画布操作或非 demo 流程；现有浏览器脚本仅验证数据和保存按钮，不能证明画布只读。生产构建、全量脱敏、素材替换仍未完成。
+- 决定与下一步：先单独修复 7A 画布只读与 demo 路由隔离，之后单独修正 6B 日期语义；暂缓现有提示词的 8A，不自动继续开发。
+
+## 追加：三项复盘问题已修复（2026-09-24）
+
+本轮按用户授权修复三项问题，未开始 8A。
+
+### 修改文件
+
+- `src/views/floorConfiguar/components/Designer.vue`：demo 图元不可拖动，不渲染 Transformer 与编辑弹窗；拖动、变形、编辑、删除等方法加只读保护，不修改共享 isEdit 种子。
+- `src/router/index.js`：FloorDesigner 单一定义；仅 demo 放顶层，非 demo 放回 Layout.children（与 RoomDesigner 同级），路由匹配测试确认无重复 FloorDesigner。
+- `src/mock/clock.js`：固定演示时钟与快捷日期范围。`src/mock/fixtures/alarm.js`：删除墙钟 48 小时重映射，绝对日期直接筛选；无时区日期按 UTC+8 解析，非法/倒序区间返回空。
+- `src/views/dataV/components/AlarmThingStatistics.vue`：demo 初始化和快捷日期使用固定时钟，自定义日期保持原值；展示演示日期基准，demo 自定义时间使用 24 小时格式。非 demo 保留原日期路径。
+- `tests/unit/demo/designer-route.spec.js`、`alarm.spec.js`、`dataV.spec.js`：demo/非 demo 路由匹配、墙钟变化、绝对日期、时区等价、边界、非法区间及 HTTP 默认路径回归。
+- `scripts/check-demo-browser.cjs`：实际 Konva 节点不可拖动、无 Transformer、CDP 鼠标拖动/双击、编辑方法防护，验证图元和 Vuex 前后相同。
+- 文档更新：STATUS、demo-guide、next-task-prompt；review-task-7a 保留为修复前历史记录。
+
+### 验证
+
+- 最终单测：8 文件 / 36 用例通过；此前 35 用例版本在 TZ=UTC 下也全部通过。
+- 本地 8090 Edge 回归通过：包含新增画布只读交互检查，以及登录/楼宇/平面/抽屉/双大屏/告警排行/路由与网络隔离；外部请求尝试 0，未捕获异常 0。
+- 路由测试暴露原表中 Gateway、AssetCount、Labdevice、Login 重名警告，非本轮新增；没有扩大范围修复。
+
+### 未验证与决定
+
+- 非 demo 仅验证路由匹配与源码条件分支，没有连接原服务验证保存全链路。
+- 未做生产构建、完整视觉验收、全量脱敏、模型下载或素材替换；自定义日期选择器未逐项人工点击验收。
+- 快捷日期以 2026-09-24 UTC+8 为明确演示基准，后端 Mock 不再猜测查询意图；历史告警与实时正常状态分开。
+- 三项复盘阻塞已解决，可交接 8A；下一最小任务建议只改善一层 SVG，楼宇选材独立处理。完成后停止，不扩展业务。
+
+## 追加：下载楼宇模型接入完成（2026-09-29）
+
+用户授权先替换楼宇，SVG 等参考图。本轮只替换演示一号楼，二号楼和乙园区仍用占位模型。
+
+### 修改文件
+
+- `src/utils/demoModelUrl.js`：demo-building-a 映射用户提供的 `public/demo/models/office-building-low-rise.glb`。操作时文件已采用此名称，无需再次重命名；未修改 GLB 二进制。
+- `src/views/building/Building.vue`：demo 按应用节点变换后的包围盒统一缩放到最大边 55，居中并落地；同步 OrbitControls 目标、相机位置，降低演示灯光强度并使用 sRGB 输出。非 demo 保留原变换与灯光路径。
+- `public/demo/models/README.md`：记录作者 aitortilla01、原始来源与 GLB 内嵌 CC-BY-4.0 信息；区分第三方模型与自建占位模型，生成脚本不覆盖外部模型。演示楼层数据不代表模型真实楼层结构。
+- `scripts/check-demo-browser.cjs`：断言实际加载 1423 三角面、贴图已解码、新资源 HTTP 200；支持可选 DEMO_SCREENSHOT 本地截图。
+- 文档：追加 STATUS，更新 demo-guide。下一项仍等待用户提供 SVG 参考。
+
+### 验证与未验证
+
+- 8 文件 / 36 单测通过；隔离 demo 编译成功，本次端口 8091。
+- Edge 完整回归通过：登录、实际模型/贴图、园区切换、楼层、抽屉、双大屏、告警排行与设计器只读；外部请求尝试 0、未捕获异常 0。
+- 截图人工检查楼体完整、贴图可见、落地且无明显裁切；截图位于平台 node_modules/.cache/office-building-preview.png（临时验收产物）。
+- 未修改平面 SVG、未安装依赖、未访问原服务或运行生产构建。未做全尺寸视觉验收、长时间显存压力测试；原品牌/背景素材仍待专门脱敏阶段处理。
+
+### 下一步
+
+等待用户的平面图参考，再执行单独 SVG 改善任务；不自动扩大业务或替换另外两栋楼。
+
+## 追加：恢复环境色并提亮楼宇（2026-09-29）
+
+- 按用户反馈修改 `src/views/building/Building.vue`：撤销全局 sRGB 输出和环境方向光强度修改，恢复原深蓝环境；仅 demo 楼宇材质增加与原贴图一致的轻微自发光补亮（0.3）。模型位置、视角与侧栏保持不变。
+- 验证：本地 8091 Edge 回归通过，外部请求 0、异常 0；已查看新截图，环境恢复深蓝，楼宇外墙更亮。此次为局部视觉调整，未新增或重跑单测；未验证所有屏幕尺寸。
+- 修改文件：Building.vue、本 STATUS；临时预览截图刷新。下一步仍等待 SVG 参考。
+
+## 追加：默认楼宇显示放大（2026-09-29）
+
+- 修改 Building.vue 的 demo 初始相机距离，沿原观察方向靠近约 13%，楼宇显示约放大 15%；未改变模型尺寸、光照和颜色。
+- 本地 8091 Edge 回归通过，外部请求 0、异常 0；刷新截图用于检查边界。局部相机参数调整，未新增单测；未逐屏幕尺寸验收。
+- 修改文件：Building.vue、本 STATUS。下一步仍等待 SVG 参考。
+
+## 追加：8A 实验室底图与动态设备边界（2026-09-29）
+
+- 用户提供办公楼俯视参考，要求减少桌椅、采用大型实验台与靠墙设备，并最终由 SaaS 配置设备布局、Mock 动态展示。按既定小步范围，本轮先完成底图，设备不烘焙入 SVG。
+- 修改 `scripts/write-floor-svg.cjs`、生成 `public/demo/floors/floor-a-1f.svg`：两间实验室、中央走廊、大型固定实验台、墙边台面、门窗、楼梯、电梯及准备区；保留 1678×795 坐标系和资源 key。
+- `src/mock/fixtures/floor.js`：同步三个房间标记坐标，保留 ID/名称及详情链路。`public/demo/floors/README.md` 记录台面坐标和静态/动态边界。
+- `scripts/check-demo-browser.cjs` 支持 DEMO_FLOOR_SCREENSHOT，并在该模式用 1920×1080 桌面尺寸截取楼层。36 单测通过；Edge 全链路通过，外部请求 0、异常 0；实际检查桌面截图，底图与房间标记对齐。
+- 小尺寸默认浏览器截图存在原画布裁切，1920×1080 正常；响应式画布全尺寸适配未在此任务改造。尚无设备图元、布局写入/持久化或动态设备状态，本轮不能宣称后台配置闭环完成。
+- 真实源码：楼层设计器配置房间；roomConfiguar/Layout.vue 配置设备，读取 POST /map/element/getRoonInstrumentInfoList?roomId，保存 POST /map/element/config（type:4）。后续沿用真实契约，不在楼层 SVG 硬编码设备。
+- 文档：更新 STATUS、demo-guide、next-task-prompt。下一步 8B 只接设备布局读取/预览和共享实体；8C 再做后台拖放保存、演示存储与刷新恢复。底图完成后停止，不提前开放写接口。
+
+## 追加：首组设备 SVG 素材（2026-09-29）
+
+- 用户授权绘制三种设备。本轮新增 `public/demo/devices/analyzer.svg`、`lab-refrigerator.svg`、`incubator.svg`，以及 `preview.html`、`README.md`。修改本 STATUS 和 next-task-prompt 的素材说明。
+- 自绘统一 128×144 透明背景图标，冷灰蓝机身、轻微立体边缘；不包含业务名称、监控读数、告警状态。图标仅表达设备类别，不表示真实工程外形。
+- 验证：三个 SVG 均可解析为 XML；本地 Edge 渲染预览并人工检查大图、48px 缩略和台面排列。截图为 node_modules/.cache/device-art-preview.png。素材变更未新增测试或重跑业务测试。
+- 尚未接 Mock/路由/设备布局或保存。下一步仍是 8B，将素材 key 映射设备实体并独立叠加状态；位置、尺寸、旋转由布局数据提供。8C 再做后台保存，不将静态素材预览当业务完成。
+
+## 追加：设备叠加到底图的效果预览（2026-09-29）
+
+- 用户要求先看放置效果。新增 `public/demo/devices/floor-preview.html`：检测仪/培养箱放实验台，冷藏柜沿墙，复用原 SVG 底图并独立叠加图片，不修改业务页面或 Mock。
+- 本地 Edge 渲染并查看截图 `node_modules/.cache/device-floor-preview.png`，检查设备落位与底图对齐；纯静态预览未跑业务测试。
+- 此 HTML 坐标仅为视觉样例，不是设备布局数据源。动态状态、后台保存及 8B 仍未实现；后续按真实接口迁移到统一 Mock，不能把预览硬编码带入业务页面。
+
+## 追加：补齐六类设备并更新平面预览（2026-09-29）
+
+- 新增 `public/demo/devices/oscilloscope.svg`、`monitor-terminal.svg`、`equipment-rack.svg`，延续 128×144 透明底和冷灰蓝风格；示波器示意线条是图标装饰，不代表实时曲线。
+- 更新同目录 `preview.html`、`floor-preview.html`、`README.md`。台面放检测仪/示波器/监测终端，左右墙边分别排列冷藏柜/培养箱/设备机柜，预览共 16 台。
+- 六个 SVG XML 解析通过；本地 Edge 渲染平面预览并检查实际落位。截图更新为 node_modules/.cache/device-floor-preview.png。静态素材任务未重跑业务测试。
+- 业务源码、底图、Mock 和保存接口未修改；8B 动态数据接入仍待后续，预览不等于后台布局完成。
+
+## 追加：8B 交接提示词收紧（2026-09-29）
+
+- 用户确认六类设备效果后，更新 docs/next-task-prompt.md：完整可复制任务包含六类素材与摆放基准、共享设备 ID/告警引用、房间坐标转换、明确入口、只读边界及验收路径。
+- 将动态 Mock 限定为最小可重复的正常/异常/离线场景切换，通过共享层让平面与设备大屏一致；不做持续推送或布局写入。8C 才处理拖放保存与持久化。
+- 本轮仅修改提示词和本 STATUS，未实施 8B，未运行代码测试。下一步交给执行者按该提示词处理单项任务。
+
+## 追加：8B 房间设备布局只读接入（2026-09-29）
+
+- 目标：现有房间平面预览接入统一 Mock 设备实体与布局；可发现入口；最小场景切换；布局只读。未做拖放保存/持久化（留给 8C）。
+- **契约与坐标**
+  - 读：`POST /map/element/getRoonInstrumentInfoList?roomId=` → `items.list`（x/y/rotation/scaleX/scaleY/url/status/isMonitor/types/sortIndex/isEdit/elementId）+ `board` + `simpleEquipmentList`。
+  - 写：`POST /map/element/config` 仍 `MOCK_NOT_IMPLEMENTED`。
+  - 房间画布 1600×790；楼层 1678×795；Lab A `78,78,762×327`、Lab B `840,78,760×327`。预览百分比经 `floorPctToRoomLocal` 转入房间局部坐标，不用全楼层底图当房间背景。
+  - 状态：RoomView `status` 1 / -1 / -100；RoomDataV `senorStatus` 1 / 2 / -100；由共享 `scenario`（normal/alarm/offline）派生。
+- **修改文件（平台）**
+  - Mock：`fixtures/instrument.js`、`fixtures/scenario.js`、`fixtures/dataV.js`（大屏改读共享实体）、`handlers/instrument.js`、`mock/index.js`。
+  - 资源：`scripts/write-floor-svg.cjs` 生成 `room-a.svg` / `room-b.svg`；`utils/demoDeviceUrl.js`、`utils/demoRoomMapUrl.js`。
+  - API：`api/demoScenario.js`。
+  - 视图：`roomConfiguar/index.vue`、`ImageNode.vue`；`floorConfiguar/index.vue`（入口+场景）；`room/components/RoomModule.vue`（抽屉入口）；`permission.js` 放行 `/room/view`。
+  - 测试：`tests/unit/demo/instrument.spec.js`；更新 `dataV.spec.js`；`scripts/check-demo-browser.cjs`（进入/返回布局 + 场景后大屏计数）；文档 STATUS / demo-guide / next-task-prompt；floors/devices README。
+- **共享实体**：保留告警引用 ID 970001–970003；新增 970004–970012；六类素材覆盖两间实验室；走廊无布局；一设备一房间。
+- **验证**
+  - `test:demo`：9 文件 / **41** 用例通过。
+  - `test:demo:browser`（端口 8088）：全链路通过；外部请求 0、未捕获异常 0。
+  - 1920×1080 截图 `node_modules/.cache/device-room-layout.png`：房间 A 裁切底图、台面/墙边设备与绿色状态点对齐。
+- **未验证 / 边界**
+  - 未开放布局写入、刷新持久化、RoomDesigner 拖放。
+  - 设备详情抽屉因 `isEdit=0` 禁用；小屏画布适配未改；持续推送/监测曲线未做。
+  - 历史告警事件不随场景改写（有意）。
+- **下一步**：8C 受限写接口、演示命名空间持久化、重置与跨页同步。底图与只读接入完成后停止，不提前宣称后台配置闭环。
+
+## 追加：8C 设备布局拖放保存与演示持久化（2026-09-29）
+
+- 目标：在 8B 只读布局上开放受限 type:4 写入、命名空间持久化、重置；场景切换仍不改坐标。未做多租户 SaaS 或侧栏增删设备。
+- **契约**
+  - 写：`POST /map/element/config` 接受设备数组（`type:4`、`elementId`、`mediaId/roomId`、`x/y/rotation/scaleX/scaleY/sortIndex`）；校验归属与画布范围；须提交该房间全部已上图设备。
+  - 重置：`POST /demo/room-layout/reset` `{roomId}` → 清除覆盖，读回种子。
+  - 拒绝：`type:11`、未知 ID、跨房间、缺设备、越界、空列表。
+  - 持久化键：`smart-facility-demo:v1:roomLayoutOverrides`。
+- **修改文件**
+  - Mock：`fixtures/instrument.js`（覆盖合并/保存/重置）、`handlers/instrument.js`；`api/demoLayout.js`。
+  - 路由/权限：demo 下 `/room/designer` 提到壳外（与楼层设计器一致）；`permission.js` 放行。
+  - UI：`roomConfiguar/index.vue`（进入配置）、`Layout.vue`（跳过 instrument/list、重置、保存）、`Designer.vue`（demo 底图/设备 URL、禁删）。
+  - 测试：`instrument.spec.js`、`floor.spec.js`、`dataV.spec.js`、`designer-route.spec.js`、`check-demo-browser.cjs`（保存→重进→重置）。
+  - 文档：STATUS、demo-guide、next-task-prompt。
+- **验证**：`test:demo` 9 文件 / 42 用例；Edge 全链路通过，外部请求 0、异常 0（端口 8091）。
+- **未验证**：真实鼠标拖拽手感、小屏适配、设备详情抽屉、楼层标记写入、侧栏新增设备。
+- **下一步**：等待用户指定方向（品牌脱敏、其他楼宇等）；不自动扩大范围。
+
+## 追加：8B / 8C 复盘（2026-09-29）
+
+- 新增 docs/review-task-8bc.md，追加本 STATUS；本轮没有业务修改。
+- 9 文件 / 42 单测重跑通过；内存复现左侧旋转设备边界 x=-19，且保存接受 scaleX=100、重复设备、x=-40。
+- 发现：中心/左上角旋转语义不一致；图标和房间比例被拉伸；保存只验坐标点不验完整几何、覆盖缺校验；设计器状态 -1/-100 落为黑色；浏览器保存测试直接改数组而非拖动，未验证布局整页刷新恢复。
+- 未验证：本轮未重跑 Edge 或真实鼠标、未做生产构建/原服务验证。历史通过记录只证明有限路径。
+- 决定：暂不按“8C 全部验收”扩展下一业务；先修坐标与受限保存，并补真实拖动→保存→刷新→重置。随后单独优化完整房间边界、等比适配和状态信息展示。
+
+## P1 修复验收（2026-09-29）
+
+- 修改文件（平台目录内）：新增 src/utils/demoLayoutGeometry.js；修改 src/mock/fixtures/instrument.js、src/views/roomConfiguar/index.vue、src/views/roomConfiguar/components/Designer.vue、src/views/roomConfiguar/components/ImageNode.vue、tests/unit/demo/instrument.spec.js、scripts/check-demo-browser.cjs。本轮同时更新 STATUS、review-task-8bc、demo-guide、next-task-prompt。
+- P1 几何：演示设备改为中心坐标及中心旋转，按 SVG 的 128×144 比例显示；底图和种子设备采用同一等比映射；设计器视口变化不再重写演示逻辑坐标。
+- P1 校验：拖动和变换结束时校验完整旋转包围盒，非法操作回退；保存拒绝重复设备、冲突房间、非有限数值、无效顺序、非正/过大缩放和越界；读取持久化记录复用相同校验。
+- 设计决定：缩放范围 0.2–3；缓存使用 version:2 的 rooms 信封。旧版左上角坐标缓存及损坏记录回退种子，不做有歧义的自动迁移；首次重新保存使用新版。只改变演示分支。
+- 验证：9 文件 / 53 单测通过；本机 8090 开发编译成功；Edge 真实鼠标拖动→保存→返回→整页刷新恢复→重置回归通过，外部请求 0、未捕获异常 0。截图检查左侧三台设备完整显示、图形等比。
+- 未验证：人工连续缩放/旋转手感、触屏和小屏、原服务/生产构建；原有重复路由警告仍存在。
+- 下一步最小任务：单独修复设计器状态 -1/-100 的颜色映射（P2），与房间只读视图一致；需用户确认后开工。房间墙体视觉完善不纳入本轮。
+- Git：按用户要求跳过初始化、提交和推送，回复提供本轮 commit 信息。
+
+## 首次提交忽略规则（2026-09-29）
+
+- 用户已在根目录初始化 Git；当前实际目录只有 smart-facility-platform 和 docs，facility-miniapp 尚未放入。
+- 修改：新增根 .gitignore，排除各项目依赖、构建输出、缓存、日志、编辑器文件、环境文件、证书及本地小程序配置；排除旧 backupSuite 工具目录。平台 .gitignore 移除 yarn.lock 忽略，允许保留依赖锁文件。
+- 单独放行平台 .env.demo：以白名单核验其仅含本地演示设置，不记录真实环境值。未修改业务代码或环境文件。
+- 验证：git check-ignore 验证依赖、生产/开发环境、小程序私有配置和构建目录；808 个候选文件中无上述敏感路径、无大于等于 50 MiB 的文件；暂存区为空。
+- 限制：忽略规则不等于源码全量脱敏。尚未对所有候选源码、文档及二进制素材完成提交前内容审查，小程序也尚未审查。
+- 下一最小任务：首次暂存前审查候选文件中的硬编码凭据、内部地址、真实业务资料及素材授权；本轮未暂存、提交、设置远程或推送。

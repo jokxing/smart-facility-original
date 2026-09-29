@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="144" viewBox="0 0 128 144" role="img" aria-label="恒温培养箱">
+<title>恒温培养箱</title>
+<!-- Original demo artwork. Front/control edge faces down. No live values or status. -->
+<defs><linearGradient id="case" x2=".8" y2="1"><stop stop-color="#edf4f5"/><stop offset="1" stop-color="#adc3cc"/></linearGradient><linearGradient id="glass" x2="1" y2="1"><stop stop-color="#173f54"/><stop offset="1" stop-color="#357087"/></linearGradient></defs>
+<rect x="16" y="17" width="100" height="116" rx="11" fill="#0b2233" opacity=".22"/>
+<rect x="15" y="16" width="99" height="112" rx="9" fill="#668797" stroke="#294b60" stroke-width="3"/>
+<rect x="12" y="10" width="99" height="111" rx="9" fill="url(#case)" stroke="#294b60" stroke-width="3"/>
+<rect x="24" y="22" width="75" height="63" rx="6" fill="#567c8e" stroke="#92aeb9" stroke-width="3"/>
+<rect x="30" y="28" width="63" height="51" rx="3" fill="url(#glass)"/>
+<path d="M34 43h55M34 59h55M42 32v43M62 32v43M82 32v43" stroke="#7ba8b7" stroke-width="2" opacity=".75"/>
+<path d="M32 30h59L32 64Z" fill="#d8f1f5" opacity=".12"/>
+<rect x="25" y="94" width="34" height="16" rx="2" fill="#254f64"/>
+<circle cx="75" cy="102" r="5" fill="#c6d9e0" stroke="#6e8d9b" stroke-width="2"/>
+<path d="M88 96v13" stroke="#567d8e" stroke-width="6" stroke-linecap="round"/>
+<path d="M22 115h76" stroke="#f0f6f7" stroke-width="2"/>
+</svg>

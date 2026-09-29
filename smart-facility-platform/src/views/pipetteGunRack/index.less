@@ -1,0 +1,52 @@
+@import "../../style/variable.less";
+
+.pipetteGun{
+    .next-card{
+        margin-bottom: 28px;
+    }
+    .operation{
+        .el-button{
+            padding: 0
+        }
+    }
+    .el-table td.el-table__cell div{
+        .blueColor{
+            color: @blueColor;
+        }
+        .offline{
+            color: @offLine;
+        }
+        .normal{
+            color: @normal;
+        }
+    }
+}
+
+/deep/ .pipetteGun-dialog{
+    .el-form-item{
+        margin-bottom: 12px;
+    }
+    .el-dialog__body{
+        padding: 10px 20px;
+    }
+    .el-select{
+        width: 100%;
+    }
+}
+
+/deep/ .pipetteGun-drawer{
+    .el-descriptions-item__label:not(.is-bordered-label){
+        width: 100px;
+    }
+    .detail-switch{
+        position: absolute;
+        top: 0;
+    }
+    .layout-row{
+        display: flex;
+        align-items: center;
+    }
+    .el-table td.el-table__cell div.blue{
+        color: #3078F0;
+    }
+}

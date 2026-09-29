@@ -1,0 +1,53 @@
+.sticky-head {
+
+  /deep/.el-table {
+    overflow: visible;
+  }
+
+  /deep/.el-table__header-wrapper, .el-table__fixed-header-wrapper {
+    overflow: hidden;
+    position: sticky;
+    top: -20px;
+    z-index: 10;
+  }
+
+  table {
+    position: sticky;
+    top: 0;
+
+    thead {
+      position: relative;
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+    }
+  }
+
+  /deep/.el-table__header-wrapper table {
+    thead {
+      position: relative;
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+    }
+  }
+
+  /deep/.el-table__header-wrapper table .is-hidden .cell {
+    visibility: visible;
+  }
+
+  /deep/.el-table__header-wrapper table .is-hidden {
+    right: 0;
+  }
+
+  /deep/.el-table__fixed-header-wrapper {
+    display: none;
+  }
+
+}

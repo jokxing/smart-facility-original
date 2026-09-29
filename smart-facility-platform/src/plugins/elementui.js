@@ -1,0 +1,131 @@
+import Vue from "vue";
+import {
+    Alert,
+    Avatar,
+    Button,
+    Card,
+    Checkbox,
+    Popover,
+    Col,
+    Steps,
+    Step,
+    DatePicker,
+    Descriptions,
+    DescriptionsItem,
+    Cascader,
+    Dialog,
+    Divider,
+    Drawer,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    Form,
+    FormItem,
+    Icon,
+    Input,
+    Loading,
+    Menu,
+    Submenu,
+    MenuItem,
+    Message,
+    MessageBox,
+    Option,
+    Pagination,
+    Row,
+    Select,
+    Switch,
+    Table,
+    TableColumn,
+    TabPane,
+    Tabs,
+    Tag,
+    TimeSelect,
+    Tooltip,
+    Upload,
+    Radio,
+    RadioGroup,
+    RadioButton,
+    Scrollbar,
+    InputNumber,
+    Tree,
+    Skeleton,
+    SkeletonItem,
+    CheckboxGroup,
+    Progress,
+    Image,
+    Link,
+    Empty,
+    ColorPicker,
+    Timeline,
+    TimelineItem,
+    Autocomplete,
+    CheckboxButton,
+    TimePicker
+} from "element-ui";
+//默认组件大小，默认弹窗初始位置
+Vue.prototype.$ELEMENT = {size: "medium", zIndex: 3000};
+Vue.use(Button);
+Vue.use(CheckboxGroup);
+Vue.use(Empty);
+Vue.use(Alert);
+Vue.use(ColorPicker);
+Vue.use(TimeSelect);
+Vue.use(Upload);
+Vue.use(Switch);
+Vue.use(Checkbox);
+Vue.use(DatePicker);
+Vue.use(Tag);
+Vue.use(Tabs);
+Vue.use(TabPane);
+Vue.use(Col);
+Vue.use(Row);
+Vue.use(Steps);
+Vue.use(Step);
+Vue.use(Divider);
+Vue.use(Descriptions);
+Vue.use(DescriptionsItem);
+Vue.use(Pagination);
+Vue.use(Drawer);
+Vue.use(Cascader);
+Vue.use(Form);
+Vue.use(Dialog);
+Vue.use(FormItem);
+Vue.use(Input);
+Vue.use(Tooltip);
+Vue.use(Icon);
+Vue.use(Avatar);
+Vue.use(DropdownMenu);
+Vue.use(Dropdown);
+Vue.use(DropdownItem);
+Vue.use(Menu);
+Vue.use(Submenu);
+Vue.use(MenuItem);
+Vue.use(MenuItem);
+Vue.use(Card);
+Vue.use(Table);
+Vue.use(TableColumn);
+Vue.use(Select);
+Vue.use(Option);
+Vue.use(Radio);
+Vue.use(RadioGroup);
+Vue.use(RadioButton);
+Vue.use(InputNumber);
+Vue.use(Scrollbar);
+Vue.use(Tree);
+Vue.use(Popover);
+Vue.use(Skeleton);
+Vue.use(SkeletonItem);
+Vue.use(Loading.directive);
+Vue.use(Progress);
+Vue.use(Image);
+Vue.use(Link);
+Vue.use(Timeline);
+Vue.use(TimelineItem);
+Vue.use(Autocomplete);
+Vue.use(CheckboxButton)
+Vue.use(TimePicker)
+
+Vue.prototype.$loading = Loading.service;
+Vue.prototype.$message = Message;
+Vue.prototype.$confirm = MessageBox.confirm;
+Vue.prototype.$alert = MessageBox.alert;

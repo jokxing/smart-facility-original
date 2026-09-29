@@ -1,0 +1,1983 @@
+{
+  "id": "2552467",
+  "name": "chuxouSaaS",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "36537710",
+      "name": "分级统计",
+      "font_class": "fenjitongji_1",
+      "unicode": "e6ee",
+      "unicode_decimal": 59118
+    },
+    {
+      "icon_id": "36252025",
+      "name": "数据中心",
+      "font_class": "shujuzhongxin",
+      "unicode": "e6eb",
+      "unicode_decimal": 59115
+    },
+    {
+      "icon_id": "36252029",
+      "name": "使用统计",
+      "font_class": "shiyongtongji",
+      "unicode": "e6ed",
+      "unicode_decimal": 59117
+    },
+    {
+      "icon_id": "34269714",
+      "name": "工作中",
+      "font_class": "gongzuozhong",
+      "unicode": "e6e1",
+      "unicode_decimal": 59105
+    },
+    {
+      "icon_id": "34269715",
+      "name": "未工作",
+      "font_class": "weigongzuo",
+      "unicode": "e6e2",
+      "unicode_decimal": 59106
+    },
+    {
+      "icon_id": "34269716",
+      "name": "断开连接",
+      "font_class": "duankailianjie1",
+      "unicode": "e6e6",
+      "unicode_decimal": 59110
+    },
+    {
+      "icon_id": "34269717",
+      "name": "正常",
+      "font_class": "zhengchang",
+      "unicode": "e6e7",
+      "unicode_decimal": 59111
+    },
+    {
+      "icon_id": "34269718",
+      "name": "监控中",
+      "font_class": "jiankongzhong",
+      "unicode": "e6e8",
+      "unicode_decimal": 59112
+    },
+    {
+      "icon_id": "34269719",
+      "name": "监控总数",
+      "font_class": "jiankongzongshu",
+      "unicode": "e6ea",
+      "unicode_decimal": 59114
+    },
+    {
+      "icon_id": "34269387",
+      "name": "断开连接",
+      "font_class": "duankailianjie",
+      "unicode": "e6e9",
+      "unicode_decimal": 59113
+    },
+    {
+      "icon_id": "33768782",
+      "name": "未绑定",
+      "font_class": "weibangding",
+      "unicode": "e6e0",
+      "unicode_decimal": 59104
+    },
+    {
+      "icon_id": "32381044",
+      "name": "运输车",
+      "font_class": "yunshuche",
+      "unicode": "e6d9",
+      "unicode_decimal": 59097
+    },
+    {
+      "icon_id": "32381045",
+      "name": "运单",
+      "font_class": "yundan",
+      "unicode": "e6da",
+      "unicode_decimal": 59098
+    },
+    {
+      "icon_id": "32381082",
+      "name": "品名维护",
+      "font_class": "pinmingweihu",
+      "unicode": "e6dc",
+      "unicode_decimal": 59100
+    },
+    {
+      "icon_id": "32381083",
+      "name": "基础",
+      "font_class": "jichu",
+      "unicode": "e6dd",
+      "unicode_decimal": 59101
+    },
+    {
+      "icon_id": "32381084",
+      "name": "收货",
+      "font_class": "shouhuo",
+      "unicode": "e6de",
+      "unicode_decimal": 59102
+    },
+    {
+      "icon_id": "32381085",
+      "name": "发货",
+      "font_class": "fahuo",
+      "unicode": "e6df",
+      "unicode_decimal": 59103
+    },
+    {
+      "icon_id": "31046658",
+      "name": "处置",
+      "font_class": "chuzhi",
+      "unicode": "e6c7",
+      "unicode_decimal": 59079
+    },
+    {
+      "icon_id": "31046659",
+      "name": "点检",
+      "font_class": "dianjian",
+      "unicode": "e6c8",
+      "unicode_decimal": 59080
+    },
+    {
+      "icon_id": "31046660",
+      "name": "定期保养",
+      "font_class": "dingqibaoyang",
+      "unicode": "e6ca",
+      "unicode_decimal": 59082
+    },
+    {
+      "icon_id": "31046661",
+      "name": "借用",
+      "font_class": "jieyong",
+      "unicode": "e6cc",
+      "unicode_decimal": 59084
+    },
+    {
+      "icon_id": "31046662",
+      "name": "报修",
+      "font_class": "baoxiu",
+      "unicode": "e6cd",
+      "unicode_decimal": 59085
+    },
+    {
+      "icon_id": "31046663",
+      "name": "领用",
+      "font_class": "lingyong",
+      "unicode": "e6ce",
+      "unicode_decimal": 59086
+    },
+    {
+      "icon_id": "31046665",
+      "name": "报修、维保",
+      "font_class": "a-baoxiuweibao",
+      "unicode": "e6cf",
+      "unicode_decimal": 59087
+    },
+    {
+      "icon_id": "31046666",
+      "name": "设备文件受控",
+      "font_class": "shebeiwenjianshoukong",
+      "unicode": "e6d0",
+      "unicode_decimal": 59088
+    },
+    {
+      "icon_id": "31046667",
+      "name": "入库验收",
+      "font_class": "rukuyanshou",
+      "unicode": "e6d1",
+      "unicode_decimal": 59089
+    },
+    {
+      "icon_id": "31046672",
+      "name": "进出管理",
+      "font_class": "jinchuguanli",
+      "unicode": "e6d3",
+      "unicode_decimal": 59091
+    },
+    {
+      "icon_id": "31046673",
+      "name": "资产变更",
+      "font_class": "zichanbiangeng",
+      "unicode": "e6d4",
+      "unicode_decimal": 59092
+    },
+    {
+      "icon_id": "31046675",
+      "name": "预约",
+      "font_class": "yuyue",
+      "unicode": "e6d5",
+      "unicode_decimal": 59093
+    },
+    {
+      "icon_id": "31046676",
+      "name": "使用",
+      "font_class": "shiyong",
+      "unicode": "e6d6",
+      "unicode_decimal": 59094
+    },
+    {
+      "icon_id": "31046677",
+      "name": "退还",
+      "font_class": "tuihuan",
+      "unicode": "e6d7",
+      "unicode_decimal": 59095
+    },
+    {
+      "icon_id": "31046678",
+      "name": "申请采购",
+      "font_class": "shenqingcaigou",
+      "unicode": "e6d8",
+      "unicode_decimal": 59096
+    },
+    {
+      "icon_id": "32085309",
+      "name": "Applets",
+      "font_class": "Applets",
+      "unicode": "e6c3",
+      "unicode_decimal": 59075
+    },
+    {
+      "icon_id": "32085310",
+      "name": "help",
+      "font_class": "help",
+      "unicode": "e6c4",
+      "unicode_decimal": 59076
+    },
+    {
+      "icon_id": "32085311",
+      "name": "map settings",
+      "font_class": "a-mapsettings",
+      "unicode": "e6c5",
+      "unicode_decimal": 59077
+    },
+    {
+      "icon_id": "32085312",
+      "name": "After sales",
+      "font_class": "a-Aftersales",
+      "unicode": "e6c6",
+      "unicode_decimal": 59078
+    },
+    {
+      "icon_id": "31907014",
+      "name": "通知",
+      "font_class": "tongzhi",
+      "unicode": "e6c1",
+      "unicode_decimal": 59073
+    },
+    {
+      "icon_id": "31907016",
+      "name": "待办",
+      "font_class": "daiban",
+      "unicode": "e6c2",
+      "unicode_decimal": 59074
+    },
+    {
+      "icon_id": "31324179",
+      "name": "关闭语音",
+      "font_class": "guanbiyuyin",
+      "unicode": "e6c0",
+      "unicode_decimal": 59072
+    },
+    {
+      "icon_id": "77403",
+      "name": "链接",
+      "font_class": "lianjie",
+      "unicode": "e6be",
+      "unicode_decimal": 59070
+    },
+    {
+      "icon_id": "866500",
+      "name": "喇叭001_hover",
+      "font_class": "laba001hover",
+      "unicode": "e6bf",
+      "unicode_decimal": 59071
+    },
+    {
+      "icon_id": "31127442",
+      "name": "移动资产数",
+      "font_class": "yidongzichanshu",
+      "unicode": "e6b9",
+      "unicode_decimal": 59065
+    },
+    {
+      "icon_id": "31127443",
+      "name": "未移动资产数",
+      "font_class": "weiyidongzichanshu",
+      "unicode": "e6ba",
+      "unicode_decimal": 59066
+    },
+    {
+      "icon_id": "31127451",
+      "name": "盘点",
+      "font_class": "pandian",
+      "unicode": "e6bb",
+      "unicode_decimal": 59067
+    },
+    {
+      "icon_id": "31127482",
+      "name": "资产总数",
+      "font_class": "zichanzongshu",
+      "unicode": "e6bc",
+      "unicode_decimal": 59068
+    },
+    {
+      "icon_id": "31127483",
+      "name": "资产总额",
+      "font_class": "zichanzonge",
+      "unicode": "e6bd",
+      "unicode_decimal": 59069
+    },
+    {
+      "icon_id": "31056294",
+      "name": "巡查记录",
+      "font_class": "xunchajilu",
+      "unicode": "e6b8",
+      "unicode_decimal": 59064
+    },
+    {
+      "icon_id": "30626587",
+      "name": "超时未归还",
+      "font_class": "chaoshiweiguihuan",
+      "unicode": "e675",
+      "unicode_decimal": 58997
+    },
+    {
+      "icon_id": "30626588",
+      "name": "闲置",
+      "font_class": "xianzhi",
+      "unicode": "e6b6",
+      "unicode_decimal": 59062
+    },
+    {
+      "icon_id": "30626589",
+      "name": "使用中",
+      "font_class": "shiyongzhong",
+      "unicode": "e6b7",
+      "unicode_decimal": 59063
+    },
+    {
+      "icon_id": "29700949",
+      "name": "设备保养记录",
+      "font_class": "a-3-shebeibaoyangjilu",
+      "unicode": "e6f6",
+      "unicode_decimal": 59126
+    },
+    {
+      "icon_id": "29700952",
+      "name": "设备保养检查任务",
+      "font_class": "a-2-shebeibaoyangjiancharenwu",
+      "unicode": "e6f7",
+      "unicode_decimal": 59127
+    },
+    {
+      "icon_id": "29701135",
+      "name": "设备保养提醒",
+      "font_class": "a-30-shebeibaoyangtixing",
+      "unicode": "e6ff",
+      "unicode_decimal": 59135
+    },
+    {
+      "icon_id": "29779638",
+      "name": "湿度温度监测",
+      "font_class": "a-45-shiduwendujiankong",
+      "unicode": "e714",
+      "unicode_decimal": 59156
+    },
+    {
+      "icon_id": "29830062",
+      "name": "温度",
+      "font_class": "a-47-wendu",
+      "unicode": "e71b",
+      "unicode_decimal": 59163
+    },
+    {
+      "icon_id": "29961314",
+      "name": "办结任务",
+      "font_class": "a-51-banjierenwu",
+      "unicode": "e71f",
+      "unicode_decimal": 59167
+    },
+    {
+      "icon_id": "28550226",
+      "name": "温湿度检测记录",
+      "font_class": "wenshidujiancejilu",
+      "unicode": "e699",
+      "unicode_decimal": 59033
+    },
+    {
+      "icon_id": "29376354",
+      "name": "数据统计",
+      "font_class": "shujutongji",
+      "unicode": "e6ac",
+      "unicode_decimal": 59052
+    },
+    {
+      "icon_id": "29378188",
+      "name": "产品管理",
+      "font_class": "chanpinguanli",
+      "unicode": "e6ae",
+      "unicode_decimal": 59054
+    },
+    {
+      "icon_id": "29945552",
+      "name": "pipette (2)",
+      "font_class": "pipette",
+      "unicode": "e695",
+      "unicode_decimal": 59029
+    },
+    {
+      "icon_id": "9220180",
+      "name": "icon_报警",
+      "font_class": "alarm1",
+      "unicode": "e661",
+      "unicode_decimal": 58977
+    },
+    {
+      "icon_id": "29746088",
+      "name": "power-outage",
+      "font_class": "power-outage1",
+      "unicode": "e6b4",
+      "unicode_decimal": 59060
+    },
+    {
+      "icon_id": "29746089",
+      "name": "Audible-alarm",
+      "font_class": "Audible-alarm",
+      "unicode": "e6b5",
+      "unicode_decimal": 59061
+    },
+    {
+      "icon_id": "29731516",
+      "name": "Check",
+      "font_class": "Check",
+      "unicode": "e6b2",
+      "unicode_decimal": 59058
+    },
+    {
+      "icon_id": "29730955",
+      "name": "Record",
+      "font_class": "device1",
+      "unicode": "e6b1",
+      "unicode_decimal": 59057
+    },
+    {
+      "icon_id": "29730617",
+      "name": "signal-reception",
+      "font_class": "signal-reception",
+      "unicode": "e6a9",
+      "unicode_decimal": 59049
+    },
+    {
+      "icon_id": "29730618",
+      "name": "upload",
+      "font_class": "upload1",
+      "unicode": "e6aa",
+      "unicode_decimal": 59050
+    },
+    {
+      "icon_id": "29730619",
+      "name": "download",
+      "font_class": "download2",
+      "unicode": "e6ab",
+      "unicode_decimal": 59051
+    },
+    {
+      "icon_id": "29730622",
+      "name": "equipment5",
+      "font_class": "gateway1",
+      "unicode": "e6b0",
+      "unicode_decimal": 59056
+    },
+    {
+      "icon_id": "5767878",
+      "name": "告警",
+      "font_class": "alarm2",
+      "unicode": "ec35",
+      "unicode_decimal": 60469
+    },
+    {
+      "icon_id": "5983093",
+      "name": "无线电波",
+      "font_class": "radio-wave",
+      "unicode": "ec79",
+      "unicode_decimal": 60537
+    },
+    {
+      "icon_id": "28784615",
+      "name": "电路",
+      "font_class": "circuit",
+      "unicode": "e6a4",
+      "unicode_decimal": 59044
+    },
+    {
+      "icon_id": "28784626",
+      "name": "红外线检测",
+      "font_class": "infrared-inspection",
+      "unicode": "e6a5",
+      "unicode_decimal": 59045
+    },
+    {
+      "icon_id": "28784631",
+      "name": "空调",
+      "font_class": "air-conditioner",
+      "unicode": "e6a6",
+      "unicode_decimal": 59046
+    },
+    {
+      "icon_id": "28784638",
+      "name": "检测",
+      "font_class": "detection",
+      "unicode": "e6a7",
+      "unicode_decimal": 59047
+    },
+    {
+      "icon_id": "28784654",
+      "name": "门锁",
+      "font_class": "door-lock",
+      "unicode": "e6a8",
+      "unicode_decimal": 59048
+    },
+    {
+      "icon_id": "28784643",
+      "name": "探测",
+      "font_class": "detect",
+      "unicode": "e69a",
+      "unicode_decimal": 59034
+    },
+    {
+      "icon_id": "28784646",
+      "name": "水浸",
+      "font_class": "water-logging",
+      "unicode": "e69c",
+      "unicode_decimal": 59036
+    },
+    {
+      "icon_id": "28784647",
+      "name": "探测器",
+      "font_class": "detector1",
+      "unicode": "e69f",
+      "unicode_decimal": 59039
+    },
+    {
+      "icon_id": "28784652",
+      "name": "冷却塔",
+      "font_class": "cooling-tower",
+      "unicode": "e6a0",
+      "unicode_decimal": 59040
+    },
+    {
+      "icon_id": "28784663",
+      "name": "冷却泵",
+      "font_class": "cooling-pump",
+      "unicode": "e6a1",
+      "unicode_decimal": 59041
+    },
+    {
+      "icon_id": "28784669",
+      "name": "暖通设备",
+      "font_class": "Hvac-equipment",
+      "unicode": "e6a2",
+      "unicode_decimal": 59042
+    },
+    {
+      "icon_id": "28784680",
+      "name": "喷淋",
+      "font_class": "Sprinkler-System",
+      "unicode": "e6a3",
+      "unicode_decimal": 59043
+    },
+    {
+      "icon_id": "29626624",
+      "name": "icon-Add to",
+      "font_class": "add-to",
+      "unicode": "e6396",
+      "unicode_decimal": 942998
+    },
+    {
+      "icon_id": "29617951",
+      "name": "icon-people add",
+      "font_class": "people-add",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "29617952",
+      "name": "icon-refresh",
+      "font_class": "refresh",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "29617953",
+      "name": "icon-Query data",
+      "font_class": "query-data",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "29617954",
+      "name": "icon-repair",
+      "font_class": "icon-repair",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "29617955",
+      "name": "icon-Personnel screening",
+      "font_class": "personne-iscreening",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "29617956",
+      "name": "icon-power outage",
+      "font_class": "power-outage",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "29617957",
+      "name": "icon-power",
+      "font_class": "power1",
+      "unicode": "e641",
+      "unicode_decimal": 58945
+    },
+    {
+      "icon_id": "29617958",
+      "name": "icon-reset",
+      "font_class": "reset",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "29617959",
+      "name": "icon-return",
+      "font_class": "return",
+      "unicode": "e646",
+      "unicode_decimal": 58950
+    },
+    {
+      "icon_id": "29617960",
+      "name": "icon-ozone",
+      "font_class": "ozone",
+      "unicode": "e649",
+      "unicode_decimal": 58953
+    },
+    {
+      "icon_id": "29617961",
+      "name": "icon-reserve",
+      "font_class": "reserve",
+      "unicode": "e64d",
+      "unicode_decimal": 58957
+    },
+    {
+      "icon_id": "29617962",
+      "name": "icon-search",
+      "font_class": "search1",
+      "unicode": "e64e",
+      "unicode_decimal": 58958
+    },
+    {
+      "icon_id": "29617963",
+      "name": "icon-salinity",
+      "font_class": "salinity",
+      "unicode": "e651",
+      "unicode_decimal": 58961
+    },
+    {
+      "icon_id": "29617964",
+      "name": "icon-Temperature and humidity",
+      "font_class": "temperature-and-humidity",
+      "unicode": "e652",
+      "unicode_decimal": 58962
+    },
+    {
+      "icon_id": "29617965",
+      "name": "icon-Voltage",
+      "font_class": "voltage",
+      "unicode": "e653",
+      "unicode_decimal": 58963
+    },
+    {
+      "icon_id": "29617966",
+      "name": "icon-set up",
+      "font_class": "setup",
+      "unicode": "e655",
+      "unicode_decimal": 58965
+    },
+    {
+      "icon_id": "29617967",
+      "name": "icon-water volume",
+      "font_class": "water-volume",
+      "unicode": "e656",
+      "unicode_decimal": 58966
+    },
+    {
+      "icon_id": "29617968",
+      "name": "icon-Staff settings",
+      "font_class": "staff-settings",
+      "unicode": "e657",
+      "unicode_decimal": 58967
+    },
+    {
+      "icon_id": "29617969",
+      "name": "icon-turbid",
+      "font_class": "turbid",
+      "unicode": "e659",
+      "unicode_decimal": 58969
+    },
+    {
+      "icon_id": "29617970",
+      "name": "icon-WeChat",
+      "font_class": "weChat",
+      "unicode": "e65a",
+      "unicode_decimal": 58970
+    },
+    {
+      "icon_id": "29617971",
+      "name": "icon-upload",
+      "font_class": "upload",
+      "unicode": "e65b",
+      "unicode_decimal": 58971
+    },
+    {
+      "icon_id": "29617972",
+      "name": "icon-Add to",
+      "font_class": "addto",
+      "unicode": "e65c",
+      "unicode_decimal": 58972
+    },
+    {
+      "icon_id": "29617973",
+      "name": "icon-branch",
+      "font_class": "branch",
+      "unicode": "e65d",
+      "unicode_decimal": 58973
+    },
+    {
+      "icon_id": "29617974",
+      "name": "icon-calendar",
+      "font_class": "calendar",
+      "unicode": "e65e",
+      "unicode_decimal": 58974
+    },
+    {
+      "icon_id": "29617975",
+      "name": "icon-building",
+      "font_class": "building1",
+      "unicode": "e65f",
+      "unicode_decimal": 58975
+    },
+    {
+      "icon_id": "29617976",
+      "name": "icon-temperature",
+      "font_class": "temperature1",
+      "unicode": "e660",
+      "unicode_decimal": 58976
+    },
+    {
+      "icon_id": "29617978",
+      "name": "icon-Ammonia",
+      "font_class": "ammonia",
+      "unicode": "e662",
+      "unicode_decimal": 58978
+    },
+    {
+      "icon_id": "29617979",
+      "name": "icon-default device",
+      "font_class": "device",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "29617980",
+      "name": "icon-door sensor",
+      "font_class": "sensor",
+      "unicode": "e664",
+      "unicode_decimal": 58980
+    },
+    {
+      "icon_id": "29617981",
+      "name": "icon-check",
+      "font_class": "check",
+      "unicode": "e666",
+      "unicode_decimal": 58982
+    },
+    {
+      "icon_id": "29617982",
+      "name": "icon-current",
+      "font_class": "current",
+      "unicode": "e667",
+      "unicode_decimal": 58983
+    },
+    {
+      "icon_id": "29617983",
+      "name": "icon-document",
+      "font_class": "document",
+      "unicode": "e668",
+      "unicode_decimal": 58984
+    },
+    {
+      "icon_id": "29617984",
+      "name": "icon-equipment5",
+      "font_class": "equipment5",
+      "unicode": "e669",
+      "unicode_decimal": 58985
+    },
+    {
+      "icon_id": "29617985",
+      "name": "icon-company",
+      "font_class": "company",
+      "unicode": "e66a",
+      "unicode_decimal": 58986
+    },
+    {
+      "icon_id": "29617986",
+      "name": "icon-carbon dioxide",
+      "font_class": "carbon-dioxide",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "29617987",
+      "name": "icon-download",
+      "font_class": "download1",
+      "unicode": "e66c",
+      "unicode_decimal": 58988
+    },
+    {
+      "icon_id": "29617988",
+      "name": "icon-Camera",
+      "font_class": "camera1",
+      "unicode": "e66d",
+      "unicode_decimal": 58989
+    },
+    {
+      "icon_id": "29617989",
+      "name": "icon-clock",
+      "font_class": "clock",
+      "unicode": "e66f",
+      "unicode_decimal": 58991
+    },
+    {
+      "icon_id": "29617990",
+      "name": "icon-Electricity",
+      "font_class": "electricity",
+      "unicode": "e676",
+      "unicode_decimal": 58998
+    },
+    {
+      "icon_id": "29617991",
+      "name": "icon-delete",
+      "font_class": "delete1",
+      "unicode": "e677",
+      "unicode_decimal": 58999
+    },
+    {
+      "icon_id": "29617992",
+      "name": "icon-drop down",
+      "font_class": "dropdown",
+      "unicode": "e679",
+      "unicode_decimal": 59001
+    },
+    {
+      "icon_id": "29617993",
+      "name": "icon-data",
+      "font_class": "data",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    },
+    {
+      "icon_id": "29617994",
+      "name": "icon-edit",
+      "font_class": "edit",
+      "unicode": "e67b",
+      "unicode_decimal": 59003
+    },
+    {
+      "icon_id": "29617995",
+      "name": "icon-flooding",
+      "font_class": "flooding",
+      "unicode": "e67c",
+      "unicode_decimal": 59004
+    },
+    {
+      "icon_id": "29617996",
+      "name": "icon-equipment2",
+      "font_class": "equipment2",
+      "unicode": "e67d",
+      "unicode_decimal": 59005
+    },
+    {
+      "icon_id": "29617997",
+      "name": "icon-home",
+      "font_class": "home1",
+      "unicode": "e67e",
+      "unicode_decimal": 59006
+    },
+    {
+      "icon_id": "29617998",
+      "name": "icon-GPS",
+      "font_class": "GPS",
+      "unicode": "e67f",
+      "unicode_decimal": 59007
+    },
+    {
+      "icon_id": "29617999",
+      "name": "icon-more",
+      "font_class": "more",
+      "unicode": "e680",
+      "unicode_decimal": 59008
+    },
+    {
+      "icon_id": "29618000",
+      "name": "icon-dissolved oxygen",
+      "font_class": "dissol-vedoxygen",
+      "unicode": "e681",
+      "unicode_decimal": 59009
+    },
+    {
+      "icon_id": "29618001",
+      "name": "icon-menu expand",
+      "font_class": "menu-expand",
+      "unicode": "e682",
+      "unicode_decimal": 59010
+    },
+    {
+      "icon_id": "29618002",
+      "name": "icon-door",
+      "font_class": "door1",
+      "unicode": "e683",
+      "unicode_decimal": 59011
+    },
+    {
+      "icon_id": "29618003",
+      "name": "icon-cha",
+      "font_class": "close1",
+      "unicode": "e684",
+      "unicode_decimal": 59012
+    },
+    {
+      "icon_id": "29618004",
+      "name": "icon-hydrogen sulfide",
+      "font_class": "hydrogen-sulfide",
+      "unicode": "e686",
+      "unicode_decimal": 59014
+    },
+    {
+      "icon_id": "29618005",
+      "name": "icon-log",
+      "font_class": "log",
+      "unicode": "e688",
+      "unicode_decimal": 59016
+    },
+    {
+      "icon_id": "29618006",
+      "name": "icon-chlorophyll",
+      "font_class": "chlorophyll",
+      "unicode": "e689",
+      "unicode_decimal": 59017
+    },
+    {
+      "icon_id": "29618007",
+      "name": "icon-gas",
+      "font_class": "gas",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
+      "icon_id": "29618008",
+      "name": "icon-differential pressure",
+      "font_class": "differential-pressure1",
+      "unicode": "e68e",
+      "unicode_decimal": 59022
+    },
+    {
+      "icon_id": "29618009",
+      "name": "icon-department",
+      "font_class": "department",
+      "unicode": "e68f",
+      "unicode_decimal": 59023
+    },
+    {
+      "icon_id": "29618010",
+      "name": "icon-equipment3",
+      "font_class": "equipment3",
+      "unicode": "e690",
+      "unicode_decimal": 59024
+    },
+    {
+      "icon_id": "29618011",
+      "name": "icon-equipment4",
+      "font_class": "equipment4",
+      "unicode": "e691",
+      "unicode_decimal": 59025
+    },
+    {
+      "icon_id": "29618012",
+      "name": "icon-Methane",
+      "font_class": "Methane",
+      "unicode": "e692",
+      "unicode_decimal": 59026
+    },
+    {
+      "icon_id": "29618013",
+      "name": "icon-information",
+      "font_class": "information",
+      "unicode": "e693",
+      "unicode_decimal": 59027
+    },
+    {
+      "icon_id": "29618014",
+      "name": "icon-Employee",
+      "font_class": "employee",
+      "unicode": "e694",
+      "unicode_decimal": 59028
+    },
+    {
+      "icon_id": "29618016",
+      "name": "icon-menu collapsed",
+      "font_class": "menu-collapsed",
+      "unicode": "e697",
+      "unicode_decimal": 59031
+    },
+    {
+      "icon_id": "29618017",
+      "name": "icon-oxygen",
+      "font_class": "oxygen",
+      "unicode": "e698",
+      "unicode_decimal": 59032
+    },
+    {
+      "icon_id": "29537245",
+      "name": "组织",
+      "font_class": "organization",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "4933356",
+      "name": "离线",
+      "font_class": "offline",
+      "unicode": "e73e",
+      "unicode_decimal": 59198
+    },
+    {
+      "icon_id": "19808073",
+      "name": "正常运行",
+      "font_class": "normal1",
+      "unicode": "e63e",
+      "unicode_decimal": 58942
+    },
+    {
+      "icon_id": "19984772",
+      "name": "水浸",
+      "font_class": "water",
+      "unicode": "e79a",
+      "unicode_decimal": 59290
+    },
+    {
+      "icon_id": "9841808",
+      "name": "全部",
+      "font_class": "all",
+      "unicode": "e63d",
+      "unicode_decimal": 58941
+    },
+    {
+      "icon_id": "18655275",
+      "name": "送检",
+      "font_class": "inspect",
+      "unicode": "e6cb",
+      "unicode_decimal": 59083
+    },
+    {
+      "icon_id": "7736018",
+      "name": "download",
+      "font_class": "download",
+      "unicode": "e8e4",
+      "unicode_decimal": 59620
+    },
+    {
+      "icon_id": "12732488",
+      "name": "解绑",
+      "font_class": "unbundle",
+      "unicode": "e612",
+      "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "2959140",
+      "name": "作业时长",
+      "font_class": "tokinaga",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "4488846",
+      "name": "开始时间",
+      "font_class": "starttime",
+      "unicode": "e63a",
+      "unicode_decimal": 58938
+    },
+    {
+      "icon_id": "4488854",
+      "name": "结束时间",
+      "font_class": "endtime",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "6278309",
+      "name": "能耗",
+      "font_class": "powerenergy",
+      "unicode": "e63c",
+      "unicode_decimal": 58940
+    },
+    {
+      "icon_id": "3845091",
+      "name": "插座",
+      "font_class": "socket",
+      "unicode": "e69e",
+      "unicode_decimal": 59038
+    },
+    {
+      "icon_id": "25742452",
+      "name": "禁用-线",
+      "font_class": "disable-line",
+      "unicode": "e7dd",
+      "unicode_decimal": 59357
+    },
+    {
+      "icon_id": "25742490",
+      "name": "开关-线",
+      "font_class": "switch-line",
+      "unicode": "e7df",
+      "unicode_decimal": 59359
+    },
+    {
+      "icon_id": "25742511",
+      "name": "关闭2-线",
+      "font_class": "close-line",
+      "unicode": "e7de",
+      "unicode_decimal": 59358
+    },
+    {
+      "icon_id": "25742564",
+      "name": "警示-线",
+      "font_class": "warning-line",
+      "unicode": "e7e0",
+      "unicode_decimal": 59360
+    },
+    {
+      "icon_id": "6607737",
+      "name": "ico_细胞银行_液氮罐查看-147",
+      "font_class": "equipment005",
+      "unicode": "e912",
+      "unicode_decimal": 59666
+    },
+    {
+      "icon_id": "742123",
+      "name": "存储设备",
+      "font_class": "storage-device",
+      "unicode": "ea5f",
+      "unicode_decimal": 59999
+    },
+    {
+      "icon_id": "2486584",
+      "name": "电源",
+      "font_class": "power-supply002",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "4506836",
+      "name": "设备管理",
+      "font_class": "equipment004",
+      "unicode": "ebb7",
+      "unicode_decimal": 60343
+    },
+    {
+      "icon_id": "5024127",
+      "name": "柜子",
+      "font_class": "cabinet002",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "5124854",
+      "name": "电冰箱",
+      "font_class": "refrigerator002",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
+      "icon_id": "5157204",
+      "name": "柜子",
+      "font_class": "cabinet001",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "7023752",
+      "name": "空调",
+      "font_class": "air-conditioner-equipment002",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "7677938",
+      "name": "设备",
+      "font_class": "equipment003",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "7791981",
+      "name": "设备",
+      "font_class": "equipment002",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "7813072",
+      "name": "冰箱",
+      "font_class": "refrigerator001",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "8974305",
+      "name": "空调",
+      "font_class": "air-conditioner-equipment001",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "11464315",
+      "name": "危化品罐-冷冻",
+      "font_class": "refrigeration-equipment",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "11806536",
+      "name": "电源开关",
+      "font_class": "power-supply",
+      "unicode": "e671",
+      "unicode_decimal": 58993
+    },
+    {
+      "icon_id": "14151206",
+      "name": "视频设备",
+      "font_class": "videoe-quipment",
+      "unicode": "e634",
+      "unicode_decimal": 58932
+    },
+    {
+      "icon_id": "18164107",
+      "name": "电灯,电灯,发光,光,灯泡,想法",
+      "font_class": "bulb-full",
+      "unicode": "e856",
+      "unicode_decimal": 59478
+    },
+    {
+      "icon_id": "25204364",
+      "name": "设备管理",
+      "font_class": "equipment001",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "25948537",
+      "name": "箭头向左",
+      "font_class": "back1",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "25948771",
+      "name": "箭头前",
+      "font_class": "right1",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "13519524",
+      "name": "set-up",
+      "font_class": "set-up",
+      "unicode": "e674",
+      "unicode_decimal": 58996
+    },
+    {
+      "icon_id": "10156198",
+      "name": "可见",
+      "font_class": "visible",
+      "unicode": "e640",
+      "unicode_decimal": 58944
+    },
+    {
+      "icon_id": "24325492",
+      "name": "不可见",
+      "font_class": "invisible",
+      "unicode": "ee34",
+      "unicode_decimal": 60980
+    },
+    {
+      "icon_id": "348658",
+      "name": "money",
+      "font_class": "money",
+      "unicode": "eb72",
+      "unicode_decimal": 60274
+    },
+    {
+      "icon_id": "19644570",
+      "name": "打开新窗口",
+      "font_class": "windows",
+      "unicode": "e64f",
+      "unicode_decimal": 58959
+    },
+    {
+      "icon_id": "249840",
+      "name": "上",
+      "font_class": "up",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "657136",
+      "name": "下",
+      "font_class": "down",
+      "unicode": "e611",
+      "unicode_decimal": 58897
+    },
+    {
+      "icon_id": "324747",
+      "name": "stack",
+      "font_class": "stack",
+      "unicode": "e630",
+      "unicode_decimal": 58928
+    },
+    {
+      "icon_id": "216517",
+      "name": "back",
+      "font_class": "back",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "38674",
+      "name": "search",
+      "font_class": "search",
+      "unicode": "e672",
+      "unicode_decimal": 58994
+    },
+    {
+      "icon_id": "178349",
+      "name": "close",
+      "font_class": "close",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "721774",
+      "name": "正常",
+      "font_class": "normal",
+      "unicode": "e685",
+      "unicode_decimal": 59013
+    },
+    {
+      "icon_id": "1676952",
+      "name": "异常",
+      "font_class": "alarm",
+      "unicode": "e644",
+      "unicode_decimal": 58948
+    },
+    {
+      "icon_id": "971243",
+      "name": "门磁传感",
+      "font_class": "detector",
+      "unicode": "e68d",
+      "unicode_decimal": 59021
+    },
+    {
+      "icon_id": "1014878",
+      "name": "摄像头",
+      "font_class": "camera3",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "783279",
+      "name": "定位",
+      "font_class": "locationCard",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "323872",
+      "name": "温湿度",
+      "font_class": "equipment1",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "313981",
+      "name": "冰箱",
+      "font_class": "refrigerator1",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "2295554",
+      "name": "投影仪",
+      "font_class": "projector",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "169529",
+      "name": "地图",
+      "font_class": "map",
+      "unicode": "e696",
+      "unicode_decimal": 59030
+    },
+    {
+      "icon_id": "748582",
+      "name": "传感器 感应器",
+      "font_class": "sensor1",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "538463",
+      "name": "浓度仪",
+      "font_class": "instrument",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
+      "icon_id": "246714",
+      "name": "时间",
+      "font_class": "time",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    },
+    {
+      "icon_id": "163674",
+      "name": "区间视图",
+      "font_class": "rang",
+      "unicode": "e69b",
+      "unicode_decimal": 59035
+    },
+    {
+      "icon_id": "898764",
+      "name": "大屏展示",
+      "font_class": "dataV",
+      "unicode": "e69d",
+      "unicode_decimal": 59037
+    },
+    {
+      "icon_id": "554429",
+      "name": "地图",
+      "font_class": "mapedit",
+      "unicode": "e713",
+      "unicode_decimal": 59155
+    },
+    {
+      "icon_id": "168687",
+      "name": "退出",
+      "font_class": "logout",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "819288",
+      "name": "全屏",
+      "font_class": "screenfull-open",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
+      "icon_id": "2138592",
+      "name": "退出全屏",
+      "font_class": "screenfull-close",
+      "unicode": "e6ad",
+      "unicode_decimal": 59053
+    },
+    {
+      "icon_id": "2330462",
+      "name": "电源线",
+      "font_class": "power",
+      "unicode": "e72f",
+      "unicode_decimal": 59183
+    },
+    {
+      "icon_id": "2468766",
+      "name": "水浸探测器",
+      "font_class": "waterLogging",
+      "unicode": "e621",
+      "unicode_decimal": 58913
+    },
+    {
+      "icon_id": "77409",
+      "name": "浏览器",
+      "font_class": "browser-chrome",
+      "unicode": "e678",
+      "unicode_decimal": 59000
+    },
+    {
+      "icon_id": "1948978",
+      "name": "浏览器-360极速",
+      "font_class": "browser-360",
+      "unicode": "e940",
+      "unicode_decimal": 59712
+    },
+    {
+      "icon_id": "2075254",
+      "name": "浏览器-IE",
+      "font_class": "browser-ie",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "889606",
+      "name": "home",
+      "font_class": "home",
+      "unicode": "e626",
+      "unicode_decimal": 58918
+    },
+    {
+      "icon_id": "2612098",
+      "name": "门磁传感",
+      "font_class": "type-1",
+      "unicode": "e941",
+      "unicode_decimal": 59713
+    },
+    {
+      "icon_id": "1996555",
+      "name": "过滤",
+      "font_class": "filter",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
+      "icon_id": "2563907",
+      "name": "系统管理",
+      "font_class": "system",
+      "unicode": "e629",
+      "unicode_decimal": 58921
+    },
+    {
+      "icon_id": "1852254",
+      "name": "统计",
+      "font_class": "statistics",
+      "unicode": "e62e",
+      "unicode_decimal": 58926
+    },
+    {
+      "icon_id": "3983195",
+      "name": "报警",
+      "font_class": "alarmer",
+      "unicode": "e673",
+      "unicode_decimal": 58995
+    },
+    {
+      "icon_id": "4141033",
+      "name": "断电",
+      "font_class": "poweroffAlarmer",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "3913446",
+      "name": "门禁",
+      "font_class": "accessControl",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    },
+    {
+      "icon_id": "7996231",
+      "name": "客户管理",
+      "font_class": "crm",
+      "unicode": "e70a",
+      "unicode_decimal": 59146
+    },
+    {
+      "icon_id": "18662219",
+      "name": "水浸",
+      "font_class": "water-out",
+      "unicode": "e6b3",
+      "unicode_decimal": 59059
+    },
+    {
+      "icon_id": "12642949",
+      "name": "门",
+      "font_class": "door",
+      "unicode": "e687",
+      "unicode_decimal": 59015
+    },
+    {
+      "icon_id": "18135974",
+      "name": "窗户12*200",
+      "font_class": "window",
+      "unicode": "e70f",
+      "unicode_decimal": 59151
+    },
+    {
+      "icon_id": "9281554",
+      "name": "水浸报警器-01",
+      "font_class": "flooding-alarm",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    },
+    {
+      "icon_id": "11806532",
+      "name": "水浸传感器",
+      "font_class": "flood-sensor",
+      "unicode": "e66e",
+      "unicode_decimal": 58990
+    },
+    {
+      "icon_id": "3851470",
+      "name": "压差",
+      "font_class": "differential-pressure",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "7335415",
+      "name": "二氧化碳",
+      "font_class": "eryanghuatan",
+      "unicode": "eb15",
+      "unicode_decimal": 60181
+    },
+    {
+      "icon_id": "3207745",
+      "name": "温湿度",
+      "font_class": "temperature",
+      "unicode": "e64b",
+      "unicode_decimal": 58955
+    },
+    {
+      "icon_id": "21623171",
+      "name": "环境温湿度",
+      "font_class": "environmental-temperature-and-humidity",
+      "unicode": "e706",
+      "unicode_decimal": 59142
+    },
+    {
+      "icon_id": "23034070",
+      "name": "冰箱",
+      "font_class": "The-refrigerator1",
+      "unicode": "e8b4",
+      "unicode_decimal": 59572
+    },
+    {
+      "icon_id": "11183352",
+      "name": "门禁",
+      "font_class": "Entrance-guard",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "19990401",
+      "name": "二氧化碳",
+      "font_class": "Carbon-dioxide-sensor1",
+      "unicode": "e7e6",
+      "unicode_decimal": 59366
+    },
+    {
+      "icon_id": "15596710",
+      "name": "氧气传感器",
+      "font_class": "Oxygen-sensor",
+      "unicode": "e6c9",
+      "unicode_decimal": 59081
+    },
+    {
+      "icon_id": "21548543",
+      "name": "氧气",
+      "font_class": "Oxygen-sensor1",
+      "unicode": "e8be",
+      "unicode_decimal": 59582
+    },
+    {
+      "icon_id": "7445810",
+      "name": "温度传感器",
+      "font_class": "Temperature-sensor1",
+      "unicode": "e748",
+      "unicode_decimal": 59208
+    },
+    {
+      "icon_id": "11327607",
+      "name": "温度传感器",
+      "font_class": "Temperature-sensor",
+      "unicode": "e9a6",
+      "unicode_decimal": 59814
+    },
+    {
+      "icon_id": "15598492",
+      "name": "压差传感器-绿",
+      "font_class": "Differential-pressure-sensor",
+      "unicode": "e738",
+      "unicode_decimal": 59192
+    },
+    {
+      "icon_id": "24246129",
+      "name": "P压差传感器",
+      "font_class": "Differential-pressure-sensor1",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "12140832",
+      "name": "水浸传感器",
+      "font_class": "flood-sensor1",
+      "unicode": "e733",
+      "unicode_decimal": 59187
+    },
+    {
+      "icon_id": "18473648",
+      "name": "水浸传感器",
+      "font_class": "flood-sensor2",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "11892129",
+      "name": "单开门",
+      "font_class": "Single-door",
+      "unicode": "e68c",
+      "unicode_decimal": 59020
+    },
+    {
+      "icon_id": "21516812",
+      "name": "区域",
+      "font_class": "area",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "15726936",
+      "name": "统计",
+      "font_class": "statistical",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
+      "icon_id": "18772641",
+      "name": "公司",
+      "font_class": "The-company",
+      "unicode": "e6db",
+      "unicode_decimal": 59099
+    },
+    {
+      "icon_id": "5387431",
+      "name": "中控",
+      "font_class": "central",
+      "unicode": "ead6",
+      "unicode_decimal": 60118
+    },
+    {
+      "icon_id": "538866",
+      "name": "链接",
+      "font_class": "link",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "1206405",
+      "name": "文字",
+      "font_class": "Thetext",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "13200519",
+      "name": "智能硬件",
+      "font_class": "Smart-hardware",
+      "unicode": "e618",
+      "unicode_decimal": 58904
+    },
+    {
+      "icon_id": "15784819",
+      "name": "设备",
+      "font_class": "equipment",
+      "unicode": "e74b",
+      "unicode_decimal": 59211
+    },
+    {
+      "icon_id": "16290365",
+      "name": "房间数",
+      "font_class": "Theroom",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "1503986",
+      "name": "楼层",
+      "font_class": "floor",
+      "unicode": "e68b",
+      "unicode_decimal": 59019
+    },
+    {
+      "icon_id": "23097482",
+      "name": "楼房",
+      "font_class": "building",
+      "unicode": "e7d6",
+      "unicode_decimal": 59350
+    },
+    {
+      "icon_id": "938213",
+      "name": "delete",
+      "font_class": "delete",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "6326640",
+      "name": "export",
+      "font_class": "export",
+      "unicode": "e6e3",
+      "unicode_decimal": 59107
+    },
+    {
+      "icon_id": "6326643",
+      "name": "import",
+      "font_class": "import",
+      "unicode": "e6e5",
+      "unicode_decimal": 59109
+    },
+    {
+      "icon_id": "16142235",
+      "name": "员工管理",
+      "font_class": "Staffmanagement",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "1996270",
+      "name": "网络设备",
+      "font_class": "Networkequipment",
+      "unicode": "e6d2",
+      "unicode_decimal": 59090
+    },
+    {
+      "icon_id": "903814",
+      "name": "通知(2)",
+      "font_class": "notice-2",
+      "unicode": "e670",
+      "unicode_decimal": 58992
+    },
+    {
+      "icon_id": "933837",
+      "name": "通知2",
+      "font_class": "notice",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "1163350",
+      "name": "电话",
+      "font_class": "phone",
+      "unicode": "e62a",
+      "unicode_decimal": 58922
+    },
+    {
+      "icon_id": "2053181",
+      "name": "短信",
+      "font_class": "sms",
+      "unicode": "e6e4",
+      "unicode_decimal": 59108
+    },
+    {
+      "icon_id": "3206574",
+      "name": "品牌标识-钉钉",
+      "font_class": "dingding",
+      "unicode": "e747",
+      "unicode_decimal": 59207
+    },
+    {
+      "icon_id": "4239017",
+      "name": "通知",
+      "font_class": "notice-3",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "9097145",
+      "name": "邮件",
+      "font_class": "email",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "9186709",
+      "name": "微信",
+      "font_class": "weixin",
+      "unicode": "e665",
+      "unicode_decimal": 58981
+    },
+    {
+      "icon_id": "10070968",
+      "name": "通知",
+      "font_class": "bell",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "15643736",
+      "name": "企业微信",
+      "font_class": "enterprise-weChat",
+      "unicode": "e6af",
+      "unicode_decimal": 59055
+    },
+    {
+      "icon_id": "5961301",
+      "name": "冰箱",
+      "font_class": "refrigerator",
+      "unicode": "ec4f",
+      "unicode_decimal": 60495
+    },
+    {
+      "icon_id": "9203421",
+      "name": "传感器",
+      "font_class": "speed",
+      "unicode": "e654",
+      "unicode_decimal": 58964
+    },
+    {
+      "icon_id": "9430525",
+      "name": "温湿度_line",
+      "font_class": "temperature-humidity-2",
+      "unicode": "e6ec",
+      "unicode_decimal": 59116
+    },
+    {
+      "icon_id": "15427414",
+      "name": "门磁",
+      "font_class": "doorsensor",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "15432392",
+      "name": "网关",
+      "font_class": "gateway",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "15631443",
+      "name": "摄像头",
+      "font_class": "camera",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "21161152",
+      "name": "温湿度传感器",
+      "font_class": "temperature-humidity",
+      "unicode": "e88b",
+      "unicode_decimal": 59531
+    }
+  ]
+}

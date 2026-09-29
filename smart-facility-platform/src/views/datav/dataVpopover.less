@@ -1,0 +1,153 @@
+@primary: #B4C9FF;
+.background() {
+    border: none;
+    background-color: initial;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.dataV-popover{
+    // background-color: #1E2A46;
+    // border-color: #20BCFC;
+    .background;
+    background-image: url(../../assets/dataV/department-screen.png);
+    background-size: 100% 100%;
+    padding: 28px 22px;
+    .body{
+        position: relative;
+        .close{
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-image: url(../../assets/dataV/popover-close.png);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        h5{
+            color: @primary;
+            font-size: 18px;
+            font-weight: initial;
+            margin-bottom: 10px;
+        }
+        .el-cascader, .el-select {
+            width: 100%!important;
+            .el-input .el-select__caret{
+                color: @primary;
+            }
+            .el-input__inner{
+                height: 40px;
+                background-image: url(../../assets/dataV/dataV-select.png);
+                background-size: 101% 100%;
+                .background;
+                color: @primary;
+            }
+        }
+
+        .setting-checkbox{
+            height: 186px;
+            overflow-y: auto;
+            margin-top: 10px;
+            &::-webkit-scrollbar-thumb{
+                background: #4880e3;
+            }
+            &::-webkit-scrollbar-track-piece{
+                background: #d3dce61a;
+                border-radius: 3px;
+            }
+        }
+        .btn{
+            margin-top: 24px;
+            text-align: right;
+            .el-button{
+                .background;
+                background-color: initial!important;
+                background-image: url(../../assets/dataV/select-button.png);
+                background-size: 100% 100%;
+                color: #B4C9FF!important;
+            }
+            .el-button:focus, 
+            .el-button:hover{
+                background-image: url(../../assets/dataV/select-button-hover.png);
+            }
+        }
+    }
+}
+.room-popover{
+    background-image: url(../../assets/dataV/room-screen.png);
+}
+
+.dataV-popover[x-placement^=bottom]{
+    margin-top: 0;
+    .popper__arrow{
+        border: none;
+        &::after{
+            border: none;
+        }
+    }
+}
+
+.dataV-select{
+    background-color: #1E2A46;
+    border-color: #20BCFC;
+    .el-scrollbar__wrap{
+        overflow: hidden;
+        .el-tree{
+            background-color: #1E2A46;
+            .el-tree-node__content:hover{
+                background-color: #20BCFC;
+                color: #fff;
+            }
+            .is-current .el-tree-node__label{
+                color: #fff;
+            }
+        }
+    }
+    .el-cascader-node:hover,
+    .el-select-dropdown__item:hover {
+        background-color: #20BCFC !important;
+    }
+    .el-select-dropdown__item{
+        &::-webkit-scrollbar-thumb{
+            background: #4880e3;
+        }
+        &::-webkit-scrollbar{
+            background: #d3dce61a;
+            border-radius: 3px;
+        }
+    }
+
+    .is-current{
+        .el-tree-node__content{
+            background-image: url(../../assets/dataV/dataV-gou.png);
+            background-repeat: no-repeat;
+            background-position: right center;
+        }
+    }
+
+    .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content{
+        background-color: #20BCFC;
+    }
+}
+
+.alarm-select{
+    background-color: #1E2A46;
+    border-color: #20BCFC;
+    .el-select-dropdown__item.selected,
+    .el-select-dropdown__item.hover, 
+    .el-select-dropdown__item:hover{
+        background-color: #1b3771!important;
+        color: #44f1ff!important;
+    }
+}
+
+.dataV-select[x-placement^=bottom]{
+    .popper__arrow{
+        border-bottom-color: #20BCFC;
+        &::after{
+            border-bottom-color: #1E2A46;
+        }
+    }
+}

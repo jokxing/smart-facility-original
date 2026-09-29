@@ -1,0 +1,232 @@
+@import "variable";
+
+.login-container {
+  height: 100%;
+  width: 100%;
+  background: @background url("../../src/assets/loginImages/background.at.svg") no-repeat 50%;
+  background-size: 100% 100%;
+  overflow: hidden;
+
+  .login-form {
+    position: absolute;
+    width: 360px;
+    height: 450px;
+    max-width: 100%;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    background: @white;
+  }
+
+  .svg-container {
+    padding: 6px 5px 6px 15px;
+    color: #889aa4;
+    vertical-align: middle;
+    width: 30px;
+    display: inline-block;
+
+    img {
+      width: 100%;
+    }
+  }
+
+  .language {
+    position: fixed;
+    right: 60px;
+    top: 30px;
+
+    .ft24 {
+      font-size: 18px;
+    }
+  }
+
+  .title-container {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    display: flex;
+    align-items: center;
+
+    .logo {
+      width: 100px;
+      height: 28px;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-size: 26px;
+      color: #c79f7e;
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+
+  .show-pwd {
+    position: absolute;
+    right: 10px;
+    top: 7px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .pc-login {
+    width: 320px;
+    height: 287px;
+    margin: 0 auto;
+
+    .login_type {
+      height: 50px;
+      line-height: 40px;
+      font-size: 20px;
+      text-align: center;
+      color: #666666;
+    }
+  }
+
+  .wx-login {
+    width: 100%;
+    height: 287px;
+    background-color: white;
+
+    .login_type {
+      height: 50px;
+      line-height: 40px;
+      font-size: 20px;
+      text-align: center;
+      color: #666666;
+    }
+
+    .weixin-code {
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      font-size: 14px;
+    }
+  }
+
+  .ewm-img-area {
+    width: 100%;
+    height: 200px;
+    text-align: center;
+
+    img {
+      width: 200px;
+      height: 200px;
+    }
+  }
+
+  .login-type-change {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .login-type-change-title {
+      width: 160px;
+      height: 20px;
+      margin-top: 8px;
+      margin-left: 140px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+
+      .login-type-change-title-rectangle {
+        width: 140px;
+        height: 30px;
+        line-height: 30px;
+        color: #465afa;
+        border-radius: 4px;
+        background-color: rgba(70, 90, 250, 0.06);
+      }
+    }
+
+    .triangle {
+      border-top: 10px solid transparent;
+      border-left: 10px solid rgba(70, 90, 250, 0.06);
+      border-bottom: 10px solid transparent;
+    }
+
+    .login-type-change-img {
+      width: 60px;
+      height: 60px;
+      margin-left: auto;
+      background-color: aqua;
+      position: relative;
+      cursor: pointer;
+
+      .img-triangle {
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 0;
+        z-index: 50;
+        border-bottom: 60px solid #ffffff;
+        border-right: 60px solid transparent;
+      }
+
+      img {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 60px;
+        height: 60px;
+      }
+    }
+  }
+}
+
+.login-container {
+  .el-input {
+    display: inline-block;
+    height: 40px;
+    width: 85%;
+    border: 1px solid rgba(255, 255, 255, 1);
+
+    input {
+      background: transparent;
+      border: 0;
+      -webkit-appearance: none;
+      border-radius: 0;
+      padding: 12px 5px 12px 15px;
+      color: #283443;
+      height: 40px;
+      caret-color: #283443;
+
+      &:-webkit-autofill {
+        box-shadow: 0 0 0 1000px white inset !important;
+        -webkit-text-fill-color: #283443 !important;
+      }
+    }
+  }
+
+  .el-form-item {
+    border: 1px solid #d0d0d1;
+    background: white;
+    border-radius: 4px;
+    color: black;
+  }
+
+  .el-form-item__content {
+    line-height: 30px;
+    display: flex;
+  }
+
+  .captcha-code-class {
+    width: 40%;
+    float: right;
+  }
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 24px !important;
+}
+
+iframe {
+  width: 100%;
+  height: 200px;
+  margin: 0 auto;
+}

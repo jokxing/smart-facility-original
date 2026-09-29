@@ -1,0 +1,262 @@
+@import "variable";
+
+.bg-color {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-size: 100% 100%;
+  position: relative;
+
+  .bg-img {
+    width: 100%;
+    height: 100%;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .home-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .navbar {
+    height: 80px;
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .left-logo {
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .avatar-wrapper {
+        display: flex;
+        line-height: 25px;
+      }
+    }
+
+    .right-menu {
+      padding: 0 40px 0 20px;
+      cursor: pointer;
+      display: flex;
+
+      .company-title {
+        color: @white;
+        font-size: @font16;
+        font-weight: @fw400;
+      }
+
+      .icon-down {
+        margin-left: @smallFontSize;
+        line-height: 40px;
+        color: @white;
+      }
+
+      .avatar-wrapper {
+        display: flex;
+        align-items: center;
+      }
+
+      .avatar-wrapper:hover {
+        .el-icon-caret-bottom {
+          color: @blue;
+        }
+      }
+    }
+  }
+
+  .bashboard-session {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    height: 600px;
+    z-index: 200;
+    text-align: center;
+    color: @white;
+
+    .logo {
+      width: 163px;
+      height: 53px;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      width: 1012px;
+      height: 70px;
+      margin: 0 auto;
+
+      .img1 {
+        width: 1012px;
+        height: 70px;
+      }
+      .img2 {
+        width: 1012px;
+        height: 140px;
+      }
+    }
+
+    .session-t {
+      position: relative;
+      top: 80px;
+      float: left;
+      width: 100%;
+      min-width: 420px;
+      overflow: hidden;
+
+      .box-button {
+        position: relative;
+        float: left;
+        left: 50%;
+      }
+    }
+
+  }
+
+  .copyright {
+    width: 100%;
+    height: 16px;
+    font-size: @font14;
+    font-weight: @fw400;
+    color: #C3CDE4;
+    line-height: 30px;
+    text-align: center;
+    position: absolute;
+    bottom: 170px;
+  }
+  .version {
+    width: 100%;
+    height: 16px;
+    font-size: @font14;
+    font-weight: @fw400;
+    color: #C3CDE4;
+    line-height: 30px;
+    text-align: center;
+    position: absolute;
+    bottom: 150px;
+  }
+}
+
+.grid-content {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-user-select: none;
+  width: 224px;
+  height: 200px;
+  background: #405294;
+  box-shadow: 0 3px 13px 0 rgba(18, 50, 141, 0.08);
+  border-radius: 8px;
+  cursor: default;
+  margin-left: @normalInterval;
+  margin-bottom: @normalInterval;
+  position: relative;
+  top: 50%;
+  right: 50%;
+  float: left;
+}
+
+.btn-3d-roll {
+  perspective: 500px;
+  -webkit-perspective: 500px;
+  -moz-perspective: 500px;
+}
+
+.btn-3d-roll > div {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  color: @white;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+.div-a {
+  cursor: pointer;
+  color: #E6EBFF;
+
+  .home-icon {
+
+    img {
+      width: 84px;
+      height: 90px;
+      margin: @normalInterval 0;
+    }
+  }
+}
+
+.btn-3d-roll:hover {
+  background-color: @white;
+
+  .div-a {
+    color: #000000;
+  }
+}
+
+.btn-3d-roll > div:nth-child(1) {
+  transform: rotateX(90deg);
+  -webkit-transform: rotateX(90deg);
+  -moz-transform: rotateX(90deg);
+  transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  transform-origin: 50% 50% -100px;
+  -webkit-transform-origin: 50% 50% -90px;
+  -moz-transform-origin: 50% 50% -90px;
+  opacity: 0;
+}
+
+.btn-3d-roll > div:nth-child(2) {
+  transform: rotateX(0deg);
+  -webkit-transform: rotateX(0deg);
+  -moz-transform: rotateX(0deg);
+  transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  transform-origin: 50% 50% -100px;
+  -webkit-transform-origin: 50% 50% -90px;
+  -moz-transform-origin: 50% 50% -90px;
+  opacity: 1;
+}
+
+.btn-3d-roll:hover > div:nth-child(1) {
+  transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  transform: rotateX(0deg);
+  -webkit-transform: rotateX(0deg);
+  -moz-transform: rotateX(0deg);
+  opacity: 1;
+}
+
+.btn-3d-roll:hover > div:nth-child(2) {
+  background-color: @white;
+  transition: all 0.2s ease;
+  transform: rotateX(-90deg);
+  -webkit-transform: rotateX(-90deg);
+  -moz-transform: rotateX(-90deg);
+  opacity: 0;
+}
+
+.open-enter-active,
+.open-leave-active {
+  transition: opacity 0.5s;
+}
+
+.open-enter,
+.open-leave-to {
+  opacity: 0;
+}
