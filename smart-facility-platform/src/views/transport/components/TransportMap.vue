@@ -2,9 +2,13 @@
 <template>
     <div class="map">
         <slot name="append"></slot>
-        <div id="container"></div>
+        <div id="container">
+            <div v-if="mapUnavailable" class="map_unavailable" role="status">
+                {{ mapUnavailableHint }}
+            </div>
+        </div>
         <div class="info">
-            <h4 id='status'></h4>
+            <h4 id='status'>{{ mapUnavailable ? mapUnavailableHint : '' }}</h4>
             <hr>
             <p id='result'></p>
             <hr>
@@ -21,12 +25,17 @@ import AMapLoader from "@amap/amap-jsapi-loader"
  * @param item(Number)
  */
 let AMap1, marker;
+const isDemo = process.env.VUE_APP_DEMO === "true";
+// Never embed a provider key in source. Non-demo may supply one via env; demo never loads the SDK.
+const mapKey = (process.env.VUE_APP_AMAP_KEY || "").trim();
 export default {
     name: "TransportMap",
     data() {
         return {
             polyline: null,
-            markerObj: {}
+            markerObj: {},
+            mapUnavailable: false,
+            mapUnavailableHint: "运输地图未接入本地演示，不加载外部地图服务。"
         }
     },
     props: {
@@ -62,25 +71,31 @@ export default {
     methods: {
         initMap() {
             const _this = this;
+            if (isDemo || !mapKey) {
+                this.mapUnavailable = true;
+                return;
+            }
             AMapLoader.load({
-                key: "3f7d5e9e0332c49140d8757801947968",             // 申请好的Web端开发者Key，首次调用 load 时必填
-                version: "2.0",      // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-                plugins: ['AMap.Geolocation', 'AMap.MoveAnimation', "AMap.GraspRoad"],       // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+                key: mapKey,
+                version: "2.0",
+                plugins: ['AMap.Geolocation', 'AMap.MoveAnimation', "AMap.GraspRoad"],
             }).then((AMap) => {
                 AMap1 = AMap;
-                this.map = new AMap.Map("container", {  //设置地图容器id
-                    viewMode: "3D",    //是否为3D地图模式
-                    zoom: 16,           //初始化地图级别
-                    // center: [113.409958, 23.18623], //初始化地图中心点位置
-                    center: _this.lineArr[0], //初始化地图中心点位置
-                    // layers: [new AMap.TileLayer.Satellite()],  //设置图层,可设置成包含一个或多个图层的数组
-                    resizeEnable: true,// 未填写center时自动定位
+                this.map = new AMap.Map("container", {
+                    viewMode: "3D",
+                    zoom: 16,
+                    center: _this.lineArr[0],
+                    resizeEnable: true,
                 });
             }).catch(e => {
+                this.mapUnavailable = true;
                 console.log(e);
             })
         },
         drawMarker(index, items) {
+            if (!this.map || !AMap1) {
+                return;
+            }
             const key = "marker" + index;
             this.markerObj[key] = null;
             this.markerObj[key] = new AMap1.Marker({
@@ -99,6 +114,9 @@ export default {
         },
         // 绘制轨迹
         drawPolyline() {
+            if (!this.map || !AMap1) {
+                return;
+            }
             if (this.polyline != null) {
                 this.polyline.remove();
             }
@@ -130,6 +148,9 @@ export default {
         },
         // 精准定位
         handleGeolocation() {
+            if (!this.map || !AMap1) {
+                return;
+            }
             const _this = this;
             AMap1.plugin('AMap.Geolocation', function () {
                 const geolocation = new AMap.Geolocation({
@@ -243,8 +264,22 @@ export default {
     height: 500px;
 }
 
+.map_unavailable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #606266;
+    background: #f5f7fa;
+    font-size: 14px;
+    text-align: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
 .amap-copyright {
-    opacity: 0 !important; //去掉高德的版本号
+    opacity: 0 !important;
 }
 
 .info {

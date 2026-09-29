@@ -51,7 +51,7 @@
 </template>
 
 <script>
-    import { getFilePolicy } from "@/api/upload";
+    const UPLOAD_UNAVAILABLE_HINT = "文件上传未接入本副本，当前不可用。";
 
     export default {
         name: "chuxouUpload",
@@ -100,7 +100,8 @@
             return {
                 dialogVisible: false,
                 dialogImageUrl: "",
-                httpRequest: "https://chuxou.oss-cn-shenzhen.aliyuncs.com",
+                // No hardcoded external upload host; action stays empty until a local demo upload is wired.
+                httpRequest: "",
                 ossData: {
                     policy: "",
                     signature: "",
@@ -160,50 +161,12 @@
                 this.$emit("handleUploadSuccess", array);
             },
             handleSuccess(res, file) {
-                if (!(Object.prototype.toString.call(res) === "[object Object]")) {
-                    this.$message.error("OSS服务异常");
-                }
-                let url = res.items.fileUrl || res.items.fileName || res.items.filename || null;
-                if (!this.useOss) {
-                    url = res.data.url;
-                }
-                if (!url) {
-                    return this.$message.error(this.$t('labDevice.noWareImg'));
-                } else {
-                    this.fileList.push({ name: res.items.fileName, url: file.url, uid: file.uid });
-                    this.handleReturnUrl(this.fileList);
-                }
+                // Upload is not wired; never treat an empty/local failure as success.
+                this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
             },
             beforeAvatarUpload(file) {
-                const that = this;
-                if (!this.useOss) {
-                    return true;
-                }
-                const isLt2M = file.size / 1024 / 1024 < this.max;
-                if (!isLt2M) {
-                    return this.$message.error(this.$t('labDevice.updatedLength') + this.max + "MB");
-                }
-                return new Promise((resolve, reject) => {
-                    getFilePolicy({ dir: this.dir })
-                    .then((res) => {
-                        if (res.code) {
-                            const { host, accessKey, dir, callback, policy, signature } = res.items;
-                            that.ossData = {
-                                policy,
-                                signature,
-                                OSSAccessKeyId: accessKey,
-                                dir,
-                                host,
-                                callback,
-                                key: dir + file.name,
-                            };
-                            resolve(true);
-                        }
-                    })
-                    .catch((err) => {
-                        reject(false);
-                    });
-                });
+                this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
+                return false;
             },
             handleExceed(files, fileList) {
                 if(this.dir === 'image'){

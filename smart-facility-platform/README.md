@@ -1,101 +1,35 @@
-# chuxou-saas-web
+# 智慧设施平台（本地演示副本）
 
-### nodejs
+Vue 2 第二版 Web 工程的本地演示副本，用于展示已接入的中控地图、设备详情/历史曲线与告警处理等链路。本目录可脱敏修改，**不是**生产部署包，也不连接原公司业务服务。
 
-#### 1、安装地址：
+更完整的背景与履历表述见仓库根目录 `docs/PROJECT_CONTEXT.md`。
 
-官网：https://nodejs.org/en/ 
-中文官网：https://nodejs.org/zh-cn/ 
+## 启动演示
 
-#### 2、安装步骤注意点：
-
-在Custom Setup步骤中：
-
-1. 情况一：
-
-   选择add to PATH 不需要手动设置系统环境变量
-
-2. 情况二：
-
-   选择其他项，需要手动配置系统环境变量
-
-   检测PATH是否配置:
-
-   ```
-   点击开始=》运行=》输入"cmd" => 输入命令"path" 或 win+r => 输入cmd => 输入path
-   ```
-
-其他地方直接next
-
-如有需要可以安装nvm,对node.js 版本进行管理切换
-**ps:  本项目使用node.js > 8.0 webpack 5.65.0**
-
-### 下载命令说明
-
-1. 推荐使用yarn
-
-   ```
-   //安装npm前提下
-   npm install yarn -g
-   ```
-
-2. 如果使用npm下载报错，可切换淘宝镜像
-
-   ```
-   npm config set registry https://registry.npm.taobao.org
-   // 检验是否验证成功
-   npm config get registry
-   // 还原npm仓库
-   npm config set registry https://registry.npmjs.org/
-   ```
-### 初始化下载
-```
-npm init -y 或
-yarn init -y
+```powershell
+npm run demo
 ```
 
-### 下载第三方依赖
-```
-npm install --global yarn
-yarn install或
-npm install
+端口以终端为准。账号、开放路由与操作路径见 `docs/demo-guide.md`。
+
+## 限制（本批已对齐）
+
+- 演示模式走统一 Mock 与 CSP，禁止直连远程业务服务或旧工具包入口。
+- 演示模式不加载外部地图 SDK；运输地图页会明确提示未接入。
+- 文件上传组件保留 UI，但未接入存储：选择文件时提示不可用，不伪造成功，不回退到原上传目标。
+- 非演示 `serve` / `build` 脚本仍保留历史工程结构；本地代理仅指向本机占位地址，不得配置为原内部服务。
+
+## 验证
+
+```powershell
+npm run test:demo -- --watch=false
+npm run test:demo:browser
 ```
 
-### 编译与热编译
-```
-yarn serve 或 //测试服务器
-npm run serve 
-yarn dev 或 //正式服务器
-npm run dev
-```
+浏览器回归要求外部应用请求与未捕获异常均为 0（需本机已启动演示服务）。
 
-### 打包
-```
-yarn build:dev //测试服务器
-yarn build:prod //正式服务器
-```
+## 自定义配置
 
-### 测试文件
-```
-yarn test:unit
-```
+通用 Vue CLI 配置见官方文档。演示相关见 `config/demo.js`、`.env.demo` 与 `docs/` 下交接文档。
 
-### 自定义配置
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-### 功能模块
-#### 一、登录
-#### 二、首页
-### 代码检查
-### 安装sonarlint 代码扫描插件
-npm i -g sonar-scanner
-### 执行检查
-sonar-scanner
-### 20220601新增组件svg-progress-bar
-```node
-yarn add svg-progress-bar
-```
-### 20220610新引入vue-seamless-scroll
-```node
-yarn add vue-seamless-scroll
-```
+品牌元数据、素材与 XLS 等后续分批处理，见 `docs/precommit-content-audit.md`。

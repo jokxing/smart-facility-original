@@ -42,6 +42,7 @@ module.exports = {
         open: false,
         ...(isDemo ? { host: "127.0.0.1", progress: false, headers: demoConfig.headers, before: demoConfig.before } : {}),
         proxy: isDemo ? undefined : {
+            // Local placeholder only. Never point this at original internal hosts.
             [process.env.VUE_APP_BASE_URL]: {
                 target: `http://127.0.0.1/api`,
                 ws: false,

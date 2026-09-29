@@ -33,8 +33,7 @@
 </template>
 
 <script>
-import {getFilePolicy} from "@/api/upload";
-import {getDetectComplete} from "@/api/detect";
+const UPLOAD_UNAVAILABLE_HINT = "文件上传未接入本副本，当前不可用。";
 
 export default {
   name: "Inspected",
@@ -43,7 +42,8 @@ export default {
     return {
       title: _this.$t('hardware.detectedFinish'),
       dialogVisible: false,
-      httpRequest: "https://chuxou.oss-cn-shenzhen.aliyuncs.com",
+      // No hardcoded external upload host; action stays empty until a local demo upload is wired.
+      httpRequest: "",
       ossData: {
         policy: "",
         signature: "",
@@ -70,55 +70,19 @@ export default {
       this.dialogVisible = false;
     },
     handleSubmit() {
-        this.loading = true;
-      getDetectComplete(this.form).then(res => {
-        if (res.code) {
-          this.$message.success(res.message);
-          this.$emit("handle");
-          this.handleClose();
-        } else {
-          this.$message.error(res.message);
-        }
-      }).finally(() => {
-          this.loading = false;
-      })
+      // Upload is unavailable in this copy; confirmation must not complete a report.
+      this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
+      return false;
     },
     handleExceed(file, fileList) {
       this.$message.warning(this.$t('hardware.uploadMaxFile'));
     },
     handleSuccess(res, file) {
-      const url = res.items.fileUrl || res.items.fileName || null;
-      if (!url) {
-        return this.$message.error(this.$t('hardware.uploadNotFile'));
-      } else {
-        this.form.reportFileName = res.items.fileName;
-      }
+      this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
     },
     beforeAvatarUpload(file) {
-      const _this = this;
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
-        return this.$message.error(this.$t('hardware.uploadTip'));
-      }
-      return new Promise((resolve, reject) => {
-        getFilePolicy({dir: "pdf"}).then(res => {
-          if (res.code) {
-            const {host, accessKey, dir, callback, policy, signature} = res.items;
-            _this.ossData = {
-              policy,
-              signature,
-              OSSAccessKeyId: accessKey,
-              dir,
-              host,
-              callback,
-              key: dir + file.name
-            };
-            resolve(true);
-          }
-        }).catch(err => {
-          reject(false);
-        })
-      })
+      this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
+      return false;
     }
   }
 }
