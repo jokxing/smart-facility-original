@@ -1,4 +1,19 @@
 import axios from 'axios';
+import {setDemoScenario, resetDemoScenario} from '../../../src/mock/fixtures/scenario';
+
+test('floor room summaries follow shared instrument scenarios, empty rooms stay empty', () => {
+  try {
+    for (const scenario of ['normal', 'alarm', 'offline']) {
+      setDemoScenario(scenario);
+      const rooms = listFloorOverview(930001).labList;
+      const lab = rooms.find(r => r.id === 950001).deviceSummary;
+      expect(lab.total).toBe(6);
+      expect(lab[scenario]).toBe(6);
+      expect(lab.normal + lab.alarm + lab.offline + lab.unknown).toBe(6);
+      expect(rooms.find(r => r.id === 950002).deviceSummary.total).toBe(0);
+    }
+  } finally { resetDemoScenario(); }
+});
 import qs from 'qs';
 import {DEMO_BASE_URL} from '../../../src/mock/adapter';
 import mockAdapter from '../../../src/mock';

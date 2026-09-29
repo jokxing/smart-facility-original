@@ -1,5 +1,6 @@
 import {DEMO_SPACE} from './space';
-import {listInstrumentsByRoomId} from './instrument';
+import {listInstrumentsByRoomId, listRoonInstrumentInfo} from './instrument';
+import {countDemoDeviceStatus} from '../../utils/demoDeviceStatus';
 import {getDemoScenario, statusForScenario} from './scenario';
 
 /**
@@ -85,6 +86,7 @@ export function listFloorOverview(floorId) {
       const hasInstruments = listInstrumentsByRoomId(room.id).length > 0;
       return {
         ...room,
+        deviceSummary: countDemoDeviceStatus(listRoonInstrumentInfo(room.id).list),
         senorStatus: hasInstruments ? scenarioStatus : room.senorStatus,
         equipments: (room.equipments || []).map(eq => ({
           ...eq,

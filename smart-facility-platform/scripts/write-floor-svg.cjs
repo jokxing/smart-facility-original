@@ -48,12 +48,25 @@ console.log('wrote', file, fs.statSync(file).size);
 
 // Room crops: same geometry, viewBox limited to each lab so RoomView is not the full floor.
 function writeRoomCrop(name, viewBox, width, height, title) {
+  // Keep the existing coordinate frame and saved device layouts. Draw the
+  // architectural edge inside that frame instead of changing the crop origin.
+  const [left, top] = viewBox.split(' ').map(Number);
+  const right = left + width, bottom = top + height;
+  const doorLeft = name === 'room-a.svg' ? 365 : 1200;
+  const windowXs = name === 'room-a.svg' ? [150,310,470,630] : [930,1090,1250,1410];
+  const edge = `<g aria-label="房间墙体与窗户">
+    <path d="M${left+5} ${bottom-5}V${top+5}H${right-5}V${bottom-5}H${doorLeft+90} M${left+5} ${bottom-5}H${doorLeft}" fill="none" stroke="#274859" stroke-width="10"/>
+    <path d="M${left+11} ${bottom-12}V${top+12}H${right-12}V${bottom-12}" fill="none" stroke="#bdd1d8" stroke-width="2"/>
+    ${windowXs.map(x => `<g fill="#b9e0e9" stroke="#4e8298" stroke-width="2"><rect x="${x}" y="${top+1}" width="112" height="10"/><path d="M${x+56} ${top+1}v10"/></g>`).join('')}
+    <path d="M${doorLeft} ${bottom-4}h90" stroke="#b7ced6" stroke-width="2" stroke-dasharray="4 4"/>
+    <text x="${left+width/2}" y="${top+62}" text-anchor="middle" fill="#456778" font-family="sans-serif" font-size="16" letter-spacing="3">实验操作区</text>
+  </g>`;
   const cropped = svg
     .replace('width="1678" height="795" viewBox="0 0 1678 795"', `width="${width}" height="${height}" viewBox="${viewBox}"`)
     .replace(
       '<title>合成实验室楼层底图：固定建筑与实验台，设备由独立数据层提供</title>',
       `<title>${title}</title>`
-    );
+    ).replace('</svg>', edge + '</svg>');
   const target = path.join(outDir, name);
   fs.writeFileSync(target, cropped);
   console.log('wrote', target, fs.statSync(target).size);

@@ -34,4 +34,10 @@
 </g>
 <path d="M710 465h-70m12-8-12 8 12 8 M975 465h70m-12-8 12 8-12 8" fill="none" stroke="#bad6df" stroke-width="3"/>
 <text x="70" y="770" fill="#688fa4" font-family="sans-serif" font-size="14">实验区 / 公共准备区 / 辅助区</text>
-</svg>
+<g aria-label="房间墙体与窗户">
+    <path d="M845 400V83H1595V400H1290 M845 400H1200" fill="none" stroke="#274859" stroke-width="10"/>
+    <path d="M851 393V90H1588V393" fill="none" stroke="#bdd1d8" stroke-width="2"/>
+    <g fill="#b9e0e9" stroke="#4e8298" stroke-width="2"><rect x="930" y="79" width="112" height="10"/><path d="M986 79v10"/></g><g fill="#b9e0e9" stroke="#4e8298" stroke-width="2"><rect x="1090" y="79" width="112" height="10"/><path d="M1146 79v10"/></g><g fill="#b9e0e9" stroke="#4e8298" stroke-width="2"><rect x="1250" y="79" width="112" height="10"/><path d="M1306 79v10"/></g><g fill="#b9e0e9" stroke="#4e8298" stroke-width="2"><rect x="1410" y="79" width="112" height="10"/><path d="M1466 79v10"/></g>
+    <path d="M1200 401h90" stroke="#b7ced6" stroke-width="2" stroke-dasharray="4 4"/>
+    <text x="1220" y="140" text-anchor="middle" fill="#456778" font-family="sans-serif" font-size="16" letter-spacing="3">实验操作区</text>
+  </g></svg>

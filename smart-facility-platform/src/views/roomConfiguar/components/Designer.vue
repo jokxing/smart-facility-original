@@ -56,6 +56,7 @@
 </template>
 <script>
 import { roomFrame, validPlacement } from "@/utils/demoLayoutGeometry";
+import { demoDeviceStatusColor } from "@/utils/demoDeviceStatus";
 import ImageNode from "./ImageNode.vue";
 import { BASE_URL } from "@/utils/constant.js";
 import { resolveDeviceAssetUrl } from "@/utils/demoDeviceUrl";
@@ -241,7 +242,7 @@ export default {
       }
       return {
         ...obj,
-        fill: color,
+        fill: isDemo ? demoDeviceStatusColor(status) : color,
       };
     },
     handleDragmove(data,e){

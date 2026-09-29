@@ -70,7 +70,8 @@
                   @dblclick="handleRoomDetail(item, $event)"
                   @mousedown="handleMouseDown(item, $event)"
                   @mouseout="handleNoPathRoom"
-                  @mouseover="handlePathRoom"
+                  @mouseover="handlePathRoom(item, $event)"
+                  @mousemove="moveRoomHover"
                   @touchstart="handleMouseDown(item, $event)"
               ></v-text>
               <v-image
@@ -92,6 +93,7 @@
                   @mousedown="handleRoomDetail(item, $event)"
                   @mouseout="handleMouseOut"
                   @mouseover="handleMouseOver(item, $event)"
+                  @mousemove="moveRoomHover"
                   @touchstart="handleRoomDetail(item, $event)"
               ></v-image>
             </v-group>
@@ -248,6 +250,17 @@
         </transition>
       </div>
     </div>
+    <div v-if="isDemo && hoverRoom" class="demo-room-tooltip" role="tooltip"
+      :style="{left: roomHoverPoint.x + 'px', top: roomHoverPoint.y + 'px'}">
+      <strong>{{ hoverRoom.name }}</strong>
+      <template v-if="hoverRoom.deviceSummary">
+        <div>设备 {{ hoverRoom.deviceSummary.total }} 台</div>
+        <div>正常 {{ hoverRoom.deviceSummary.normal }} · 告警 {{ hoverRoom.deviceSummary.alarm }} · 离线 {{ hoverRoom.deviceSummary.offline }}</div>
+        <div v-if="hoverRoom.deviceSummary.unknown">未知 {{ hoverRoom.deviceSummary.unknown }}</div>
+      </template>
+      <div v-else>暂无设备统计</div>
+      <small>演示数据</small>
+    </div>
     <RoomStatisticsDrawer :floorData="floorData"></RoomStatisticsDrawer>
     <RoomDrawerNew :isDrawer.sync="isDrawerNew" :roomId.sync="roomId" />
     <Drawer :departments="departments" :is-drawer.sync="isDrawer" :room-id.sync="roomId" @handle="handleCloseDrawer"/>
@@ -335,6 +348,8 @@ export default {
       touSet: null,
       touSet2: null,
       isDemo,
+      hoverRoom: null,
+      roomHoverPoint: {x: 0, y: 0},
       demoScenario: 'normal'
     };
   },
@@ -422,6 +437,13 @@ export default {
     }),
   },
   methods: {
+    moveRoomHover(event) {
+      if (!isDemo || !event || !event.evt) return;
+      this.roomHoverPoint = {
+        x: Math.max(12, Math.min(event.evt.clientX + 18, window.innerWidth - 282)),
+        y: Math.max(12, Math.min(event.evt.clientY + 18, window.innerHeight - 165))
+      };
+    },
     handleRefreshTime() {
       clearInterval(timeIn);
       timeIn = "";
@@ -725,6 +747,7 @@ export default {
     },
 
     async handleDemoScenario(scenario) {
+      this.hoverRoom = null;
       if (!isDemo) return;
       try {
         const res = await updateDemoScenario(scenario);
@@ -791,13 +814,21 @@ export default {
         },
       });
     },
-    handlePathRoom() {
+    handlePathRoom(item, event) {
+      if (isDemo) { this.hoverRoom = item; this.moveRoomHover(event); }
       document.body.style.cursor = "pointer";
     },
     handleNoPathRoom() {
+      this.hoverRoom = null;
       document.body.style.cursor = "";
     },
     handleMouseOver(data, event) {
+      if (isDemo) {
+        this.hoverRoom = data;
+        this.moveRoomHover(event);
+        document.body.style.cursor = 'pointer';
+        return;
+      }
       if (!data.isEdit) {
         return false;
       }
@@ -850,6 +881,7 @@ export default {
       element.innerHTML = html;
     },
     handleMouseOut() {
+      this.hoverRoom = null;
       this.selectedRoomKey = "";
       document.body.style.cursor = "default";
       // element.style = "";
@@ -858,6 +890,7 @@ export default {
     },
 
     handleResize() {
+      this.hoverRoom = null;
       this.handleInitView();
       this.config = {
         width,
@@ -891,6 +924,7 @@ export default {
 
     // 触摸事件
     handleTouchstart(event) {
+      this.hoverRoom = null;
       this.blockChildEle = true;
       this.touSet = setTimeout(() => {
         this.blockChildEle = false
@@ -1120,6 +1154,7 @@ export default {
       }
     },
     detectZoom(e) {
+      this.hoverRoom = null;
       const ev = e || window.event;
       elementKonva = document.getElementsByClassName("konvajs-content")[0];
       let down = true;
@@ -1162,6 +1197,25 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.demo-room-tooltip {
+  position: fixed;
+  z-index: 20;
+  pointer-events: none;
+  box-sizing: border-box;
+  width: 270px;
+  max-height: 153px;
+  overflow: hidden;
+  padding: 14px 16px;
+  border: 1px solid #537f94;
+  border-radius: 6px;
+  background: rgba(12, 34, 49, 0.97);
+  color: #d5e9f0;
+  font-size: 14px;
+  line-height: 1.7;
+  box-shadow: 0 6px 24px #06172480;
+  strong { display: block; color: #87d6ed; overflow-wrap: anywhere; }
+  small { color: #8faab7; }
+}
 @import "./index.less";
 
 .layout-left-nav {

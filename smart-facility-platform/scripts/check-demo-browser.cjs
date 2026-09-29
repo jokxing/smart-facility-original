@@ -154,6 +154,42 @@ async function fill(password) {
         && page.deviceList && page.deviceList.length >= 3
         && page.deviceList.some(r => r.name === '演示房间 A'));
     })()`, 'floor plan background and room markers loaded', 45000);
+    await sleep(800);
+    const roomHoverHit = await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.moveRoomHover && vm.$refs.stage) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__), stage = page.$refs.stage.getNode();
+      const box = stage.content.getBoundingClientRect();
+      const node = stage.findOne('.deviceGroup0').findOne('Text');
+      const rect = node.getClientRect();
+      return {x: box.left+(rect.x+rect.width/2)*box.width/stage.width(), y: box.top+(rect.y+rect.height/2)*box.height/stage.height()};
+    })()`);
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...roomHoverHit});
+    await waitPage(`(() => { const card = document.querySelector('.demo-room-tooltip'); return card && /设备\\s*6\\s*台/.test(card.textContent) && /正常\\s*6/.test(card.textContent); })()`, 'floor room hover shows shared device counts');
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: 10, y: 110});
+    await waitPage("!document.querySelector('.demo-room-tooltip')", 'floor room hover closes on leave');
+    for (const [scenario, label] of [['alarm', '告警'], ['offline', '离线'], ['normal', '正常']]) {
+      await evaluate(`(() => {
+        const find = vm => (!vm ? null : vm.moveRoomHover ? vm : (vm.$children || []).map(find).find(Boolean));
+        return find(document.querySelector('#app').__vue__).handleDemoScenario('${scenario}');
+      })()`);
+      await sleep(300);
+      await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...roomHoverHit});
+      await waitPage(`(() => { const c = document.querySelector('.demo-room-tooltip'); return c && c.textContent.includes('${label} 6'); })()`, 'floor hover ' + scenario);
+      await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: 10, y: 110});
+    }
+    const emptyRoomHit = await evaluate(`(() => {
+      const find = vm => (!vm ? null : vm.moveRoomHover ? vm : (vm.$children || []).map(find).find(Boolean));
+      const p = find(document.querySelector('#app').__vue__), s = p.$refs.stage.getNode(), b = s.content.getBoundingClientRect();
+      const index = p.deviceList.findIndex(r => r.id === 950002);
+      const r = s.findOne('.deviceGroup'+index).findOne('Text').getClientRect();
+      return {x: b.left+(r.x+r.width/2)*b.width/s.width(), y: b.top+(r.y+r.height/2)*b.height/s.height()};
+    })()`);
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...emptyRoomHit});
+    await waitPage(`(() => {const c=document.querySelector('.demo-room-tooltip'); return c && c.textContent.includes('设备 0 台');})()`, 'empty room hover has zero devices');
+    // Synthetic edge coordinates test popup clamping; no device layout mutation.
+    await evaluate(`(() => {const find=vm=>(!vm?null:vm.moveRoomHover?vm:(vm.$children||[]).map(find).find(Boolean)); find(document.querySelector('#app').__vue__).moveRoomHover({evt:{clientX:innerWidth-1,clientY:innerHeight-1}});})()`);
+    await waitPage(`(() => {const r=document.querySelector('.demo-room-tooltip').getBoundingClientRect(); return r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight;})()`, 'room hover stays inside viewport at lower right');
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: 10, y: 110});
     if (process.env.DEMO_FLOOR_SCREENSHOT) {
       await sleep(600);
       const capture = await send('Page.captureScreenshot', {format: 'png'});
@@ -213,6 +249,28 @@ async function fill(password) {
         && page.deviceList.every(d => d.isEdit === 1));
     })()`, 'room layout devices and cropped background loaded', 45000);
     assert.equal(await evaluate("fetch('/demo/devices/analyzer.svg').then(r => r.status)"), 200);
+    await sleep(1000);
+    const hoverHit = await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.deviceList && vm.getDrawerDataAsync) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__), stage = page.$refs.stage.getNode();
+      const box = stage.content.getBoundingClientRect();
+      const node = stage.findOne('.deviceGroup3');
+      return {x: box.left + node.x() * box.width / stage.width(), y: box.top + node.y() * box.height / stage.height()};
+    })()`);
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...hoverHit});
+    await sleep(200);
+    await waitPage(`(() => { const card = document.querySelector('.demo-device-tooltip'); return card && card.textContent.includes('正常') && card.textContent.includes('5.2℃'); })()`, 'device hover shows existing mock reading');
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: 10, y: 110});
+    await waitPage("!document.querySelector('.demo-device-tooltip')", 'device hover closes on leave');
+    for (const label of ['告警', '离线', '正常']) {
+      await evaluate(`(() => {const find=vm=>(!vm?null:vm.handleDemoScenarioCycle?vm:(vm.$children||[]).map(find).find(Boolean));return find(document.querySelector('#app').__vue__).handleDemoScenarioCycle();})()`);
+      await sleep(300);
+      await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...hoverHit});
+      await waitPage(`(() => {const c=document.querySelector('.demo-device-tooltip');return c && c.textContent.includes('${label}') && c.textContent.includes('${label === '离线' ? '暂无读数' : '5.2℃'}');})()`, 'device hover ' + label);
+      await evaluate(`(() => {const find=vm=>(!vm?null:vm.handleDeviceHoverMove?vm:(vm.$children||[]).map(find).find(Boolean));find(document.querySelector('#app').__vue__).handleDeviceHoverMove({evt:{clientX:innerWidth-1,clientY:innerHeight-1}});})()`);
+      await waitPage(`(() => {const r=document.querySelector('.demo-device-tooltip').getBoundingClientRect();return r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight;})()`, 'device hover stays inside viewport');
+      await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: 10, y: 110});
+    }
     assert.equal(await evaluate("fetch('/demo/floors/room-a.svg').then(r => r.status)"), 200);
     const seedPositions = await evaluate(`(() => {
       const root = document.querySelector('#app').__vue__;
@@ -256,6 +314,45 @@ async function fill(password) {
       const moved = page.deviceDrawerList.find(d => d.elementId === window.__demoMovedId);
       return Math.abs(moved.x - window.__demoMovedXY[0]) < 1 && Math.abs(moved.y - window.__demoMovedXY[1]) < 1;
     })()`, 'real pointer drag updates logical layout');
+    // Read geometry only; all mutations below go through actual pointer gestures.
+    const readTransform = () => evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.commitDemoPlacement && vm.$refs.stage) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const stage = page.$refs.stage.getNode(), box = stage.container().getBoundingClientRect();
+      const index = page.deviceDrawerList.findIndex(d => d.elementId === window.__demoMovedId);
+      const node = stage.findOne('.deviceGroup' + index), tr = page.$refs.transformer.getNode();
+      const point = n => { const p = n.getAbsolutePosition(); return {x: box.left + p.x, y: box.top + p.y}; };
+      const geometry = d => [d.x, d.y, d.rotation, d.scaleX, d.scaleY];
+      return {value: geometry(page.deviceDrawerList[index]),
+        rendered: [node.x()/page.ratio, node.y()/page.ratio, node.rotation(), node.scaleX()/page.ratio, node.scaleY()/page.ratio],
+        center: point(node), corner: point(tr.findOne('.bottom-right')), rotate: point(tr.findOne('.rotater')),
+        outside: {x: box.left + 5, y: box.top + 5}};
+    })()`);
+    const gesture = async (from, to) => {
+      await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...from});
+      await send('Input.dispatchMouseEvent', {type: 'mousePressed', ...from, button: 'left', buttons: 1, clickCount: 1});
+      for (let i = 1; i <= 8; i++) {
+        await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: from.x+(to.x-from.x)*i/8, y: from.y+(to.y-from.y)*i/8, buttons: 1});
+        await sleep(30);
+      }
+      await send('Input.dispatchMouseEvent', {type: 'mouseReleased', ...to, button: 'left', clickCount: 1});
+      await sleep(200);
+    };
+    const beforeScale = await readTransform();
+    await gesture(beforeScale.corner, {x: beforeScale.corner.x + 12, y: beforeScale.corner.y + 12});
+    const scaled = await readTransform();
+    assert.ok(Math.abs(scaled.value[3]-beforeScale.value[3]) > 0.01, 'real resize anchor changes scale');
+    const dx = scaled.rotate.x-scaled.center.x, dy = scaled.rotate.y-scaled.center.y, angle = Math.PI/6;
+    await gesture(scaled.rotate, {x: scaled.center.x+dx*Math.cos(angle)-dy*Math.sin(angle), y: scaled.center.y+dx*Math.sin(angle)+dy*Math.cos(angle)});
+    const rotated = await readTransform();
+    assert.ok(Math.abs(rotated.value[2]-scaled.value[2]) > 10, 'real rotation anchor changes angle');
+    await gesture(rotated.center, rotated.outside);
+    const rejected = await readTransform();
+    rotated.value.forEach((v, i) => {
+      assert.ok(Math.abs(rejected.value[i]-v) < 0.001, 'invalid drag preserves logical transform');
+      assert.ok(Math.abs(rejected.rendered[i]-v) < 0.001, 'invalid drag restores rendered transform');
+    });
+    const expectedTransform = rejected.value;
     await evaluate(`(() => {
       const find = vm => (!vm ? null : (vm.handleSave && vm.deviceDrawerList) ? vm : (vm.$children || []).map(find).find(Boolean));
       const page = find(document.querySelector('#app').__vue__);
@@ -281,6 +378,12 @@ async function fill(password) {
       const item = page && page.deviceList.find(d => d.elementId === ${persistedDrag.id});
       return !!item && item.x === ${persistedDrag.xy[0]} && item.y === ${persistedDrag.xy[1]};
     })()`, 'saved pointer drag survives full page reload');
+    const restoredTransform = await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.deviceList && vm.getDrawerDataAsync) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const item = find(document.querySelector('#app').__vue__).deviceList.find(d => d.elementId === ${persistedDrag.id});
+      return [item.x, item.y, item.rotation, item.scaleX, item.scaleY];
+    })()`);
+    expectedTransform.forEach((v, i) => assert.ok(Math.abs(restoredTransform[i]-v) < 0.001, 'full transform survives save and reload'));
     await evaluate(`window.__demoMovedId = ${persistedDrag.id}; window.__demoMovedXY = ${JSON.stringify(persistedDrag.xy)}; window.__demoSeedXY = ${JSON.stringify(persistedDrag.seed)};`);
     await evaluate(`(() => {
       const root = document.querySelector('#app').__vue__;

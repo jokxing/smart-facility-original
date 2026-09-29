@@ -1,6 +1,7 @@
 <template>
   <div
     class="desinerLayout designer_fullScreen"
+    :class="{ 'demo-room-view': isDemo }"
     v-loading="loading"
     element-loading-background="rgba(0, 0, 0, 0.8)"
     style="touch-action: none;">
@@ -48,7 +49,8 @@
                 scaleX: item.scaleX * ratio || ratio,
                 scaleY: item.scaleY * ratio || ratio,
               }"
-              @mouseover="handleMouseOver"
+              @mouseover="handleMouseOver(item, $event)"
+              @mousemove="handleDeviceHoverMove"
               @mouseout="handleMouseOut"
               @mousedown="handleMouseDown(item, $event)"
               @touchstart="handleMouseDown(item, $event)"
@@ -67,6 +69,26 @@
         </v-layer>
       </v-stage>
     </div>
+    <div v-if="isDemo" class="demo-status-summary" role="status" aria-live="polite">
+      <span>当前显示 {{ demoStatusCounts.total }} 台</span>
+      <span><i :style="{background: demoStatusColor(1)}"></i>正常 {{ demoStatusCounts.normal }}</span>
+      <span><i :style="{background: demoStatusColor(-1)}"></i>告警 {{ demoStatusCounts.alarm }}</span>
+      <span><i :style="{background: demoStatusColor(-100)}"></i>离线 {{ demoStatusCounts.offline }}</span>
+      <span v-if="demoStatusCounts.unknown"><i :style="{background: demoStatusColor(null)}"></i>未知 {{ demoStatusCounts.unknown }}</span>
+    </div>
+    <div v-if="isDemo && hoveredDevice" class="demo-device-tooltip" role="tooltip"
+      :style="{left: hoverPoint.x + 'px', top: hoverPoint.y + 'px'}">
+      <strong>{{ hoveredDevice.name }}</strong>
+      <div><i :style="{background: demoStatusColor(hoveredDevice.status)}"></i>{{ hoverStatusLabel }}</div>
+      <template v-if="String(hoveredDevice.status) !== '-100' && hoverSensors.length">
+        <div v-for="sensor in hoverSensors" :key="sensor.id">
+          {{ sensor.sensorType && sensor.sensorType.name || '监测值' }}：
+          {{ sensor.val == null || sensor.val === '' ? '暂无读数' : sensor.val + (sensor.unit || '') }}
+        </div>
+      </template>
+      <div v-else>暂无读数</div>
+      <small>演示数据</small>
+    </div>
     <RoomStatisticsDrawer :roomData="roomData"></RoomStatisticsDrawer>
     <LabDeviceDrawer :id="detailId" :is-drawer.sync="isDrawer"/>
     <Drawer>
@@ -76,6 +98,7 @@
 </template>
 <script>
 import { roomFrame } from "@/utils/demoLayoutGeometry";
+import { demoDeviceStatusColor, countDemoDeviceStatus } from "@/utils/demoDeviceStatus";
 import ImageNode from "./components/ImageNode.vue";
 import RoomStatisticsDrawer from "./components/RoomStatistics.vue";
 import Drawer from "@/components/Drawer";
@@ -105,6 +128,8 @@ export default {
       title: "房间",
       isDemo,
       demoScenario: 'normal',
+      hoveredDeviceId: null,
+      hoverPoint: {x: 0, y: 0},
       tabs: [
         {
           text: "全部",
@@ -204,6 +229,16 @@ export default {
     }
   },
   computed: {
+    hoveredDevice() {
+      return this.deviceList.find(item => item.elementId === this.hoveredDeviceId) || null;
+    },
+    hoverStatusLabel() {
+      return this.hoveredDevice ? ({'1': '正常', '-1': '告警', '-100': '离线'}[String(this.hoveredDevice.status)] || '未知') : '';
+    },
+    hoverSensors() {
+      const device = (this.roomData.simpleEquipmentList || []).find(item => item.id === this.hoveredDeviceId);
+      return device && Array.isArray(device.sensors) ? device.sensors : [];
+    },
     ...mapState("cmap", {
       overviewVisible: "overViewRoomVisible",
     }),
@@ -212,8 +247,12 @@ export default {
       if (this.demoScenario === 'offline') return '离线';
       return '正常';
     },
+    demoStatusCounts() {
+      return countDemoDeviceStatus(this.deviceList);
+    },
   },
   methods: {
+    demoStatusColor: demoDeviceStatusColor,
     ...mapMutations("cmap", {
       handleSetIsDrawer: "SETISOVERVIEWROOMDRAWER",
     }),
@@ -238,6 +277,7 @@ export default {
     },
 
     async handleDemoScenarioCycle() {
+      this.hoveredDeviceId = null;
       const order = ['normal', 'alarm', 'offline'];
       const next = order[(order.indexOf(this.demoScenario) + 1) % order.length];
       try {
@@ -284,7 +324,10 @@ export default {
       this.handleSetIsDrawer();
     },
     handleResize() {
-      if (screen.height < 1080) {
+      this.hoveredDeviceId = null;
+      if (isDemo) {
+        this.ratio = Math.max(0.2, Math.min((window.innerWidth - 96) / 1600, (window.innerHeight - 160) / 790, 1.1));
+      } else if (screen.height < 1080) {
         if (screen.height >= 800) {
           this.ratio = 0.7;
         } else {
@@ -340,11 +383,12 @@ export default {
       }
       return {
         ...obj,
-        fill: color,
+        fill: isDemo ? demoDeviceStatusColor(status) : color,
       };
     },
     // tab
     handleTab(item,index) {
+      this.hoveredDeviceId = null;
       this.tabIndex = index;
       var deviceList = JSON.parse(JSON.stringify(this.deviceLists))
       var arr = [];
@@ -395,14 +439,27 @@ export default {
         },
       });
     },
-    handleMouseOver() {
+    handleMouseOver(item, event) {
       document.body.style.cursor = "pointer";
+      if (isDemo) {
+        this.hoveredDeviceId = item.elementId;
+        this.handleDeviceHoverMove(event);
+      }
+    },
+    handleDeviceHoverMove(event) {
+      if (!isDemo || !event || !event.evt) return;
+      this.hoverPoint = {
+        x: Math.max(12, Math.min(event.evt.clientX + 18, window.innerWidth - 252)),
+        y: Math.max(12, Math.min(event.evt.clientY + 18, window.innerHeight - 180))
+      };
     },
     handleMouseOut() {
+      this.hoveredDeviceId = null;
       document.body.style.cursor = "default";
     },
     // 触摸事件
     handleTouchstart(event) {
+      this.hoveredDeviceId = null;
       this.blockChildEle = true;
       this.touSet = setTimeout(() => {
         this.blockChildEle = false
@@ -518,6 +575,7 @@ export default {
     },
     // 鼠标滚轮滚动
     detectZoom(e) {
+      this.hoveredDeviceId = null;
       const ev = e || window.event;
       const element = document.getElementsByClassName("konvajs-content")[0];
       let down = true;
@@ -550,4 +608,49 @@ export default {
 </script>
 <style lang="less" scoped>
   @import "./index.less";
+  .demo-device-tooltip {
+    position: fixed;
+    z-index: 20;
+    pointer-events: none;
+    box-sizing: border-box;
+    width: 240px;
+    max-height: 168px;
+    overflow: auto;
+    padding: 14px 16px;
+    background: rgba(12, 34, 49, 0.97);
+    border: 1px solid #537f94;
+    border-radius: 6px;
+    box-shadow: 0 6px 24px #06172480;
+    color: #d5e9f0;
+    font-size: 14px;
+    line-height: 1.7;
+    strong { display: block; overflow-wrap: anywhere; color: #87d6ed; }
+    small { color: #8faab7; }
+    i { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; }
+  }
+  .demo-status-summary {
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 24px;
+    width: max-content;
+    max-width: calc(100% - 48px);
+    padding: 10px 20px;
+    border: 1px solid #315369;
+    border-radius: 6px;
+    background: #102b3e;
+    color: #cce2eb;
+    font-size: 14px;
+    pointer-events: none;
+    span { display: inline-flex; align-items: center; white-space: nowrap; }
+    i { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; border: 1px solid #839ba9; }
+  }
+  .demo-room-view .layout /deep/ .konvajs-content {
+    transform: translate(-50%, -50%) scale(1);
+  }
 </style>
