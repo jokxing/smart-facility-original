@@ -10,9 +10,7 @@
       <el-form-item :rules="[{required: true}]" :label="$t('hardware.alarmType')">
         <el-select
             v-model="form.errorType"
-            allow-create
             class="select-change-p"
-            default-first-option
             :placeholder="$t('common.placeholder')">
           <el-option
               v-for="item in alarmTypes"
@@ -22,13 +20,14 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item :label="$t('hardware.disposeTime')">
+      <el-form-item :label="$t('hardware.disposeTime')" required>
         <el-date-picker
             v-model="form.processDate"
             class="select-change-p"
             default-time="12:00:00"
             :placeholder="$t('common.selectTime')"
-            type="datetime">
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss">
         </el-date-picker>
       </el-form-item>
       <el-form-item :label="$t('hardware.processUsername')">
@@ -64,8 +63,25 @@
 import {getAlarmErrorList,} from "@/api/device";
 import {batchHandleException} from "../../../api/alarmLog";
 import moment from "moment";
+import {DEMO_NOW_MS, formatDemoDateTime} from "@/mock/clock";
 
-let date = new Date();
+const isDemo = process.env.VUE_APP_DEMO === "true";
+
+function defaultProcessDate() {
+  return isDemo ? formatDemoDateTime(DEMO_NOW_MS) : moment().format('YYYY-MM-DD HH:mm:ss');
+}
+
+function emptyForm() {
+  return {
+    ids: [],
+    errorType: null,
+    processDate: '',
+    errorCauseMethod: '',
+    errorCauseMsg: '',
+    errorCauseUserName: '',
+  };
+}
+
 export default {
   name: "AlarmProcessing",
     props: {
@@ -79,14 +95,7 @@ export default {
     return {
       title: _this.$t('hardware.disposeAlarm'),
       dialogVisible: false,
-      form: {
-          ids: [],
-          errorType: 0,
-          processDate: '',
-          errorCauseMethod: '',
-          errorCauseMsg: '',
-          errorCauseUserName: '',
-      },
+      form: emptyForm(),
       ids: [],
       alarmTypes: [],
       process: null,
@@ -95,42 +104,70 @@ export default {
   },
   methods: {
     open(row) {
+        const rows = Array.isArray(row) ? row : [];
+        if (!rows.length) {
+            this.$message.error(this.$t('common.placeholder'));
+            return;
+        }
         this.dialogVisible = true;
-        console.log(row)
-        this.form.ids = row.map(item => item.id);
-        this.form.errorCauseUserName = localStorage.getItem('username');
+        this.form = emptyForm();
+        this.form.ids = rows.map(item => item.id);
+        this.form.errorCauseUserName = localStorage.getItem('username') || '';
+        this.form.processDate = defaultProcessDate();
+        this.form.errorType = null;
+        this.form.errorCauseMethod = '';
+        this.form.errorCauseMsg = '';
         getAlarmErrorList().then(res => {
             if (res.code) {
                 this.alarmTypes = res.items.list;
+                if (this.form.errorType == null && this.alarmTypes.length) {
+                    this.form.errorType = this.alarmTypes[0].id;
+                }
             }
         });
-        if (row.length === 1) {
-            const item = row[0];
-            this.form.errorType = item.errorCauseType * 1 === 0 ? 0 : (item.errorCauseType * 1 || 0);
-            this.form.processDate = item.processDate || moment(date).format('YYYY-MM-DD HH:mm:ss');
-            this.form.errorCauseMethod = item.errorCauseMethod;
-            this.form.errorCauseMsg = item.errorCauseMsg;
-            this.form.errorCauseUserName = item.errorCauseUserName || localStorage.getItem('username');
+        if (rows.length === 1) {
+            const item = rows[0];
+            const typed = item.errorCauseType == null ? null : Number(item.errorCauseType);
+            if (typed && typed > 0) this.form.errorType = typed;
+            if (item.processDate) this.form.processDate = item.processDate;
+            this.form.errorCauseMethod = item.errorCauseMethod || '';
+            this.form.errorCauseMsg = item.errorCauseMsg || '';
+            this.form.errorCauseUserName = item.errorCauseUserName || localStorage.getItem('username') || '';
         }
     },
     handleClose() {
       this.dialogVisible = false;
-      this.form = {
-          ids: [],
-          errorType: 0,
-          processDate: '',
-          errorCauseMethod: '',
-          errorCauseMsg: '',
-          errorCauseUserName: '',
-      }
+      this.form = emptyForm();
     },
     handleSubmit() {
-        this.form.processDate = moment(this.form.processDate).format('YYYY-MM-DD HH:mm:ss');
+        if (!this.form.ids.length) {
+            this.$message.error(this.$t('common.placeholder'));
+            return;
+        }
+        if (this.form.errorType == null || this.form.errorType === '') {
+            this.$message.error(this.$t('common.placeholder'));
+            return;
+        }
+        if (!this.form.processDate) {
+            this.$message.error(this.$t('common.selectTime'));
+            return;
+        }
+        const processDate = moment(this.form.processDate, 'YYYY-MM-DD HH:mm:ss', true);
+        if (!processDate.isValid()) {
+            this.$message.error(this.$t('common.selectTime'));
+            return;
+        }
+        const payload = {
+            ...this.form,
+            errorType: Number(this.form.errorType),
+            processDate: processDate.format('YYYY-MM-DD HH:mm:ss')
+        };
         this.disabled = true;
-        batchHandleException(this.form).then(res => {
+        batchHandleException(payload).then(res => {
             if (res.code) {
                 this.$message.success(this.$t('common.success'));
                 this.dialogVisible = false;
+                this.form = emptyForm();
                 this.$emit('refresh');
             } else {
                 this.$message.error(res.message);

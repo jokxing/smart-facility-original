@@ -47,7 +47,7 @@ function send(method, params = {}, target = sessionId) {
 }
 async function evaluate(expression) {
   const result = await send('Runtime.evaluate', {expression, returnByValue: true, awaitPromise: true});
-  if (result.exceptionDetails) throw new Error('Browser evaluation failed: ' + result.exceptionDetails.text);
+  if (result.exceptionDetails) throw new Error('Browser evaluation failed: ' + (result.exceptionDetails.exception && result.exceptionDetails.exception.description || result.exceptionDetails.text) + '\nExpression: ' + expression.slice(0, 700));
   return result.result.value;
 }
 async function waitPage(expression, label) {
@@ -76,7 +76,14 @@ async function fill(password) {
         const job = pending.get(message.id); pending.delete(message.id);
         if (message.error) job.reject(new Error(message.error.message)); else job.resolve(message.result);
       }
-      if (message.method === 'Runtime.exceptionThrown') exceptions.push(message.params.exceptionDetails.text);
+      if (message.method === 'Runtime.exceptionThrown') {
+        const details = message.params.exceptionDetails || {};
+        const desc = (details.exception && (details.exception.description || details.exception.value))
+          || details.text
+          || details.url
+          || JSON.stringify(details);
+        exceptions.push(String(desc));
+      }
       if (message.method === 'Fetch.requestPaused') {
         const {requestId, request} = message.params;
         const allowed = request.url.startsWith(origin + '/') || /^(data:|blob:|about:)/.test(request.url);
@@ -271,6 +278,144 @@ async function fill(password) {
       await waitPage(`(() => {const r=document.querySelector('.demo-device-tooltip').getBoundingClientRect();return r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight;})()`, 'device hover stays inside viewport');
       await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: 10, y: 110});
     }
+    // Device read-only detail: hover → click → close → switch; offline empty reading.
+    // Hover loop above ends on 正常; open detail from that shared scenario state.
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', ...hoverHit});
+    await waitPage(`(() => { const card = document.querySelector('.demo-device-tooltip'); return card && card.textContent.includes('正常'); })()`, 'hover before device detail click');
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.handleMouseDown && vm.deviceList && vm.getDrawerDataAsync) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const device = page.deviceList.find(d => d.elementId === 970004) || page.deviceList[0];
+      page.handleMouseDown(device, {evt: {cancelBubble: false}});
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true && vm.detailId) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      if (!page || page.detailId != 970004) return false;
+      const drawer = (function walk(vm) {
+        if (!vm) return null;
+        if (vm.detail && vm.detail.name && vm.getDetail) return vm;
+        return (vm.$children || []).map(walk).find(Boolean);
+      })(page);
+      return !!(drawer && drawer.detail && drawer.detail.name && drawer.detail.no
+        && drawer.sensors && drawer.sensors.length >= 2
+        && String(drawer.sensors[0].monitorSensorVal) === '5.2');
+    })()`, 'device click opens LabDeviceDrawer with basic info and reading', 45000);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const monitor = (function walk(vm) {
+        if (!vm) return null;
+        if (vm.dataCharts && vm.handleCutTime && vm.handleCutSensor) return vm;
+        return (vm.$children || []).map(walk).find(Boolean);
+      })(page);
+      return !!(monitor && !monitor.loading && monitor.dataCharts.rows.length > 5
+        && monitor.dataCharts.rows.every(r => typeof r.data === 'number'));
+    })()`, 'device detail shows monitorInfo series', 45000);
+    const chartBefore = await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const monitor = (function walk(vm) {
+        if (!vm) return null;
+        if (vm.dataCharts && vm.handleCutTime && vm.handleCutSensor) return vm;
+        return (vm.$children || []).map(walk).find(Boolean);
+      })(page);
+      window.__demoMonitor = monitor;
+      return {count: monitor.dataCharts.rows.length, first: monitor.dataCharts.rows[0].data, sensor: monitor.objSensorId};
+    })()`);
+    await evaluate('window.__demoMonitor.handleCutTime(5)');
+    await waitPage(`(() => {
+      const m = window.__demoMonitor;
+      return !!(m && !m.loading && m.interval === 5 && m.dataCharts.rows.length > ${chartBefore.count});
+    })()`, 'switch time dimension reloads longer series');
+    await evaluate('window.__demoMonitor.handleCutSensor(window.__demoMonitor.sensors[1])');
+    await waitPage(`(() => {
+      const m = window.__demoMonitor;
+      return !!(m && !m.loading && m.objSensorId !== ${chartBefore.sensor}
+        && m.dataCharts.rows.length > 0 && m.dataCharts.rows[0].data !== ${chartBefore.first});
+    })()`, 'switch sensor reloads different series');
+    await evaluate('delete window.__demoMonitor');
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true && vm.handleMouseDown) ? vm : (vm.$children || []).map(find).find(Boolean));
+      find(document.querySelector('#app').__vue__).isDrawer = false;
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.handleMouseDown && vm.getDrawerDataAsync) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      return !!(page && page.isDrawer === false);
+    })()`, 'device drawer closed');
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.handleMouseDown && vm.deviceList) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const other = page.deviceList.find(d => d.elementId === 970005);
+      page.handleMouseDown(other, {evt: {cancelBubble: false}});
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true && vm.detailId == 970005) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      if (!page) return false;
+      const drawer = (function walk(vm) {
+        if (!vm) return null;
+        if (vm.detail && vm.detail.id == 970005) return vm;
+        return (vm.$children || []).map(walk).find(Boolean);
+      })(page);
+      return !!(drawer && drawer.detail && drawer.detail.name === '演示示波器 A');
+    })()`, 'switching device reloads detail', 45000);
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true && vm.handleMouseDown) ? vm : (vm.$children || []).map(find).find(Boolean));
+      find(document.querySelector('#app').__vue__).isDrawer = false;
+    })()`);
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : vm.handleDemoScenarioCycle ? vm : (vm.$children || []).map(find).find(Boolean));
+      return find(document.querySelector('#app').__vue__).handleDemoScenarioCycle();
+    })()`);
+    await sleep(300);
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : vm.handleDemoScenarioCycle ? vm : (vm.$children || []).map(find).find(Boolean));
+      return find(document.querySelector('#app').__vue__).handleDemoScenarioCycle();
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.demoScenario === 'offline' && vm.deviceList) ? vm : (vm.$children || []).map(find).find(Boolean));
+      return !!find(document.querySelector('#app').__vue__);
+    })()`, 'scenario reaches offline for detail');
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.handleMouseDown && vm.deviceList) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      page.handleMouseDown(page.deviceList.find(d => d.elementId === 970004), {evt: {cancelBubble: false}});
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const drawer = (function walk(vm) {
+        if (!vm) return null;
+        if (vm.detail && vm.sensors) return vm;
+        return (vm.$children || []).map(walk).find(Boolean);
+      })(page);
+      return !!(drawer && drawer.detail && drawer.detail.bingStatus === -100
+        && drawer.sensors[0] && drawer.sensors[0].monitorSensorVal === '');
+    })()`, 'offline detail keeps empty reading', 45000);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const monitor = (function walk(vm) {
+        if (!vm) return null;
+        if (vm.dataCharts && vm.handleCutTime) return vm;
+        return (vm.$children || []).map(walk).find(Boolean);
+      })(page);
+      return !!(monitor && !monitor.loading && monitor.dataCharts.rows.length === 0);
+    })()`, 'offline detail keeps empty monitor curve', 45000);
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.isDrawer === true && vm.handleMouseDown) ? vm : (vm.$children || []).map(find).find(Boolean));
+      find(document.querySelector('#app').__vue__).isDrawer = false;
+    })()`);
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : vm.handleDemoScenarioCycle ? vm : (vm.$children || []).map(find).find(Boolean));
+      return find(document.querySelector('#app').__vue__).handleDemoScenarioCycle();
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.demoScenario === 'normal' && vm.deviceList) ? vm : (vm.$children || []).map(find).find(Boolean));
+      return !!find(document.querySelector('#app').__vue__);
+    })()`, 'restore normal scenario after detail');
     assert.equal(await evaluate("fetch('/demo/floors/room-a.svg').then(r => r.status)"), 200);
     const seedPositions = await evaluate(`(() => {
       const root = document.querySelector('#app').__vue__;
@@ -647,6 +792,75 @@ async function fill(password) {
       else location.hash = '#/floor/view';
     })()`);
     await waitPage("location.hash.indexOf('#/floor/view') === 0 || location.hash === '#/building'", 'leave designer without save');
+    await evaluate("location.hash = '#/sys/a/log'");
+    await waitPage("location.hash.indexOf('#/sys/a/log') === 0", 'alarm log route opens');
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.handleAlarmProcess && vm.handleGetList && vm.list) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      return !!(page && page.loading === false && page.list && page.list.length >= 5
+        && page.list.some(r => r.equipmentName === '演示培养箱' && r.process === false));
+    })()`, 'alarm log list loads shared instrument alarms', 45000);
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.handleAlarmProcess && vm.list) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const row = page.list.find(r => r.equipmentName === '演示培养箱' && !r.process) || page.list[0];
+      window.__demoAlarmId = row.id;
+      page.handleAlarmProcess(row);
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.handleSubmit && vm.dialogVisible && vm.alarmTypes) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const dialog = find(document.querySelector('#app').__vue__);
+      return !!(dialog && dialog.dialogVisible && dialog.alarmTypes && dialog.alarmTypes.length);
+    })()`, 'alarm process dialog opens with error types');
+    await evaluate(`(() => {
+      const find = vm => (!vm ? null : (vm.handleSubmit && vm.dialogVisible && vm.alarmTypes) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const dialog = find(document.querySelector('#app').__vue__);
+      dialog.form.errorType = dialog.alarmTypes[0].id;
+      dialog.form.processDate = '2026-09-24 12:00:00';
+      dialog.form.errorCauseMethod = '演示复位';
+      dialog.form.errorCauseMsg = '演示波动';
+      return dialog.handleSubmit();
+    })()`);
+    await waitPage(`(() => {
+      const find = vm => (!vm ? null : (vm.handleAlarmProcess && vm.handleGetList && vm.list) ? vm : (vm.$children || []).map(find).find(Boolean));
+      const page = find(document.querySelector('#app').__vue__);
+      const row = page && page.list.find(r => r.id === window.__demoAlarmId);
+      return !!(row && row.process === true && row.status === 1);
+    })()`, 'alarm handle refreshes row to processed', 45000);
+    await evaluate('delete window.__demoAlarmId');
+    // Exercise actual table checkboxes and dialog buttons, without setting form data.
+    const clickElement = async expression => {
+      await evaluate(`(() => { const e = ${expression}; if (!e) throw new Error('Missing click target'); e.scrollIntoView({block:'nearest', inline:'nearest'}); })()`);
+      await sleep(400);
+      const p = await evaluate(`(() => { const e = ${expression}; const r=e.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; })()`);
+      await send('Input.dispatchMouseEvent', {type:'mouseMoved', ...p});
+      await send('Input.dispatchMouseEvent', {type:'mousePressed', ...p, button:'left', buttons:1, clickCount:1});
+      await send('Input.dispatchMouseEvent', {type:'mouseReleased', ...p, button:'left', clickCount:1});
+      await sleep(150);
+    };
+    const batchRows = await evaluate(`(() => {
+      const find=vm=>(!vm?null:vm.handleAlarmProcess&&vm.list?vm:(vm.$children||[]).map(find).find(Boolean));
+      return find(document.querySelector('#app').__vue__).list.map((r,index)=>({id:r.id,index,process:r.process})).filter(r=>!r.process).slice(0,2);
+    })()`);
+    assert.equal(batchRows.length, 2);
+    for (const row of batchRows) {
+      await clickElement(`document.querySelectorAll('.el-table__body-wrapper tbody tr')[${row.index}].querySelector('.el-checkbox__inner')`);
+    }
+    await clickElement(`Array.from(document.querySelectorAll('button')).find(e=>/批量处理/.test(e.textContent))`);
+    await waitPage(`(() => {
+      const find=vm=>(!vm?null:vm.dialogVisible&&vm.alarmTypes?vm:(vm.$children||[]).map(find).find(Boolean));
+      const d=find(document.querySelector('#app').__vue__);
+      return d && d.form.ids.length===2 && d.form.processDate==='2026-09-24 12:00:00' && d.form.errorType && d.form.errorCauseMethod==='' && d.form.errorCauseMsg==='';
+    })()`, 'multi-select dialog initializes fresh date and fields');
+    await clickElement(`Array.from(document.querySelectorAll('.el-dialog__wrapper')).find(e=>e.getBoundingClientRect().width>0 && getComputedStyle(e).display!=='none').querySelector('.el-dialog__footer .el-button--primary')`);
+    const batchCheck = `(() => {
+      const find=vm=>(!vm?null:vm.handleAlarmProcess&&vm.list?vm:(vm.$children||[]).map(find).find(Boolean));
+      const p=find(document.querySelector('#app').__vue__);
+      return p && ${JSON.stringify(batchRows.map(r=>r.id))}.every(id=>p.list.some(r=>r.id===id && r.process===true && r.status===1 && r.processDate==='2026-09-24 12:00:00'));
+    })()`;
+    await waitPage(batchCheck, 'two selected alarm rows processed');
+    await send('Page.reload', {ignoreCache:true});
+    await waitPage(batchCheck, 'both processed alarms survive full reload');
     await evaluate("location.hash = '#/rm/room'");
     await waitPage("location.hash === '#/dashboard'", 'unopened room manage route still blocked');
     assert.equal(await evaluate("fetch('/__demo_api__/unimplemented').then(r => r.status)"), 501);
@@ -679,10 +893,10 @@ async function fill(password) {
     await send('Page.reload');
     await waitPage("!!document.querySelector('.login-button')", 'expired session redirects to login');
     assert.equal(externalAttempts, 0, 'No external application requests may be attempted');
-    assert.equal(exceptions.length, 0, 'No uncaught browser exceptions');
+    assert.equal(exceptions.length, 0, 'No uncaught browser exceptions: ' + exceptions.join(' | '));
     console.log(JSON.stringify({passed: true, login: true, wrongPassword: true, refresh: true, logout: true,
       expiry: true, storageIsolation: true, buildingPage: true, buildingModel: true, gardenSwitch: true,
-      floorView: true, floorPlanImage: true, roomMarkers: true, roomDrawer: true, floorDataV: true, roomDataV: true, alarmRank: true, designerPreview: true,
+      floorView: true, floorPlanImage: true, roomMarkers: true, roomDrawer: true, deviceDetail: true, deviceHistory: true, alarmLog: true, floorDataV: true, roomDataV: true, alarmRank: true, designerPreview: true,
       unopenedRouteBlocked: true, directApiBlocked: true, cspBlocksExternal, externalAttempts, uncaughtExceptions: exceptions.length}));
   } finally {
     if (socket && socket.readyState === WebSocket.OPEN) {

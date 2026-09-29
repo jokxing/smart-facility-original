@@ -32,5 +32,16 @@ export default [
   protectedRoute('GET', '/role/menu', () => success(DEMO_MENUS)),
   protectedRoute('GET', '/department/list', () => success({list: DEMO_DEPARTMENTS})),
   protectedRoute('GET', '/instrumentCategoryInfo/superior/cat', () => success(DEMO_CATEGORIES)),
-  protectedRoute('GET', '/equipment/dashboard', () => success(DEMO_OVERVIEW))
+  protectedRoute('GET', '/equipment/dashboard', () => success(DEMO_OVERVIEW)),
+  // Layout Navbar / MessageNotification shell — empty stubs so SaaS chrome can mount.
+  protectedRoute('GET', '/company/getLogo', () => success({logoUrl: ''})),
+  protectedRoute('GET', '/activiti/unread', () => success({activitiUnread: 0, notifyUnread: 0})),
+  protectedRoute('GET', '/notify/message/query', () => success({
+    list: [],
+    total: 0,
+    statisticalVO: {alarmCount: 0, propertyCount: 0, sysCount: 0}
+  })),
+  protectedRoute('GET', '/property/unusualMsg/noReadCount', () => success(0)),
+  protectedRoute('POST', '/activiti/task/queryAgenda', () => success({list: [], total: 0})),
+  protectedRoute('GET', '/activiti/task/query', () => success({list: [], total: 0}))
 ];

@@ -17,6 +17,9 @@ export const DEMO_MENUS = [
   ]},
   {id: 'rm', name: '房间管理', englishName: 'room', path: '/rm/room', subMenu: [
     {id: 'demo-room', name: '房间', englishName: 'room', path: '/rm/room', icon: 'icon-home1', subMenu: []}
+  ]},
+  {id: 'sys', name: '系统', englishName: 'system', path: '/sys/a/log', subMenu: [
+    {id: 'demo-alarm-log', name: '报警记录', englishName: 'alarmLog', path: '/sys/a/log', icon: 'icon-warning-line', subMenu: []}
   ]}
 ];
 // Only the landing-page contract; device records belong to the next slice.

@@ -634,3 +634,63 @@
 - 新增验证：两级悬停卡正常/告警/离线、空房间 0 台、离线暂无读数及右下角定位，完整 Edge 回归通过，外部请求和未捕获异常均 0。鼠标悬停为真实输入；场景调用现有页面方法；边缘为合成坐标传入定位函数，不代表真实边缘设备命中。此前 59 单测未重复运行。
 - 结论：当前桌面中控地图演示切片收尾，不代表全量 SaaS 完成。触屏、窄屏、全部边角与缩放越限手势仍未全面覆盖；其他楼宇素材占位、楼层布局写入、设备增删仍有限制。
 - 下一模块：建议智能监控，第一小步仅设备只读详情 Mock 与地图点击衔接；随后分开做历史曲线和告警处理。全量脱敏与 Git 提交前审查仍待处理。未自动开工下一模块，未提交或推送。
+
+## 设备只读详情（2026-09-29）
+
+- 修改：`src/mock/fixtures/instrument.js`、`handlers/instrument.js`、`views/roomConfiguar/index.vue`、`tests/unit/demo/instrument.spec.js`、`scripts/check-demo-browser.cjs`；同步 STATUS、next-task-prompt。
+- 入口：只读房间复用现有 `LabDeviceDrawer`（布局列表 `openTwoSystem: true`）；演示点击改为打开详情，不再提示「进入配置」。编辑模式布局操作未改。
+- Mock 最小范围：`GET /instrument/detail`、`GET /monitorIndicator/getOpenMonitorFlag`、`GET /monitorIndicator/getMonitorFlag`；为抽屉挂载补空壳 `GET /monitorIndicator/monitorInfo`（空数组）与 `POST /instrument/reservation/schedulerList`（空分页）。传感器读数与悬停卡共用 `sensorReadingForInstrument`；离线不伪造实时正常值；`logoUrl` 留空避免外链图片。
+- 明确未做：历史曲线真数据、告警处理、设备增删、真实控制；空 `monitorInfo` 仅防未知请求，不称为完整监控。
+- 验证：10 文件 / 61 单测通过；完整 Edge 回归通过（悬停→点击开抽屉→关闭→切换设备、离线空读数），`deviceDetail: true`，外部请求与未捕获异常均为 0。
+- 未验证：抽屉内编辑/预约/维保按钮、触屏点击、窄屏抽屉布局、历史曲线图表视觉。
+- 下一最小任务：设备历史曲线（真实分段 Mock + MonitorInfo 接入，不顺带做告警处理）。全量脱敏与 Git 提交前审查仍待处理；未提交或推送。
+
+## 设备历史曲线（2026-09-29）
+
+- 修改：`src/mock/fixtures/instrument.js`、`handlers/instrument.js`、`tests/unit/demo/instrument.spec.js`、`scripts/check-demo-browser.cjs`；同步 STATUS、next-task-prompt、demo-guide。
+- 入口：复用详情内现有 `MonitorInfo` → `GET /monitorIndicator/monitorInfo`；无页面硬编码业务 JSON。
+- Mock：按 `interval` / `beginTime+endTime` / `historyTimeInterval` 生成固定时钟（`DEMO_NOW_MS`）下的可控序列；告警场景抬升读数；离线返回 `[]`。详情监测标签增加「演示湿度」便于切换传感器。`historyPage` 仅空表桩，避免对话框 501；导出接口仍未接入。
+- 明确未做：历史检索表真数据、导出、告警处理、房间 type:3 曲线、真实控制。不把本切片称为完整监控历史。
+- 验证：10 文件 / 62 单测通过；完整 Edge 回归通过（开抽屉有曲线、切 7 天加长、切湿度换序列、离线空曲线），`deviceHistory: true`，外部请求与未捕获异常均为 0。
+- 未验证：30/90 天分段并发的浏览器专项、自定义日期选择器、查看历史对话框检索、触屏/窄屏图表。
+- 下一最小任务：告警列表与处理闭环（最小只读列表 + 单条处理 Mock，不顺带扩写全量 SaaS）。全量脱敏与 Git 提交前审查仍待处理；未提交或推送。
+
+## 告警列表与处理闭环（2026-09-29）
+
+- 修改：`src/mock/fixtures/alarm.js`、`handlers/alarmLog.js`、`handlers/auth.js`、`mock/index.js`、`fixtures/auth.js`、`permission.js`、`tests/unit/demo/alarm.spec.js`、`scripts/check-demo-browser.cjs`；同步 STATUS、next-task-prompt、demo-guide。
+- 入口：开放 `/sys/a/log`，复用现有 `alarmLog` + `AlarmProcessing`；菜单增加「系统 / 报警记录」。
+- Mock：`POST /monitorIndicator/historyAlarmRecord/summary`（设备 thingsType:4 种子）、`POST /monitorIndicator/exceptionHandle/batch`（处理写回 session 存储）、`GET /alarm/errorList`、`GET /monitorIndicator/allSensorType/v2`。Layout 壳补空桩（logo/未读/消息/待办），避免 Navbar 挂载 501。导出仍未接入。
+- 明确未做：报警导出、实时推送、全量工单/审批、房间侧报警列表、批量以外的复杂筛选验收。不把本切片称为完整告警体系。
+- 验证：10 文件 / 63 单测通过；完整 Edge 回归通过（列表加载、单条处理刷新为已处理），`alarmLog: true`，外部请求与未捕获异常均为 0。
+- 未验证：批量多选处理专项、导出按钮、窄屏/触屏、菜单文案 i18n 全覆盖。
+- 下一最小任务：建议演示收尾——全量脱敏与首次 Git 提交前内容审查；或用户指定的下一业务切片。未自动开工；未提交或推送。
+
+## 智能监控复盘（2026-09-29）
+
+- 新增 review-monitoring.md，更新 STATUS、next-task-prompt；无业务修改。
+- Git 已有基线 f9eaaea，监控相关功能为未提交增量，含未跟踪 alarmLog handler；“首次提交”说法已过时，应称下一次提交前审查。
+- 重跑 10 文件 / 63 单测通过，本轮未重跑浏览器。发现三项 P2：多选告警处理日期缺初始化及校验、非法历史范围静默回退、缓存 patch 可覆盖告警身份字段；证据和限制见复盘文档。
+- 下一最小任务改为修复上述边界并补验证，随后做脱敏/提交前内容审查，不直接扩展业务模块。未提交或推送。
+
+## 智能监控三项边界修复（2026-09-29）
+
+- 修改：`AlarmProcessing.vue`（每次 open 初始化日期/类型，提交校验）；`fixtures/alarm.js`（sanitize + batch 拒绝非法写入）；`fixtures/instrument.js`（非法显式范围失败）；`components/MonitorInfo/index.vue`（30/90 天用 DEMO_NOW）；`instrument.spec.js` / `alarm.spec.js`；同步 STATUS、review-monitoring、demo-guide、next-task-prompt。
+- 验证：`npm run test:demo -- --watch=false` → 10 文件 / **64** 用例通过。本轮未重跑浏览器。
+- 未验证：多选处理真实点击、自定义非法日期选择器 UI、触屏/窄屏、生产构建。
+- 下一最小任务：提交前内容审查与脱敏准备（见 next-task-prompt）；不自动扩展业务、不自动提交。
+
+## 三项修复复核与补强（2026-09-29）
+
+- 接手时已有初步修复，保留表单初始化/提交校验、固定演示时钟和缓存白名单。本轮修改 clock.js、fixtures/instrument.js、fixtures/alarm.js、instrument.spec.js、alarm.spec.js 及复盘文档。
+- 共享严格日期解析拒绝不存在日期（包括带时区日期）；离线也先校验显式范围。告警写入拒绝非法或重复编号，不再过滤后部分成功；拒绝对象型文本，缓存字段类型非法则回退种子。
+- 最终 10 文件 / 64 单测通过，扩展现有用例验证非法写入不改变存储、批量成功、损坏缓存回退。完整 Edge 回归通过，详情/曲线/告警链路通过，外部请求和未捕获异常均 0。最后调整离线范围校验顺序后重跑单测，浏览器成功记录对应本轮此前版本。
+- 未验证：真实多选处理点击、自定义日期 UI、触屏/窄屏。浏览器覆盖单条处理，不能把批量数据层测试称作完整点击验收。
+- 下一步：补多选处理浏览器专项，再做提交前内容审查；不扩展新模块。未提交或推送。
+
+## 多选告警处理浏览器验收（2026-09-29）
+
+- 修改 scripts/check-demo-browser.cjs、STATUS、next-task-prompt；无业务代码变更。
+- 使用实际鼠标依次点击两行复选框、批量处理、确认；不直接改选中数组或提交表单数据。验证两条 ID、固定演示时间、清空上次处理内容，以及提交刷新和整页重载后两条记录均保持已处理。
+- 修正测试点击时序：滚动至可见区域后等待稳定，再读取坐标；初次测试坐标过早导致复选框未命中，不是业务批量处理故障。保留浏览器求值的具体错误信息，便于定位既有测试时序问题。
+- 最终完整 Edge 回归通过，外部请求及未捕获异常均 0。此前 64 单测通过，本轮仅测试脚本/文档变更未重跑单测。触屏、窄屏、自定义日期选择器及导出仍不属于此次验收。
+- 下一任务：提交前内容审查与脱敏准备，不扩展业务功能；未暂存、提交或推送。提交说明应覆盖未提交的设备详情、历史曲线、告警闭环及边界修复增量，不能仍称首次初始化。

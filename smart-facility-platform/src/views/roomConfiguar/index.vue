@@ -558,7 +558,11 @@ export default {
       this.touSet2 = setTimeout(() => {
         if(!this.blockChildEle){
           if (isDemo) {
-            return this.$message.info('演示模式请点「进入配置」调整设备位置');
+            // Read-only room: open LabDeviceDrawer. Layout edits stay on「进入配置」.
+            this.hoveredDeviceId = null;
+            this.detailId = record.elementId;
+            this.isDrawer = true;
+            return;
           }
           if(record.isEdit === 1){
             this.detailId = record.elementId;

@@ -91,6 +91,9 @@ import {HISTORYTIMEINTERVAL, TIME_DIMENSION} from "@/utils/constant";
 import {getMonitorInfo} from "@/api/monitorIndicator";
 import moment from "moment";
 import {concurrentRequest} from "../../utils/methods";
+import {DEMO_NOW_MS, formatDemoDateTime} from "@/mock/clock";
+
+const isDemo = process.env.VUE_APP_DEMO === "true";
 
 export default {
     components: {
@@ -273,10 +276,16 @@ export default {
                     this.loading = false;
                 })
             } else if ([6,7].includes(this.interval)) {
-                // 获取当前时间
-                const endTime = moment().format('YYYY-MM-DD HH:mm:ss');
                 const num = this.interval === 6 ? 30 : 90;
-                const beginTime = moment().subtract(num, 'days').format('YYYY-MM-DD HH:mm:ss');
+                let beginTime;
+                let endTime;
+                if (isDemo) {
+                    endTime = formatDemoDateTime(DEMO_NOW_MS);
+                    beginTime = formatDemoDateTime(DEMO_NOW_MS - num * 86400000);
+                } else {
+                    endTime = moment().format('YYYY-MM-DD HH:mm:ss');
+                    beginTime = moment().subtract(num, 'days').format('YYYY-MM-DD HH:mm:ss');
+                }
                 this.handleTimeSection(beginTime, endTime, this.interval);
             }  else {
                 this.handleTimeSection(this.beginTime, this.endTime);

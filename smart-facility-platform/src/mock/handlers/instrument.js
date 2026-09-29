@@ -1,4 +1,10 @@
 import {
+  emptyInstrumentSchedulerPage,
+  emptyMonitorHistoryPage,
+  getDemoInstrumentDetail,
+  getDemoMonitorFlag,
+  getDemoMonitorInfo,
+  getDemoOpenMonitorFlag,
   listRoonInstrumentInfo,
   resetRoomInstrumentLayout,
   saveRoomInstrumentLayout
@@ -6,7 +12,8 @@ import {
 import {getDemoScenario, setDemoScenario} from '../fixtures/scenario';
 import {failure, protectedRoute, success} from '../response';
 
-// Room instrument layout read/write (type:4 only) + scenario + layout reset.
+// Room instrument layout + device read-only detail + MonitorInfo series.
+// historyPage is an empty stub so the dialog does not 501; export remains blocked.
 export default [
   protectedRoute('POST', '/map/element/getRoonInstrumentInfoList', ({params}) => {
     return success(listRoonInstrumentInfo(params.roomId));
@@ -29,5 +36,32 @@ export default [
       return failure('演示场景仅支持 normal / alarm / offline。');
     }
     return success({scenario: next});
-  })
+  }),
+  protectedRoute('GET', '/instrument/detail', ({params}) => {
+    const detail = getDemoInstrumentDetail(params.id);
+    return detail ? success(detail) : failure('演示设备不存在。');
+  }),
+  protectedRoute('GET', '/monitorIndicator/getOpenMonitorFlag', ({params}) => {
+    if (Number(params.objType) !== 2) {
+      return failure('本切片仅支持设备监测标签。');
+    }
+    const items = getDemoOpenMonitorFlag(params.objId);
+    return items ? success(items) : failure('演示设备不存在。');
+  }),
+  protectedRoute('GET', '/monitorIndicator/getMonitorFlag', ({params}) => {
+    if (Number(params.objType) !== 2) {
+      return failure('本切片仅支持设备监测标签。');
+    }
+    const items = getDemoMonitorFlag(params.objId);
+    return items ? success(items) : failure('演示设备不存在。');
+  }),
+  protectedRoute('GET', '/monitorIndicator/monitorInfo', ({params}) => {
+    const items = getDemoMonitorInfo(params);
+    if (items == null) return failure('演示监测曲线参数无效。');
+    return success(items);
+  }),
+  protectedRoute('POST', '/monitorIndicator/historyPage', ({body}) => {
+    return success(emptyMonitorHistoryPage(body && body.objId));
+  }),
+  protectedRoute('POST', '/instrument/reservation/schedulerList', () => success(emptyInstrumentSchedulerPage()))
 ];

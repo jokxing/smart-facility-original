@@ -220,3 +220,170 @@ test('type:4 layout save persists and reset restores seeds; illegal writes fail'
   expect((await client.post('/map/element/config', [{type: 4, elementId: 999999, mediaId: 950001, x: 10, y: 10}])).data.code).toBe(0);
   expect(saveRoomInstrumentLayout(moved.slice(0, 1)).ok).toBe(false);
 });
+
+test('instrument detail requires auth', async () => {
+  expect((await client.get('/instrument/detail', {params: {id: 970001}})).data.code).toBe(2);
+});
+
+test('instrument detail and open-monitor flags reuse shared ids/sensors; offline has no live reading', async () => {
+  await establishSession();
+
+  const detail = (await client.get('/instrument/detail', {params: {id: 970001}})).data;
+  expect(detail.code).toBe(1);
+  expect(detail.items).toMatchObject({
+    id: 970001,
+    name: '演示培养箱',
+    no: 'DEMO-EQ-970001',
+    roomName: '演示房间 A',
+    detailType: 1,
+    types: 1,
+    logoUrl: ''
+  });
+  expect(listRoonInstrumentInfo(950001).list.find(d => d.elementId === 970001).openTwoSystem).toBe(true);
+
+  const sensors = (await client.get('/monitorIndicator/getOpenMonitorFlag', {
+    params: {objId: 970001, objType: 2}
+  })).data;
+  expect(sensors.code).toBe(1);
+  expect(sensors.items.list).toHaveLength(2);
+  expect(sensors.items.list[0]).toMatchObject({
+    sensorAlias: '演示温度',
+    monitorSensorVal: '5.2',
+    unit: '℃'
+  });
+  expect(sensors.items.list[1].sensorAlias).toBe('演示湿度');
+  expect(listRoonInstrumentInfo(950001).simpleEquipmentList.find(d => d.id === 970001).sensors[0].val)
+    .toBe(sensors.items.list[0].monitorSensorVal);
+
+  expect((await client.get('/monitorIndicator/getMonitorFlag', {
+    params: {objId: 970001, objType: 2}
+  })).data.items[0].id).toBe(sensors.items.list[0].id);
+  const daySeries = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {
+      objId: 970001,
+      type: 2,
+      objSensorId: sensors.items.list[0].id,
+      interval: 4,
+      historyTimeInterval: 5
+    }
+  })).data;
+  expect(daySeries.code).toBe(1);
+  expect(daySeries.items.length).toBeGreaterThan(10);
+  expect(daySeries.items[0]).toMatchObject({
+    id: expect.any(Number),
+    createDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2} /),
+    data: expect.any(Number)
+  });
+  expect((await client.post('/instrument/reservation/schedulerList', {
+    instrumentId: 970001, pageNum: 1, pageSize: 10
+  })).data.items).toEqual({list: [], pageNum: 1, pageSize: 10, total: 0});
+
+  setDemoScenario('offline');
+  const offlineDetail = (await client.get('/instrument/detail', {params: {id: 970001}})).data.items;
+  expect(offlineDetail.bingStatus).toBe(-100);
+  const offlineSensors = (await client.get('/monitorIndicator/getOpenMonitorFlag', {
+    params: {objId: 970001, objType: 2}
+  })).data.items.list[0];
+  expect(offlineSensors.monitorSensorVal).toBe('');
+  expect(listRoonInstrumentInfo(950001).simpleEquipmentList[0].sensors[0].val).toBeNull();
+  expect((await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970001, type: 2, objSensorId: sensors.items.list[0].id, interval: 4}
+  })).data.items).toEqual([]);
+
+  expect((await client.get('/instrument/detail', {params: {id: 999999}})).data.code).toBe(0);
+  expect((await client.get('/monitorIndicator/getOpenMonitorFlag', {
+    params: {objId: 970001, objType: 3}
+  })).data.code).toBe(0);
+});
+
+test('monitorInfo series follows interval and sensor; segmented range merges; offline stays empty', async () => {
+  await establishSession();
+  const open = (await client.get('/monitorIndicator/getOpenMonitorFlag', {
+    params: {objId: 970004, objType: 2}
+  })).data.items;
+  const tempId = open.list[0].id;
+  const humidityId = open.list[1].id;
+
+  const day = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 2, objSensorId: tempId, interval: 4, historyTimeInterval: 5}
+  })).data.items;
+  const week = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 2, objSensorId: tempId, interval: 5, historyTimeInterval: 60}
+  })).data.items;
+  expect(week.length).toBeGreaterThan(day.length);
+  expect(week[0].createDate < week[week.length - 1].createDate).toBe(true);
+
+  const humidity = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 2, objSensorId: humidityId, interval: 4, historyTimeInterval: 5}
+  })).data.items;
+  expect(humidity[0].data).not.toBe(day[0].data);
+
+  setDemoScenario('alarm');
+  const alarmed = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 2, objSensorId: tempId, interval: 4, historyTimeInterval: 5}
+  })).data.items;
+  expect(alarmed[0].data).toBeGreaterThan(30);
+
+  const segment = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {
+      objId: 970004,
+      type: 2,
+      objSensorId: tempId,
+      beginTime: '2026-09-20 12:00:00',
+      endTime: '2026-09-22 12:00:00',
+      historyTimeInterval: 60
+    }
+  })).data.items;
+  expect(segment.length).toBeGreaterThan(0);
+  expect(segment[0].createDate.startsWith('2026-09-20')).toBe(true);
+  expect(segment[segment.length - 1].createDate.startsWith('2026-09-22')).toBe(true);
+
+  expect((await client.post('/monitorIndicator/historyPage', {
+    objId: 970004, type: 2, objSensorIds: [tempId], pageNum: 1, pageSize: 10
+  })).data.items).toEqual({list: {'970004': []}, total: 0, pageNum: 1, pageSize: 10});
+
+  expect((await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 3, objSensorId: tempId, interval: 4}
+  })).data.code).toBe(0);
+  expect((await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 2, objSensorId: 999, interval: 4}
+  })).data.code).toBe(0);
+
+  // Explicit invalid / reversed / one-sided ranges must fail — not fall back to default window.
+  for (const params of [
+    {beginTime: '2026-09-22 12:00:00', endTime: '2026-09-20 12:00:00'},
+    {beginTime: 'invalid', endTime: '2026-09-22 12:00:00'},
+    {beginTime: '2026-02-30 12:00:00', endTime: '2026-03-04 12:00:00'},
+    {beginTime: '2026-02-30T12:00:00+08:00', endTime: '2026-03-04T12:00:00+08:00'},
+    {beginTime: '2026-09-20 12:00:00', endTime: ''},
+    {beginTime: '2026-09-20 12:00:00'}
+  ]) {
+    expect((await client.get('/monitorIndicator/monitorInfo', {
+      params: {objId: 970004, type: 2, objSensorId: tempId, historyTimeInterval: 60, ...params}
+    })).data.code).toBe(0);
+  }
+
+  // interval=6 is 30 days ending at DEMO_NOW (2026-09-24), independent of wall clock.
+  const month = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {objId: 970004, type: 2, objSensorId: tempId, interval: 6, historyTimeInterval: 1440}
+  })).data.items;
+  expect(month.length).toBeGreaterThan(0);
+  expect(month[0].createDate.startsWith('2026-08-')).toBe(true);
+  expect(month[month.length - 1].createDate.startsWith('2026-09-24')).toBe(true);
+
+  const segmentA = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {
+      objId: 970004, type: 2, objSensorId: tempId,
+      beginTime: '2026-08-25 12:00:00', endTime: '2026-08-27 12:00:00', historyTimeInterval: 60
+    }
+  })).data.items;
+  const segmentB = (await client.get('/monitorIndicator/monitorInfo', {
+    params: {
+      objId: 970004, type: 2, objSensorId: tempId,
+      beginTime: '2026-08-27 12:00:00', endTime: '2026-08-29 12:00:00', historyTimeInterval: 60
+    }
+  })).data.items;
+  expect(segmentA.length).toBeGreaterThan(0);
+  expect(segmentB.length).toBeGreaterThan(0);
+  expect(segmentA[0].createDate < segmentB[0].createDate).toBe(true);
+});

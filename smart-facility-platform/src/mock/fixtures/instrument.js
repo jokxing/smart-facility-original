@@ -7,6 +7,7 @@
  */
 
 import storage from '../storage';
+import {DEMO_NOW_MS, formatDemoDateTime, parseDemoDateTime} from '../clock';
 import {ROOM_BOUNDS, roomFrame, validPlacement} from '../../utils/demoLayoutGeometry';
 import {getDemoScenario, statusForScenario} from './scenario';
 
@@ -178,6 +179,212 @@ export function clearAllRoomLayoutOverrides() {
   storage.removeItem(LAYOUT_STORAGE_KEY);
 }
 
+function roomNameForId(roomId) {
+  if (Number(roomId) === 950001) return '演示房间 A';
+  if (Number(roomId) === 950003) return '演示房间 B';
+  return '';
+}
+
+/**
+ * Shared hover/list sensor reading for one instrument under the current scenario.
+ * Offline keeps val null — never forge a live normal reading.
+ */
+export function sensorReadingForInstrument(elementId) {
+  const {senorStatus} = statusForScenario(getDemoScenario());
+  return {
+    id: 980000 + (Number(elementId) % 1000),
+    sensorType: {name: '演示温度'},
+    status: senorStatus === 2 ? -1 : senorStatus,
+    val: senorStatus === -100 ? null : '5.2',
+    unit: '℃'
+  };
+}
+
+/**
+ * GET /instrument/detail — LabDeviceDrawer basic info (read-only demo slice).
+ * logoUrl left empty so the drawer uses the local default image (no external file URL).
+ */
+export function getDemoInstrumentDetail(id) {
+  const entity = instrumentById(id);
+  if (!entity) return null;
+  const {status, senorStatus} = statusForScenario(getDemoScenario());
+  return {
+    id: entity.id,
+    name: entity.name,
+    no: 'DEMO-EQ-' + entity.id,
+    types: entity.types,
+    detailType: 1,
+    status,
+    bingStatus: senorStatus,
+    brand: '演示品牌',
+    departmentName: '演示运维部',
+    managerName: '演示负责人',
+    price: 0,
+    model: 'DEMO-M1',
+    typeName: '演示设备',
+    roomId: entity.roomId,
+    roomName: roomNameForId(entity.roomId),
+    userName: '演示账号',
+    createDate: '2026-09-01 10:00:00',
+    companyName: '智慧设施演示空间',
+    buyDate: '',
+    nextMaintenanceDate: '',
+    gradeName: '',
+    labelNo: '',
+    monitorStatus: null,
+    logoUrl: '',
+    qrUrl: '',
+    labelId: null,
+    standbyPowerFlag: false,
+    bindingDeviceId: null
+  };
+}
+
+/**
+ * GET /monitorIndicator/getOpenMonitorFlag — current sensor cards for MonitorSensor.
+ * Temperature reuses hover reading; humidity is chart-switch companion only.
+ */
+export function getDemoOpenMonitorFlag(objId) {
+  const entity = instrumentById(objId);
+  if (!entity) return null;
+  const reading = sensorReadingForInstrument(entity.id);
+  const offline = reading.val == null;
+  const {senorStatus} = statusForScenario(getDemoScenario());
+  const humidityVal = offline ? '' : (senorStatus === 2 ? '85.0' : '55.0');
+  return {
+    list: [
+      {
+        id: reading.id,
+        sensorAlias: reading.sensorType.name,
+        monitorSensorVal: offline ? '' : reading.val,
+        unit: reading.unit,
+        monitorSensorTime: offline ? '' : '2026-09-24 12:00:00',
+        activateFlag: reading.status === -1 ? 1 : 0,
+        signalSwitchStatus: 0,
+        monitorSensorCatId: 1,
+        normalMin: 0,
+        normalMax: 40,
+        deleteFlag: false,
+        showAlarmFlag: 1,
+        inlay: 1
+      },
+      {
+        id: reading.id + 100000,
+        sensorAlias: '演示湿度',
+        monitorSensorVal: humidityVal,
+        unit: '%',
+        monitorSensorTime: offline ? '' : '2026-09-24 12:00:00',
+        activateFlag: senorStatus === 2 ? 1 : 0,
+        signalSwitchStatus: 0,
+        monitorSensorCatId: 2,
+        normalMin: 30,
+        normalMax: 70,
+        deleteFlag: false,
+        showAlarmFlag: 1,
+        inlay: 1
+      }
+    ],
+    isBind: 1,
+    type: 2,
+    bindingDeviceId: []
+  };
+}
+
+/** GET /monitorIndicator/getMonitorFlag — vuex sensorsFlag; same probe list is enough. */
+export function getDemoMonitorFlag(objId) {
+  const open = getDemoOpenMonitorFlag(objId);
+  return open ? open.list : null;
+}
+
+
+/**
+ * Absent begin+end → interval window on DEMO_NOW_MS.
+ * Any explicit begin/end must both parse and satisfy end > begin; otherwise invalid.
+ */
+function monitorInfoRange(params) {
+  const hasBegin = params && params.beginTime != null && String(params.beginTime).trim() !== '';
+  const hasEnd = params && params.endTime != null && String(params.endTime).trim() !== '';
+  if (hasBegin || hasEnd) {
+    if (!hasBegin || !hasEnd) return {ok: false};
+    const begin = parseDemoDateTime(params.beginTime);
+    const end = parseDemoDateTime(params.endTime);
+    if (!Number.isFinite(begin) || !Number.isFinite(end) || end <= begin) return {ok: false};
+    return {ok: true, begin, end};
+  }
+  const interval = Number(params && params.interval);
+  const days = interval === 5 ? 7 : interval === 6 ? 30 : interval === 7 ? 90 : 1;
+  return {ok: true, begin: DEMO_NOW_MS - days * 86400000, end: DEMO_NOW_MS};
+}
+
+function monitorInfoStepMs(params, begin, end) {
+  const hintMin = Number(params && params.historyTimeInterval) > 0
+    ? Number(params.historyTimeInterval)
+    : 5;
+  let step = hintMin * 60 * 1000;
+  const interval = Number(params && params.interval);
+  const maxPoints = interval === 4 ? 48 : interval === 5 ? 84 : 96;
+  const span = Math.max(end - begin, step);
+  if (span / step > maxPoints) {
+    step = Math.ceil(span / maxPoints / 60000) * 60000;
+  }
+  return Math.max(step, 60 * 1000);
+}
+
+function monitorSeriesValue(sensorId, index, scenario) {
+  const humidity = Number(sensorId) >= 1080000;
+  if (scenario === 'alarm') {
+    return humidity
+      ? Number((78 + (index % 7) * 1.5).toFixed(1))
+      : Number((38 + (index % 5) * 1.2).toFixed(1));
+  }
+  return humidity
+    ? Number((52 + (index % 6) * 0.8).toFixed(1))
+    : Number((4.8 + (index % 6) * 0.2).toFixed(1));
+}
+
+/**
+ * GET /monitorIndicator/monitorInfo — MonitorInfo chart series (device type:2 only).
+ * Offline / unknown sensor → []; invalid explicit range → null (handler failure).
+ */
+export function getDemoMonitorInfo(params) {
+  if (!params || Number(params.type) !== 2) return null;
+  const objId = Number(params.objId);
+  const sensorId = Number(params.objSensorId);
+  if (!instrumentById(objId) || Number.isNaN(sensorId)) return null;
+  const open = getDemoOpenMonitorFlag(objId);
+  if (!open || !open.list.some(item => Number(item.id) === sensorId)) return null;
+
+  const range = monitorInfoRange(params);
+  if (!range.ok) return null;
+  const scenario = getDemoScenario();
+  if (scenario === 'offline') return [];
+  const {begin, end} = range;
+  const step = monitorInfoStepMs(params, begin, end);
+  const rows = [];
+  let index = 0;
+  for (let t = begin; t <= end; t += step) {
+    rows.push({
+      id: index + 1,
+      createDate: formatDemoDateTime(t),
+      data: monitorSeriesValue(sensorId, index, scenario)
+    });
+    index += 1;
+    if (index >= 120) break;
+  }
+  return rows;
+}
+
+/** Empty historyPage for SeeHistory dialog mount/query; not a full history product. */
+export function emptyMonitorHistoryPage(objId) {
+  const key = objId == null || objId === '' ? '0' : String(objId);
+  return {list: {[key]: []}, total: 0, pageNum: 1, pageSize: 10};
+}
+
+/** Empty page for TagPane mount; reservation/history not part of this slice. */
+export function emptyInstrumentSchedulerPage() {
+  return {list: [], pageNum: 1, pageSize: 10, total: 0};
+}
+
 /**
  * POST /map/element/getRoonInstrumentInfoList response items.
  */
@@ -212,9 +419,9 @@ export function listRoonInstrumentInfo(roomId) {
       status,
       senorStatus,
       isMonitor: 1,
-      // Editable in RoomDesigner; RoomView blocks detail clicks in demo.
+      // Editable in RoomDesigner; RoomView opens LabDeviceDrawer in demo.
       isEdit: 1,
-      openTwoSystem: false,
+      openTwoSystem: true,
       type: 4
     };
   });
@@ -228,15 +435,7 @@ export function listRoonInstrumentInfo(roomId) {
   const simpleEquipmentList = list.map(item => ({
     id: item.elementId,
     name: item.name,
-    sensors: [
-      {
-        id: 980000 + (item.elementId % 1000),
-        sensorType: {name: '演示温度'},
-        status: senorStatus === 2 ? -1 : senorStatus,
-        val: senorStatus === -100 ? null : '5.2',
-        unit: '℃'
-      }
-    ]
+    sensors: [sensorReadingForInstrument(item.elementId)]
   }));
 
   return {list, board, simpleEquipmentList};
