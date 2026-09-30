@@ -29,9 +29,10 @@ router.beforeEach(async (to, from, next) => {
     const demoAllowed = to.path === '/dashboard' || to.path === '/building' || to.path === '/floor/view'
       || to.path === '/floor/designer' || to.path === '/room/view' || to.path === '/room/designer'
       || to.path === '/floorDataV' || to.path === '/roomDataV' || to.path === '/roomDataV/'
-      || to.path === '/sys/a/log';
+      || to.path === '/sys/a/log'
+      || to.path === '/lhd/hardware/home' || to.path === '/pro';
     if (!demoAllowed) {
-      Message.info('本阶段已开放登录、首页、楼宇、楼层/房间预览与设备布局、大屏、设备详情曲线与报警记录处理，其他功能将分步接入演示。');
+      Message.info('本演示已开放中控地图、大屏、报警记录、智能硬件总览及支持类型详情；当前管理页面尚未接入。');
       next('/dashboard');
       NProgress.done();
       return;

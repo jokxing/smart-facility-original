@@ -143,8 +143,8 @@ export default {
             this.loading = true;
             this.items['sortName'] = this.columnSort;
             getEquipmentSortList(this.items).then(res => {
-                this.loading = false;
                 if (!res.code) {
+                    this.device = [];
                     return this.$message.error(res.message);
                 }
                 this.device = res.items.list;
@@ -160,7 +160,11 @@ export default {
                 if (res.items.pageNum === items.PAGE_NUM) {
                     this.total = res.items.total;
                 }
-            })
+            }).catch(() => {
+                this.device = [];
+            }).finally(() => {
+                this.loading = false;
+            });
         },
         sortChange(e) {
             var propName = e.prop;

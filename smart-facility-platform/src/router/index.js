@@ -30,7 +30,7 @@ export const routes = [
                     {
                         //
                         path: "/lhd/hardware/home",
-                        name: "Gateway",
+                        name: "HardwareHome",
                         component: r =>
                             require.ensure([], () =>
                                 r(

@@ -1,5 +1,12 @@
 # 工作状态
 
+## 当前下一任务：智能硬件 1A（2026-09-30，用户调整优先级）
+
+- 用户确认转向首页业务模块，不继续把品牌/装饰素材审查作为功能推进前置。剩余素材与授权审查暂缓，公开发布前仍需处理。
+- 下一执行任务已重写为智能硬件首页入口与只读列表闭环：核实契约、统一 Mock、筛选/分页/状态/排序、有限开放入口和本地验证。
+- 已核实源码线索：/pro → /lhd/hardware/home、HardwareHome.vue、DeviceTable/DeviceTotal/SelectdePartment、api/device.getEquipmentSortList、permission.js。详细提示词见 next-task-prompt.md。
+- 1B 预留类型匹配的详情/曲线/告警联动；管理写操作及其他首页模块后续分批处理。本轮只整理交接文档，未实现 1A，未提交推送。
+
 ## 当前收尾：品牌页面验收完成（2026-09-30）
 
 - 修复 check-demo-brand-ui.cjs 的验收条件：等待转场退出、Logo 可见且未遮挡、前页 DOM 移除和楼宇 canvas/加载遮罩就绪；截图前等待绘制。语言通过真实菜单切换，读取演示命名空间配置；favicon 实际 HTTP 加载、解码及透明像素断言。
@@ -825,3 +832,384 @@
 - 未验证：生产构建、标签页缓存专项、全量装饰图 OCR、Git 历史脱敏。不可宣称全量素材已脱敏。
 - 未暂存、提交或推送。建议 commit：`chore: 验收新楼宇 Logo 并移除未引用旧品牌 PNG`
 - 下一最小任务：由用户决定提交当前工作区，或继续 DataV/字形许可等残留审查。
+
+## 追加：智能硬件 1A 已完成并停止（2026-09-30）
+
+智能硬件首页入口与只读列表闭环。契约：`docs/hardware-1a-contract.md`。未覆盖上文历史条目，仅追加。
+
+### 本轮修改（相对 smart-facility-platform/，另含 docs）
+
+| 文件 | 内容 |
+| --- | --- |
+| `src/mock/fixtures/equipment.js`、`handlers/equipment.js`、`mock/index.js` | 22 条合成硬件；`POST /equipment/sort/list` 过滤/分页/排序/分面统计；dashboard 同源 |
+| `src/mock/fixtures/auth.js`、`handlers/auth.js` | 两部门；菜单补硬件主页；dashboard 迁出 auth |
+| `src/permission.js` | 放行 `/lhd/hardware/home`、`/pro`；更新开放范围提示 |
+| `src/router/index.js` | 硬件首页 `name` 改为 `HardwareHome`（消除与网关同名） |
+| `src/views/hardwareHome/HardwareHome.vue` | 列表请求 `catch/finally` 结束 loading |
+| `src/components/DeviceTable/index.vue` | 演示模式拦截详情抽屉并提示 |
+| `tests/unit/demo/equipment.spec.js`、`auth.spec.js` | Mock 契约与部门/菜单断言 |
+| `scripts/check-demo-hardware-1a.cjs`、`package.json` | 浏览器验收 + `test:demo:hardware` |
+| `docs/*`、`docs/evidence/hardware-1a/*.png` | 状态、指南、契约、截图证据 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 文件 / **73** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware`：首页卡片进入、搜索有/无结果、部门+类型、分页、筛选重置页码、排序、正常/告警/离线、详情拦截、刷新、未开放 `/lhd/device` 挡回、`externalAttempts:0`。
+- 证据：`docs/evidence/hardware-1a`（01–06 png）。
+
+### 能用 / 不能用
+
+- **能用**：登录 → 首页「智能硬件」→ 总览列表；关键词/部门/传感类型/硬件类别筛选；分页与列排序；统计卡片随接口。
+- **不能用**：点名称/编号的详情抽屉、曲线、告警联动（1B）；网关/记录仪管理等子页；新增编辑删除导入导出。
+
+### 未验证 / 残留
+
+- 未跑完整 `test:demo:browser` 回归套件（本批用专用 hardware 脚本）。
+- 侧栏仍可见「记录仪」菜单项，点击会被 permission 挡回首页。
+- 品牌/装饰素材授权审查仍暂缓。
+- 未暂存、提交或推送。
+
+### 下一步
+
+- 1A 已停止。下一提示词已写：`docs/next-task-prompt.md`（智能硬件 1B：类型匹配的详情/曲线/告警联动）。未执行 1B。
+
+## 追加：智能硬件 1B 已完成并停止（2026-09-30）
+
+类型匹配的只读详情 / 曲线 / 告警联动。契约：`docs/hardware-1b-contract.md`。本文仅追加，不覆盖上文。
+
+### 本轮修改（相对 smart-facility-platform/，另含 docs）
+
+| 文件 | 内容 |
+| --- | --- |
+| `src/mock/fixtures/equipment.js` | 详情/监测标签/曲线 type=1/告警历史/空壳绑定与负责人 |
+| `src/mock/handlers/equipment.js` | `/device/detail`、Device*MonitorFlag、binding、statusPdf、historyAlarmRecord、exceptionHandle 拒绝写 |
+| `src/mock/handlers/instrument.js` | `monitorInfo` 按 type=1 走硬件曲线 |
+| `src/components/DeviceTable/index.vue` | 演示仅放行记录仪(0)/设备管理器(10)+openTwoSystem |
+| `tests/unit/demo/equipment.spec.js` | 详情与 instrument 隔离、曲线/告警单测 |
+| `scripts/check-demo-hardware-1b.cjs`、`package.json` | `test:demo:hardware:1b` |
+| `docs/hardware-1b-contract.md`、`demo-guide.md`、`next-task-prompt.md`、`evidence/hardware-1b` | 契约、指南、下一批提示、截图 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 文件 / **75** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：记录仪详情+曲线、设备管理器详情、声光类型仍拦截、`externalAttempts:0`。
+- 证据：`docs/evidence/hardware-1b`（01–04 png）。
+
+### 能用 / 不能用
+
+- **能用（在 1A 列表之上）**：点记录仪/设备管理器 → DeviceDrawerNew 基础信息、监测曲线、告警历史只读。
+- **不能用**：声光/断电/信号等其它类型详情；硬件告警处理提交（明确失败）；编辑/绑定/导入导出等写操作；`/lhd/device` 管理页。
+
+### 下一步
+
+- 1B 已停止。下一提示词：`docs/next-task-prompt.md`（写操作 / 其它类型详情 / 其它首页模块，待用户指定）。未执行下一批。未暂存、提交或推送。
+
+## 1A/1B 独立复盘（2026-09-30）
+
+- 重跑演示单测：13 文件/75 项通过；阅读实际源码与现有详情截图，未重跑浏览器。
+- 发现：只读详情管理开关缺少能力限制与失败 loading 恢复；报警范围 undefined/阈值单位不一致；水浸离散曲线错误；离线告警标签可能混入阈值告警。完整依据见 review-hardware-1ab.md。
+- 当前不能以单测通过判定详情已收尾。建议先修这些问题，再优先做硬件告警处理闭环、监测规则设置，最后扩展其它管理功能。
+- 本轮只更新复盘文档与 STATUS，未改业务源码，未提交推送。
+
+## 追加：智能硬件 1B 第 0 批收尾修复（2026-09-30）
+
+依据 `docs/review-hardware-1ab.md`。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| P1 | `DeviceDrawerNew`：demo 隐藏管理工具栏/基础信息编辑/添加负责人；开关与下拉写操作拦截；非 demo 开关补 catch/finally |
+| P2 字段 | `equipment.js`：传感器补 `min`/`max`（HardwareState 真实字段）；阈值与告警样本对齐（温湿度/温度 0–30、压差 0–10）；信号强度改为 dBm（正常 -70 / 离线 -95） |
+| P2 曲线 | 水浸等离散量仅 0/1；`Number.isFinite` 保留合法 0，不再 `\|\| 20` |
+| P2 告警 | 离线 Tab（仅 objId）与阈值（objSensorIds）分种子；互不混入 |
+| 测试 | `equipment.spec.js` 断言加强；`check-demo-hardware-1b.cjs` 断言无管理栏且 min/max 有效 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **75** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过，`externalAttempts:0`；证据已更新 `docs/evidence/hardware-1b`。
+
+### 下一步
+
+- 第 0 批停止。下一提示词：`docs/next-task-prompt.md`（硬件告警处理闭环）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件告警处理闭环（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（告警处理）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| Mock | `equipment.js`：`handleEquipmentException` / `equipmentAlarmHandles`；981001 未处理 + 981002 已处理样例；列表 merge 回显 |
+| Handler | `POST /monitorIndicator/exceptionHandle` 真实持久化（按 objSensorId+time）；失败不写库 |
+| UI | `AlarmProcessing`：提交 catch/finally；`processDate` 格式化为字符串再提交 |
+| 测试 | `equipment.spec.js` 闭环单测；`check-demo-hardware-1b.cjs` 浏览器处理 980002 告警并截图 |
+| 文档 | `hardware-1b-contract.md`、`demo-guide.md`；`next-task-prompt.md` → 阈值/汇报间隔 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **76** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `alarmProcessed`），`externalAttempts:0`；证据含 `05-alarm-processed.png`。
+
+### 能用 / 不能用
+
+- **能用**：硬件详情阈值告警「添加/修改处理」→ 刷新回显已处理；离线告警仍不可处理。
+- **不能用**：阈值规则/汇报间隔设置；其它类型详情；管理写操作区（demo 仍隐藏）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（阈值/汇报间隔设置）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件阈值 / 汇报间隔设置（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（阈值/间隔）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| UI | `DeviceDrawerNew`：demo 工具栏仅开放汇报间隔/报警间隔/报警参数；`handleDropdownMenu` 白名单放行 |
+| Mock | `equipmentSettings` 持久化；`updateEquipmentReportingInterval` / `AlarmInterval` / `Sensors`；详情与监测标签 merge 回显 |
+| Handler | `POST /device/update/interval/report`、`/interval/alarm`、`/sensors` |
+| 测试 | `equipment.spec.js`；浏览器脚本断言间隔与阈值回显，截图 `06-settings-updated.png` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 负责人/部门 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **77** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `settingsUpdated`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：详情改汇报间隔、报警间隔、传感器报警范围并刷新回显。
+- **不能用**：声光/平台开关、部门/负责人编辑、联网配置、其它类型详情。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（负责人/部门编辑）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件负责人 / 部门编辑（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（负责人/部门）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| UI | demo 开放「编辑」名称部门、`添加负责人`；`UpdateDepartment` 白名单 |
+| Mock | `equipmentMeta` / `equipmentUsers`；`updateEquipmentBasic`；`list/add/remove` 负责人；`DEMO_STAFF` + `/user/list` |
+| Handler | `/device/update/basic`；`/equipmentUser/*`；`/user/list` |
+| 测试 | 单测 + 浏览器 `ownerDeptUpdated`；证据 `07-owner-dept-updated.png` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 绑定事物 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **78** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `ownerDeptUpdated`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：改名称与部门并回显；添加/删除负责人；员工列表来自演示人员池。
+- **不能用**：绑定事物、联网配置、其它类型详情、声光/平台开关。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（绑定事物）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件绑定事物（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（绑定事物）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| UI | `DeviceBindRelationship`：demo 展示绑定区；绑定房间/仪器、解绑；不打开级联抽屉 |
+| Mock | `equipmentBindings`；`list/add/remove` 房间(type=11)/仪器(type=4)；房间互斥替换 |
+| Handler | `/device/binding`；`/room/things/add|remove`；`/instrument/things/add|remove`；`/device/deviceBindThings` |
+| 测试 | 单测 + 浏览器 `bindingUpdated`；证据 `08-binding-updated.png` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 其它类型详情 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **79** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `bindingUpdated`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：详情绑定/解绑演示房间与仪器并回显；列表接口可读。
+- **不能用**：点击绑定名打开房间/仪器抽屉（demo 禁用级联）；联网配置；声光/断电等其它类型详情。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（其它类型详情）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件声光 / 断电详情（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（其它类型详情）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| 列表 | `DeviceTable` 演示放行 type `7` / `8+openTwoSystem`；信号等仍拦截 |
+| UI | `AlerterDrawer` / `PowerDrawerNew`：demo 隐藏写工具栏与风险子模块（Common/Multifunction） |
+| Mock | `DEMO_EQUIPMENT_DETAIL_CODES` 含 7/8；详情补 `defenceAlarmStatus`/`powerFailure`；`getAlertorBeepTime` |
+| Handler | `GET /alertor/obtain/beepTime`；`closeAlarm/*` 明确失败 |
+| 测试 | 单测 980012/980014/beepTime；浏览器 `09-alerter-detail`、`10-power-detail`；信号仍拦截 |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 信号接收器或联网配置 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **79** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `alerterDetail`/`powerDetail`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：列表打开声光只读详情（含蜂鸣时长）；打开断电只读详情（供电态、绑定/曲线区）；开关类写操作拒绝。
+- **不能用**：信号接收器详情；联网配置；真实指令下发；声光关联设备/多功能子页。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（信号接收器详情）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件信号接收器详情（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（信号接收器详情）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| 列表 | `DeviceTable` 演示放行 type `14`；枪架/网关等仍拦截 |
+| UI | `SignalSourceDrawer`：demo 隐藏编辑/绑定/解绑与级联打开 |
+| Mock | `DEMO_EQUIPMENT_DETAIL_CODES` 含 14；`statusStr`/`runStatus`；`listSignalReceiverBindings`；`getHistoryDeviceChart` |
+| Handler | `GET /device/signal/bind/list`；`GET /history/device/chart`；bind/unbind/devices 明确失败 |
+| 测试 | 单测 980016；浏览器 `11-signal-detail`；枪架仍拦截 |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 联网配置或枪架/网关 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **79** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `signalDetail`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：列表打开信号接收器只读详情（状态、探头、曲线、预置绑定列表）。
+- **不能用**：信号绑定/解绑写；编辑部门；枪架/网关详情；联网配置；真实指令。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（联网配置只读）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件联网配置只读（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（联网配置只读）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| UI | `DeviceDrawerNew`/`PowerDrawerNew` demo 开放「联网配置」；`NetworkConfiguration`/`NetworkAdvancedSetup` 只读 |
+| Mock | `getDeviceWifiEcho`（type 8/10）；SSID/IP 等演示字段 |
+| Handler | `GET /device/wifi/echo`；`POST /device/wifi/input|inputBatch` 明确失败 |
+| 测试 | 单测 echo/拒绝；浏览器 `12-network-config` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 枪架或网关详情 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **79** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `networkConfig`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：设备管理器/断电详情打开联网配置弹窗，只读查看 Wi‑Fi/LAN 演示参数。
+- **不能用**：联网配置下发；枪架/网关详情；真实指令。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（枪架或网关详情）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件枪架详情（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（枪架详情）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| 种子 | `980023/980024` 移液枪架；`EQUIPMENT_TYPE_META` 含 13 |
+| 列表 | `DeviceTable` 演示放行 type `13`；网关等仍拦截 |
+| UI | `GunRackDrawer`：demo 隐藏开关/编辑/负责人添加等写入口 |
+| Mock | 详情补 `roomName/remark/companyName`；`listGunPipetteBindings`；历史告警空桩 |
+| Handler | `POST /gun/pipette/binding/list`；`GET /history/device/alarm`、`/history/my/alarm` |
+| 测试 | 单测 980023；浏览器 `13-gunrack-detail` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 网关或其它模块 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **79** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `gunRackDetail`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：列表打开枪架只读详情（基础信息、枪位列表、负责人区、告警空态）。
+- **不能用**：声光开关/编辑/语音提醒/添加负责人；网关详情；真实指令。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（网关详情或其它模块）。未执行。未暂存/提交/推送。
+
+## 追加：智能硬件网关详情（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（开工网关）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| 种子 | `980025/980026` 资产网关；`EQUIPMENT_TYPE_META` 含 16 |
+| 列表 | `DeviceTable` 演示放行 type `16`；未知类型仍拦截 |
+| UI | `AssetGatewayDrawer`：demo 下联网配置随 `wifiFlag` 只读开放 |
+| Mock | 详情补 `roomName/companyName/propertyNum/wifiFlag`；`listLabelBindings`；`getDeviceWifiEcho` 含 16 |
+| Handler | `POST /label/binding/list`；历史告警空桩已复用 |
+| 测试 | 单测 980025 + 标签列表；浏览器 `14-gateway-detail` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 其它首页模块 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：13 / **79** 通过。
+- `DEMO_PORT=8088 npm run test:demo:hardware:1b`：通过（含 `gatewayDetail`），`externalAttempts:0`。
+
+### 能用 / 不能用
+
+- **能用**：列表打开网关只读详情（基础信息、绑定标签、历史告警空态、联网配置只读）。
+- **不能用**：联网配置下发；未知类型详情；真实指令。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（其它首页模块）。未执行。未暂存/提交/推送。
+
+## 智能硬件全模块独立复盘（2026-09-30）
+
+- 完整报告：review-hardware-module.md，覆盖入口、总览、七类详情、告警/设置/负责人/绑定、联网配置与管理页边界。
+- 实测：13 套 79 项正式单测通过；8088 本地 Edge hardware:1b 通过，外部请求尝试 0、未捕获异常 0；查看本轮真实断电/网关截图。
+- 额外临时边界测试 3 项均失败：错误 idx/type 被接受、空阈值被转为 0、批量绑定失败后前项仍保存。临时测试已移除，正式测试未修改。
+- 另发现断电曲线显示约 220℃、页面与 Mock 重复硬编码绑定目录、记录仪菜单可见却被路由拦回首页。不能把全部详情可打开等同于全模块完成。
+- 上轮开关 loading、范围 undefined、水浸曲线、离线/阈值事件混淆已有对应修复；本报告评估的是扩展后的新基线。
+- 建议转其它模块前先有限修复本报告五项问题。真实硬件通信、未接入管理页与空告警占位继续明确受限。
+- 本轮未改业务源码、未提交/推送。浏览器脚本更新了 docs/evidence/hardware-1b 的验收截图；未运行生产构建或全站浏览器回归。
+
+## 智能硬件五项质量收尾完成（2026-09-30）
+
+- 指标：equipment.js 按硬件类型处理探头；断电使用 sensorId/type 17、0/1 供电状态；温湿度设备明确演示单独温度通道，单位 ℃；无环境探头的声光/枪架/资产网关不再计入温湿度类别，监测标签返回空集。没有实现湿度第二通道。
+- 写入：规则拒绝不存在/重复/不匹配探头及空值/null/非有限阈值，合法零保留；批量仪器绑定先校验整批与重复关系，再一次持久化，失败不部分保存。
+- 目录：绑定候选从共享 DEMO_FLOOR_ROOMS/DEMO_INSTRUMENTS 派生，通过受保护的 GET /__demo/equipment/bindable 提供；api/device 与 DeviceBindRelationship 接入接口加载及失败/加载状态，删除页面候选常量。目录增加了共享实体中原未列出的仪器和空间，绑定规则仍由服务校验。
+- 导航：demo 菜单移除未开放的 /lhd/device 项；permission 与 DeviceTable 提示按实际能力更新，未放宽管理页权限。
+- 测试：新增 equipment-review.spec.js，五项行为测试覆盖异常参数、原子绑定、指标语义、统一目录与会话保护、菜单边界。14 套/84 项 test:demo 通过。
+- 浏览器：8088 本地硬件 1A、1B 均通过，外部请求尝试 0、未捕获异常 0；1B 首页入口、房间/仪器绑定改为实际 DOM 按钮与下拉选项操作，补断电详情无 ℃ 的断言。1A 过时的“所有详情受限”改为未知类型受限。截图更新至 docs/evidence/hardware-1a、hardware-1b，已查看供电曲线正确截图。
+- 验证限制：没有运行生产构建或全站浏览器回归；仍只在本地 Edge 1440×900 验收。规则保存不等于真实设备下发；状态/新事件自动重算、房间/仪器反向绑定联动、真实通信不在此次范围。
+- 文档：复盘报告与 1B 契约补收尾结论；next-task-prompt.md 已重写为设备管理 2A，目标为 /ld/labdevice 的共享仪器列表、筛选统计及已有详情入口。未开始 2A，未暂存/提交/推送。
+- 如提交整个当前硬件工作区，建议：feat: 接通智能硬件演示并完善监测语义与配置绑定校验。若只提交本轮收尾，建议：fix: 修复智能硬件指标语义与配置绑定一致性。

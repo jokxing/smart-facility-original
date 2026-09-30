@@ -5,15 +5,22 @@ export const DEMO_USER = {
   companyName: '智慧设施演示空间', departmentId: 900101, roleId: 1,
   deviceSeeFlag: 1, instrumentSeeFlag: 1, roomSeeFlag: 1
 };
+/** Staff pool for SetPrincipal /user/list (demo only). */
+export const DEMO_STAFF = Object.freeze([
+  {id: 900001, name: '演示用户', loginId: 'demo', departmentId: 900101, isBoundWeixin: true},
+  {id: 900002, name: '演示运维员', loginId: 'ops', departmentId: 900101, isBoundWeixin: false},
+  {id: 900003, name: '演示研发员', loginId: 'rd', departmentId: 900102, isBoundWeixin: true}
+]);
 export const DEMO_DEPARTMENTS = [
-  {id: 900101, name: '演示运维部', departmentName: '演示运维部', parentId: 0, children: []}
+  {id: 900101, name: '演示运维部', departmentName: '演示运维部', parentId: 0, children: [], subDivisions: []},
+  {id: 900102, name: '演示研发部', departmentName: '演示研发部', parentId: 0, children: [], subDivisions: []}
 ];
 export const DEMO_CATEGORIES = [
   {id: 900201, name: '演示设备', catName: '演示设备', parentId: 0, children: []}
 ];
 export const DEMO_MENUS = [
   {id: 'lhd', name: '智能硬件', englishName: 'hardware', path: '/lhd/hardware/home', subMenu: [
-    {id: 'demo-device', name: '记录仪', englishName: 'device', path: '/lhd/device', icon: 'icon-device1', subMenu: []}
+    {id: 'demo-hardware-home', name: '主页', englishName: 'home', path: '/lhd/hardware/home', icon: 'icon-home1', subMenu: []}
   ]},
   {id: 'rm', name: '房间管理', englishName: 'room', path: '/rm/room', subMenu: [
     {id: 'demo-room', name: '房间', englishName: 'room', path: '/rm/room', icon: 'icon-home1', subMenu: []}
@@ -22,5 +29,4 @@ export const DEMO_MENUS = [
     {id: 'demo-alarm-log', name: '报警记录', englishName: 'alarmLog', path: '/sys/a/log', icon: 'icon-warning-line', subMenu: []}
   ]}
 ];
-// Only the landing-page contract; device records belong to the next slice.
-export const DEMO_OVERVIEW = {total: 0, alarmCount: 0};
+// Dashboard overview is derived from fixtures/equipment.js (handlers/equipment).

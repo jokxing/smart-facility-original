@@ -13,14 +13,8 @@
       <div v-if="isDrawer" class="detail-container">
         <div class="detail-padding">
           <drawer-nav :deviceName="powerOutage.no" :name="powerOutage.name" :type="1" @handle="handleClose"/>
-          <div class="detail-handle clearfix" v-if="$store.state.level">
+          <div class="detail-handle clearfix" v-if="$store.state.level && !isDemo">
             <div>
-<!--              <el-button-->
-<!--                  :disabled="powerOutage.powerFailure === 1 && powerOutage.status !== 0"-->
-<!--                  class="margin-small-right" type="danger"-->
-<!--                  @click="handleInvalidateAlarm">-->
-<!--                {{ removeAlarm ? $t('hardware.removedAlarm') : $t('hardware.removeAlarm') }}-->
-<!--              </el-button>-->
               <el-switch
                   v-if="$store.state.level"
                   v-model="closeAlarmFlag"
@@ -44,7 +38,7 @@
             </div>
           </div>
           <el-descriptions :title="$t('common.basicInformation')">
-            <template v-if="$store.state.level" #extra>
+            <template v-if="$store.state.level && !isDemo" #extra>
                 <el-button
                     v-if="powerOutage.wifiFlag"
                     :disabled="powerOutage.status === 0"
@@ -55,6 +49,14 @@
               </el-button>
               <el-button type="primary" class="icon-edit" @click="handleDropdownMenu('UpdateDepartment')">&nbsp;{{ $t('common.edit') }}
               </el-button>
+            </template>
+            <template v-else-if="$store.state.level && isDemo" #extra>
+                <el-button
+                    v-if="powerOutage.wifiFlag"
+                    :disabled="powerOutage.status === 0"
+                    @click="handleDropdownMenu('NetworkConfiguration')">
+                    {{ $t('hardware.networkConfiguration') }}
+                </el-button>
             </template>
           </el-descriptions>
           <div class="layout-row">
@@ -84,7 +86,7 @@
               </el-descriptions>
             </div>
           </div>
-          <DeviceBindRelationship :id="id" @handle="handleBinding" />
+          <DeviceBindRelationship :id="id" :demo-writable="!isDemo" @handle="handleBinding" />
         </div>
         <div class="detail-padding-nocolor">
           <el-descriptions
@@ -106,7 +108,7 @@
         <MonitorInfo class="detail-padding" v-if="monitorSensors.length > 0" :objId="powerOutage.id" :sensors="monitorSensors" :type="1" />
         <div class="detail-padding-nocolor">
           <el-descriptions class="margin-center" :title="$t('hardware.users')">
-            <template v-if="$store.state.level" slot="extra">
+            <template v-if="$store.state.level && !isDemo" slot="extra">
               <el-tooltip v-if="isOpenTwoSystem && isBinding" effect="dark" :content="$t('hardware.isOpenTwoSystem')" placement="top">
                 <el-button class="icon-staff-settings button-disabled" type="primary"> {{ $t('common.addPrincipal') }}</el-button>
               </el-tooltip>
@@ -171,6 +173,8 @@ import DeviceBindRelationship from "@/views/device/components/DeviceBindRelation
 import store from "@/store";
 import NetworkConfiguration from "@/views/device/components/NetworkConfiguration";
 
+const isDemo = process.env.VUE_APP_DEMO === "true";
+
 export default {
   name: "PowerDrawer",
   components: {
@@ -202,6 +206,7 @@ export default {
   },
   data() {
     return {
+      isDemo,
       router: {
         name: "1",
         id: "",

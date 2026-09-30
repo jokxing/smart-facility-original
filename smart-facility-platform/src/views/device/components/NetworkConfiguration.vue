@@ -9,7 +9,7 @@
       append-to-body>
     <el-form v-model="form" label-position="left" label-width="auto">
       <el-form-item :label="$t('hardware.networkMode')">
-        <el-select v-model="form.networkMode" :placeholder="$t('hardware.networkOption')">
+        <el-select v-model="form.networkMode" :disabled="isDemo" :placeholder="$t('hardware.networkOption')">
           <el-option
               v-for="item in networkOption"
               :key="item.value"
@@ -26,25 +26,27 @@
     <div v-if="networkType == 0">
       <el-form  label-position="left" label-width="auto">
         <el-form-item :label="$t('hardware.wifiName')">
-          <el-input class="select-change-p" v-model="form.wifiConfig.ssid"></el-input>
+          <el-input class="select-change-p" v-model="form.wifiConfig.ssid" :disabled="isDemo"></el-input>
         </el-form-item>
         <el-form-item :label="$t('hardware.wifipwd')">
-          <el-input class="select-change-p" v-model="form.wifiConfig.password"></el-input>
+          <el-input class="select-change-p" v-model="form.wifiConfig.password" :disabled="isDemo" :show-password="!isDemo"></el-input>
         </el-form-item>
       </el-form>
       <div class="down" @click="down = !down">{{ $t('hardware.highSys') }}<i :class="down ? 'el-icon-arrow-down' : 'el-icon-arrow-right'"></i>
       </div>
       <network-advanced-setup
           v-if="down"
+          :disabled="isDemo"
           :object="form.wifiConfig"/>
     </div>
     <network-advanced-setup
         v-if="networkType == 1"
+        :disabled="isDemo"
         :network-type="networkType"
         :object="form.lanConfig"/>
     <span slot="footer" class="dialog-footer">
-      <el-button :disabled="disabled" @click="handleClose">{{ $t('common.cancel') }}</el-button>
-      <el-button :loading="disabled" type="primary" @click="handleSubmit()">{{ $t('common.confirm') }}</el-button>
+      <el-button :disabled="disabled" @click="handleClose">{{ isDemo ? $t('common.close') : $t('common.cancel') }}</el-button>
+      <el-button v-if="!isDemo" :loading="disabled" type="primary" @click="handleSubmit()">{{ $t('common.confirm') }}</el-button>
     </span>
   </el-dialog>
 </template>
@@ -54,12 +56,15 @@ import NetworkAdvancedSetup from "@/views/device/components/NetworkAdvancedSetup
 import {getDeviceWifiEcho, postDeviceWifiInput} from "@/api/device";
 import {postWifiInputBatch} from "@/api/assetTag";
 
+const isDemo = process.env.VUE_APP_DEMO === "true";
+
 export default {
   name: "NetworkConfiguration",
   components: {NetworkAdvancedSetup},
   data() {
       const _this = this;
     return {
+      isDemo,
       down: false,
       title: _this.$t('hardware.networkConfiguration'),
       dialogVisible: false,
@@ -86,7 +91,7 @@ export default {
         equipmentNo: ""
       },
         equipmentIdList: [],
-      networkType: 0,
+      networkType: "0",
       disabled: false,
       networkOption: [
         {label: _this.$t('hardware.automaticSwitchover'), value: 0},
@@ -100,7 +105,7 @@ export default {
   methods: {
     handleClose() {
       this.dialogVisible = false;
-      this.networkType = 0;
+      this.networkType = "0";
       this.down = false;
     },
       /**
@@ -111,6 +116,7 @@ export default {
     open(type, item) {
         this.type = type;
       this.dialogVisible = true;
+      this.down = !!isDemo;
       this.form = {
         networkMode: 0,
         wifiConfig: {
@@ -152,6 +158,10 @@ export default {
       })
     },
     handleSubmit() {
+      if (isDemo) {
+        this.$message.info('本阶段演示未开放联网配置下发。');
+        return;
+      }
       this.disabled = true;
       if (this.type === 1) {
           postWifiInputBatch({equipmentIdList: this.equipmentIdList,wifiParam: this.form}).then(res => {

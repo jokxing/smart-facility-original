@@ -9,6 +9,8 @@
     "demo:favicon": "node scripts/generate-demo-brand-assets.cjs --favicon-only",
     "test:demo": "vue-cli-service test:unit --runInBand tests/unit/demo",
     "test:demo:browser": "node scripts/check-demo-browser.cjs",
+    "test:demo:hardware": "node scripts/check-demo-hardware-1a.cjs",
+    "test:demo:hardware:1b": "node scripts/check-demo-hardware-1b.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",

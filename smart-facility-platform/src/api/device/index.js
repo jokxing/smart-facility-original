@@ -335,3 +335,7 @@ export function postEquipmentUseStatus(data) {
 export function getUseStatusQuery(data) {
     return get("/useStatus/query", data);
 }
+// Demo-only catalog; the original production endpoints remain unchanged.
+export function getDemoBindableCatalog(kind) {
+    return get('/__demo/equipment/bindable', {kind});
+}

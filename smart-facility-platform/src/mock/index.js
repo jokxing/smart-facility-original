@@ -6,6 +6,7 @@ import dataVRoutes from './handlers/dataV';
 import roomRoutes from './handlers/room';
 import instrumentRoutes from './handlers/instrument';
 import alarmLogRoutes from './handlers/alarmLog';
+import equipmentRoutes from './handlers/equipment';
 
 // Register only verified contracts. Unknown requests never fall through to HTTP.
 export default createMockAdapter([
@@ -15,5 +16,6 @@ export default createMockAdapter([
   ...dataVRoutes,
   ...roomRoutes,
   ...instrumentRoutes,
-  ...alarmLogRoutes
+  ...alarmLogRoutes,
+  ...equipmentRoutes
 ]);

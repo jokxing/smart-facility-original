@@ -11,7 +11,7 @@
                 <div class="detail-padding">
                     <DrawerNav :is-width="false" :deviceName="device.no" :name="device.name" :type="1" @handle="handleClose"/>
 
-                    <div class="detail-handle clearfix" v-if="$store.state.level">
+                    <div class="detail-handle clearfix" v-if="$store.state.level && !isDemo">
                         <div>
                             <el-switch
                                 v-model="closeSoundLightAlarm"
@@ -40,9 +40,23 @@
                             <el-button v-else class="margin-small-right" @click="handleDropdownMenu('UpdateAlarmRules')">{{ $t('hardware.alarmRules1') }}</el-button>
                         </div>
                     </div>
+                    <!-- Demo: only interval + threshold rules (no switches / use-status / other writes). -->
+                    <div class="detail-handle detail-handle-demo clearfix" v-else-if="$store.state.level && isDemo">
+                        <div style="margin-left: auto; margin-right: -10px">
+                            <el-button @click="handleDropdownMenu('UpdateExportTime')">
+                                {{ $t('hardware.exportTime') }}
+                            </el-button>
+                            <el-button @click="handleDropdownMenu('UpdateAlarmTime')">
+                                {{ $t('hardware.alarmTime') }}
+                            </el-button>
+                            <el-button class="margin-small-right" @click="handleDropdownMenu('UpdateAlarmRules')">
+                                {{ $t('hardware.alarmRules1') }}
+                            </el-button>
+                        </div>
+                    </div>
 
                     <el-descriptions :title="$t('common.basicInformation')">
-                        <template v-if="$store.state.level" slot="extra">
+                        <template v-if="$store.state.level && !isDemo" slot="extra">
                             <el-button
                                 v-if="device.wifiFlag"
                                 :disabled="device.status === 0"
@@ -66,6 +80,20 @@
                                 class="icon-information"
                                 @click="handleDropdownMenu('ReturnCommand')">
                                 &nbsp;{{ $t('hardware.returnCommand') }}
+                            </el-button>
+                            <el-button
+                                type="primary"
+                                class="icon-edit"
+                                @click="handleDropdownMenu('UpdateDepartment')">
+                                &nbsp;{{ $t('common.edit') }}
+                            </el-button>
+                        </template>
+                        <template v-else-if="$store.state.level && isDemo" slot="extra">
+                            <el-button
+                                v-if="device.wifiFlag"
+                                :disabled="device.status === 0"
+                                @click="handleDropdownMenu('NetworkConfiguration')">
+                                {{ $t('hardware.networkConfiguration') }}
                             </el-button>
                             <el-button
                                 type="primary"
@@ -156,8 +184,8 @@
 
                 <div class="detail-padding-nocolor">
                     <el-descriptions :title="$t('hardware.users')">
-                        <template slot="extra">
-                            <el-tooltip v-if="isOpenTwoSystem && isBinding" effect="dark"
+                        <template v-if="$store.state.level" slot="extra">
+                            <el-tooltip v-if="!isDemo && isOpenTwoSystem && isBinding" effect="dark"
                                         :content="$t('hardware.isOpenTwoSystem')" placement="top">
                                 <el-button class="icon-staff-settings button-disabled" type="primary">
                                     {{ $t('common.addPrincipal') }}
@@ -259,6 +287,8 @@
     import store from "@/store";
     import ChangeUseStatus from "@/views/device/components/changeUseStatus";
 
+    const isDemo = process.env.VUE_APP_DEMO === "true";
+
     export default {
         components: {
             DrawerNav,
@@ -309,6 +339,7 @@
         data() {
             const _this = this;
             return {
+                isDemo,
                 loading: false,
                 fullscreenLoading: false,
                 device: "",
@@ -507,12 +538,16 @@
             },
             // 声光报警
             handleAcoustoOpticAlarm() {
+                if (this.isDemo) {
+                    this.closeSoundLightAlarm = !this.closeSoundLightAlarm;
+                    this.$message.info('本阶段演示未开放声光报警开关。');
+                    return;
+                }
                 this.fullscreenLoading = true;
                 updateAlarmLight({
                     id: this.device.id,
                     closeSoundLightAlarm: this.closeSoundLightAlarm ? 0 : 1,
                 }).then((res) => {
-                    this.fullscreenLoading = false;
                     if (res.code) {
                         this.$message({
                             type: "success",
@@ -523,16 +558,24 @@
                         this.$message.error(res.message);
                         this.closeSoundLightAlarm = !this.closeSoundLightAlarm;
                     }
+                }).catch(() => {
+                    this.closeSoundLightAlarm = !this.closeSoundLightAlarm;
+                }).finally(() => {
+                    this.fullscreenLoading = false;
                 });
             },
             // 平台报警
             handlePlatformAlarm() {
+                if (this.isDemo) {
+                    this.closeSystemAlarm = !this.closeSystemAlarm;
+                    this.$message.info('本阶段演示未开放平台报警开关。');
+                    return;
+                }
                 this.fullscreenLoading = true;
                 updateCloseAlarmSystem({
                     id: this.device.id,
                     closeSystemAlarm: this.closeSystemAlarm ? 0 : 1,
                 }).then((res) => {
-                    this.fullscreenLoading = false;
                     if (res.code) {
                         this.$message({
                             type: "success",
@@ -543,10 +586,25 @@
                         this.$message.error(res.message);
                         this.closeSystemAlarm = !this.closeSystemAlarm;
                     }
+                }).catch(() => {
+                    this.closeSystemAlarm = !this.closeSystemAlarm;
+                }).finally(() => {
+                    this.fullscreenLoading = false;
                 });
             },
             // 右上角修改按钮
             handleDropdownMenu(e) {
+                const demoAllowed = {
+                    UpdateExportTime: true,
+                    UpdateAlarmTime: true,
+                    UpdateAlarmRules: true,
+                    UpdateDepartment: true,
+                    NetworkConfiguration: true
+                };
+                if (this.isDemo && !demoAllowed[e]) {
+                    this.$message.info('本阶段演示未开放硬件管理写操作。');
+                    return;
+                }
                 if (e == "StandbyPower") {
                     this.$refs[e].open(0, this.device.id);
                 } else {

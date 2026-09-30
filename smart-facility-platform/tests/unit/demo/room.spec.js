@@ -63,8 +63,9 @@ test('room detail and companion lists match RoomModule open contract', async () 
   expect((await client.get('/thingsUser/list', {params: {thingId: 950001, pageNum: 1, pageSize: 10}})).data.items.list).toEqual([]);
 });
 
-test('unknown room fails; write-style room APIs stay blocked', async () => {
+test('unknown room fails; room things/add rejects invalid hardware bind', async () => {
   await establishSession();
   expect((await client.get('/room/detail', {params: {id: 999999}})).data.code).toBe(0);
-  await expect(client.post('/room/things/add', {})).rejects.toMatchObject({code: 'MOCK_NOT_IMPLEMENTED'});
+  // Bound from hardware detail; empty/invalid body must not fake-succeed.
+  expect((await client.post('/room/things/add', {})).data.code).toBe(0);
 });

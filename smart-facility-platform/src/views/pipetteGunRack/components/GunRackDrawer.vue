@@ -9,10 +9,9 @@
         <div v-if="isDrawer" class="detail-container" v-loading="loading">
             <div class="detail-padding">
                 <drawer-nav :type="13" :deviceName="powerOutage.no" :name="powerOutage.name" @handle="handleClose" />
-                <div class="detail-handle clearfix">
+                <div v-if="$store.state.level && !isDemo" class="detail-handle clearfix">
                     <div>
                         <el-switch
-                            v-if="$store.state.level"
                             v-model="closeAlarmFlag"
                             class="margin-small-right"
                             :inactive-text="$t('hardware.acousticOptic')"
@@ -22,7 +21,7 @@
                 </div>
                 
                 <el-descriptions :title="$t('common.basicInformation')">
-                    <template #extra>
+                    <template v-if="!isDemo" #extra>
                         <el-button @click="$refs.voiceReminderSet.open(powerOutage)">{{ $t('labDevice.notScanHint') }}</el-button>
                         <el-button class="icon-information" @click="handleDropdownMenu(0,'ReturnCommand')">&nbsp;{{ $t('hardware.returnCommand') }}
                         </el-button>
@@ -71,7 +70,7 @@
 
             <div class="detail-padding-nocolor">
                 <el-descriptions :title="$t('hardware.users')">
-                    <template v-if="$store.state.level" slot="extra">
+                    <template v-if="$store.state.level && !isDemo" slot="extra">
                         <el-button class="icon-staff-settings" type="primary" @click="$refs.SetPrincipal.open(0, powerOutage.id, 'PIPETTE_GUN')">
                             &nbsp;{{ $t('common.addPrincipal') }}
                         </el-button>
@@ -124,7 +123,11 @@
     import {getEquipmentUserList} from "@/api/user";
     import { statusText, statusColor } from "@/utils/methods";
     import { GUNRACKSTATUS,GUNSTATUS,items } from "@/utils/constant"
+
+    const isDemo = process.env.VUE_APP_DEMO === "true";
+
     export default {
+        name: "GunRackDrawer",
         components: {
             DrawerNav,
             DetailStatusGarden,
@@ -154,6 +157,7 @@
         data() {
             const _this = this;
             return {
+                isDemo,
                 statusText,
                 statusColor,
                 GUNRACKSTATUS,
@@ -250,6 +254,11 @@
             },
             // 声光报警
             handleAlarmPowerOutage() {
+                if (isDemo) {
+                    this.closeAlarmFlag = !this.closeAlarmFlag;
+                    this.$message.info('本阶段演示未开放声光报警开关。');
+                    return;
+                }
                 updateAlarmLight({
                     id: this.powerOutage.id,
                     closeSoundLightAlarm: this.closeAlarmFlag ? 0 : 1

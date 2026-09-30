@@ -114,19 +114,26 @@
             },
             handleSubmit() {
                 this.disabled = true;
-                postMonitorIndicatorExceptionHandle(this.form).then(res => {
-                    this.disabled = false;
+                const payload = Object.assign({}, this.form);
+                if (payload.processDate != null && payload.processDate !== '') {
+                    payload.processDate = moment(payload.processDate).format('YYYY-MM-DD HH:mm:ss');
+                }
+                postMonitorIndicatorExceptionHandle(payload).then(res => {
                     if(res.code){
                         if(res.code === 1){
                             this.$message.success(this.form.process ? this.$t("common.editSuccess") : this.$t("hardware.exportTitle"));
                             this.dialogVisible = false;
                             this.$emit('handle')
                         }else{
-                            this.$message.error(res.messge)
+                            this.$message.error(res.messge || res.message)
                         }
                     }else{
-                        this.$message.error(res.messsage)
+                        this.$message.error(res.messsage || res.message)
                     }
+                }).catch(() => {
+                    this.$message.error(this.$t('common.requestTimeout') || '处理失败');
+                }).finally(() => {
+                    this.disabled = false;
                 })
             },
             handleClose() {

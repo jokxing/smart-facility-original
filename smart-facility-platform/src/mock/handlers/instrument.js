@@ -9,6 +9,7 @@ import {
   resetRoomInstrumentLayout,
   saveRoomInstrumentLayout
 } from '../fixtures/instrument';
+import {getEquipmentMonitorInfo} from '../fixtures/equipment';
 import {getDemoScenario, setDemoScenario} from '../fixtures/scenario';
 import {failure, protectedRoute, success} from '../response';
 
@@ -56,6 +57,12 @@ export default [
     return items ? success(items) : failure('演示设备不存在。');
   }),
   protectedRoute('GET', '/monitorIndicator/monitorInfo', ({params}) => {
+    // type 1 = smart hardware (DeviceDrawerNew); type 2 = lab instrument.
+    if (Number(params && params.type) === 1) {
+      const items = getEquipmentMonitorInfo(params);
+      if (items == null) return failure('演示硬件监测曲线参数无效。');
+      return success(items);
+    }
     const items = getDemoMonitorInfo(params);
     if (items == null) return failure('演示监测曲线参数无效。');
     return success(items);

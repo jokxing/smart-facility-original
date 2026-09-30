@@ -13,7 +13,7 @@
       <div v-if="isDrawer" ref="alerterDetail" class="detail-container">
         <div class="detail-padding">
           <drawer-nav :deviceName="alertor.no" :name="alertor.name" :type="1" @handle="handleClose"/>
-          <div v-if="$store.state.level" class="detail-handle clearfix">
+          <div v-if="$store.state.level && !isDemo" class="detail-handle clearfix">
             <div>
               <el-button
                   :disabled="!removeAlarm || alertor.status === 0"
@@ -45,7 +45,7 @@
             </div>
           </div>
           <el-descriptions :title="$t('common.basicInformation')">
-            <template v-if="$store.state.level" #extra>
+            <template v-if="$store.state.level && !isDemo" #extra>
               <el-button @click="handleAlerterDeepAlarmTime">{{ $t('hardware.updateBeepAlarmTime') }}</el-button>
               <el-button class="icon-information" @click="handleDropdownMenu('ReturnCommand')">&nbsp;{{ $t('hardware.returnCommand') }}
               </el-button>
@@ -91,10 +91,10 @@
             </div>
           </div>
         </div>
-        <div v-if="alerterType(alertor.no)" class="detail-padding">
+        <div v-if="!isDemo && alerterType(alertor.no)" class="detail-padding">
           <common :alerter-id.sync="alertor.id" @handle="handleDeviceDrawer"/>
         </div>
-        <div v-else>
+        <div v-else-if="!isDemo">
           <multifunction
               v-if="alertor.id"
               ref="multifunction"
@@ -144,6 +144,8 @@ import UpdateAlarmTime from "@/views/device/components/UpdateAlarmTime";
 import {judgeAlerter, signalStateFilter} from "@/utils/methods";
 import {mapMutations} from "vuex";
 import DeviceStatusGarden from "@c/DeviceStatusGarden/index";
+
+const isDemo = process.env.VUE_APP_DEMO === "true";
 
 let time;
 export default {
@@ -206,6 +208,7 @@ export default {
   },
   data() {
     return {
+      isDemo,
       alertor: {},
       removeAlarm: true,
       closeSystemAlarm: false,

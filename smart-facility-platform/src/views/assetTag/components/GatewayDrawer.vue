@@ -8,7 +8,7 @@
         <div class="detail-padding" v-if="isDrawer" v-loading="loading">
             <drawer-nav :type="16" :deviceName="detail.no" :name="detail.name" @handle="handleClose" />
             <el-descriptions :title="$t('common.basicInformation')">
-                <template v-if="$store.state.level" slot="extra">
+                <template v-if="$store.state.level && (!isDemo || detail.wifiFlag)" slot="extra">
                     <el-button
                         v-if="detail.wifiFlag"
                         :disabled="detail.status === 0"
@@ -74,7 +74,11 @@
     import { statusText } from "@/utils/methods";
     import { getDeviceDetail } from "@/api/device";
     import { postLabelBindingList } from "@/api/assetTag";
+
+    const isDemo = process.env.VUE_APP_DEMO === "true";
+
     export default {
+        name: "AssetGatewayDrawer",
         components: {
             DrawerNav,
             DetailStatusGarden,
@@ -96,6 +100,7 @@
         data() {
             const _this = this;
             return {
+                isDemo,
                 GUNRACKSTATUS,
                 ASSETTAGSTATUS,
                 statusText,

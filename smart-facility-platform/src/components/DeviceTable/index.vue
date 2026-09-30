@@ -196,6 +196,20 @@ export default {
             this.$emit("handle", val);
         },
         handleShowDrawer(item) {
+            if (process.env.VUE_APP_DEMO === 'true') {
+                const code = Number(item.equipmentTypeCode);
+                // 0/10 → DeviceDrawerNew；7 Alerter；8 Power；14 Signal；13 GunRack；16 Gateway
+                const ok = ((code === 0 || code === 10) && item.openTwoSystem)
+                    || code === 7
+                    || (code === 8 && item.openTwoSystem)
+                    || code === 14
+                    || code === 13
+                    || code === 16;
+                if (!ok) {
+                    this.$message.info('当前硬件类型或历史版本详情尚未接入演示。');
+                    return;
+                }
+            }
             // console.log(item.equipmentTypeCode)
             switch (item.equipmentTypeCode) {
                 case 10:

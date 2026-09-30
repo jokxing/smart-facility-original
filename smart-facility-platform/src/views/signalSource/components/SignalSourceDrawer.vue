@@ -11,7 +11,7 @@
         <div class="detail-padding">
           <drawer-nav :deviceName="signal.no" :name="signal.name" :type="1" @handle="handleClose"/>
           <el-descriptions :title="$t('common.basicInformation')">
-            <template #extra>
+            <template v-if="!isDemo" #extra>
               <el-button type="primary" class="icon-edit" @click="handleDropdownMenu('UpdateDepartment')">&nbsp;{{ $t('common.edit') }}</el-button>
             </template>
           </el-descriptions>
@@ -43,7 +43,7 @@
         <div class="detail-padding-nocolor">
           <el-descriptions
               :title="$t('hardware.newStatus') + ' （'+$t('hardware.detectionDate')+'：'+ (signal.reportDate ?  signal.reportDate : '') +'）'">
-            <template slot="extra">
+            <template v-if="!isDemo" slot="extra">
               <el-button class="icon-refresh" @click="handleInit()">&nbsp;{{ $t('hardware.reset') }}</el-button>
             </template>
           </el-descriptions>
@@ -64,8 +64,8 @@
         </div>
         <div class="detail-padding-nocolor">
           <el-descriptions :title="$t('hardware.bindThings')">
-            <template slot="extra">
-              <el-button v-if="$store.state.level" type="primary" @click="handleBindingEquipment">{{ $t("common.bindDevice") }}</el-button>
+            <template v-if="$store.state.level && !isDemo" slot="extra">
+              <el-button type="primary" @click="handleBindingEquipment">{{ $t("common.bindDevice") }}</el-button>
             </template>
           </el-descriptions>
           <el-table
@@ -82,16 +82,18 @@
             </el-table-column>
             <el-table-column fixed :label="$t('common.name')" sortable>
               <template v-slot="scope">
-                <a @click="handleShowDrawer(scope.row)">
+                <a v-if="!isDemo" @click="handleShowDrawer(scope.row)">
                   {{ scope.row.name }}
                 </a>
+                <span v-else>{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <el-table-column fixed :label="$t('common.no')" prop="no" sortable>
               <template v-slot="scope">
-                <a @click="handleShowDrawer(scope.row)">
+                <a v-if="!isDemo" @click="handleShowDrawer(scope.row)">
                   {{ scope.row.no }}
                 </a>
+                <span v-else>{{ scope.row.no }}</span>
               </template>
             </el-table-column>
             <el-table-column :label="$t('hardware.value')" min-width="240">
@@ -105,7 +107,7 @@
                 <div>{{ $t('hardware.kwh') }}：&nbsp;{{ scope.row.battery }} V</div>
               </template>
             </el-table-column>
-            <el-table-column fixed="right" :label="$t('common.handle')" min-width="100">
+            <el-table-column v-if="!isDemo" fixed="right" :label="$t('common.handle')" min-width="100">
               <template v-slot="scope">
                 <el-button type="text" @click="postDeviceSignalUnbind(scope.row)">{{ $t("common.unBind") }}</el-button>
               </template>
@@ -147,6 +149,8 @@ import DeviceMonitorMessage from "@c/DeviceMonitorMessage/index";
 import UpdateDepartment from "@/views/device/components/UpdateDepartment";
 import DeviceStatusGarden from "@c/DeviceStatusGarden/index";
 
+const isDemo = process.env.VUE_APP_DEMO === "true";
+
 let time;
 export default {
   name: "SignalSourceDrawer",
@@ -176,6 +180,7 @@ export default {
   },
   data() {
     return {
+      isDemo,
       signal: {},
       bingThings: [],
       interval: 4,

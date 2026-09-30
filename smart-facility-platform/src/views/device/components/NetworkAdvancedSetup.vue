@@ -3,6 +3,7 @@
     <el-form-item  v-if="!networkType" :label="$t('hardware.networkType')">
       <el-select
           v-model="object.securityMode"
+          :disabled="disabled"
           :style="styleWidth"
           :placeholder="$t('common.placeholder')">
         <el-option
@@ -15,6 +16,7 @@
     <el-form-item :label-width="labelWidth" v-if="!networkType" :label="$t('hardware.networkType2')">
       <el-select
           v-model="object.encryptionType"
+          :disabled="disabled"
           :style="styleWidth"
           :placeholder="$t('common.placeholder')">
         <el-option
@@ -27,6 +29,7 @@
     <el-form-item :label-width="labelWidth" :label="$t('hardware.dhcp')">
       <el-select
           v-model="object.dhcp"
+          :disabled="disabled"
           :style="styleWidth"
           :placeholder="$t('common.placeholder')">
         <el-option :label="$t('hardware.dhcp1')" :value="1"></el-option>
@@ -35,16 +38,20 @@
     </el-form-item>
     <div class="advance-setup" v-if="object.dhcp == 0">
       <el-form-item :label-width="labelWidth" :label="$t('hardware.ipAdress')">
-        <ip-input :ip="object.ip" @handle="handleIp"/>
+        <el-input v-if="disabled" :value="object.ip" disabled class="select-change-p"/>
+        <ip-input v-else :ip="object.ip" @handle="handleIp"/>
       </el-form-item>
       <el-form-item :label-width="labelWidth" :label="$t('hardware.submask')">
-        <ip-input :ip="object.submask" @handle="handleSubmask"/>
+        <el-input v-if="disabled" :value="object.submask" disabled class="select-change-p"/>
+        <ip-input v-else :ip="object.submask" @handle="handleSubmask"/>
       </el-form-item>
       <el-form-item :label-width="labelWidth" :label="$t('hardware.gateway')">
-        <ip-input :ip="object.gateway" @handle="handleGateway"/>
+        <el-input v-if="disabled" :value="object.gateway" disabled class="select-change-p"/>
+        <ip-input v-else :ip="object.gateway" @handle="handleGateway"/>
       </el-form-item>
       <el-form-item :label-width="labelWidth" label="DNS">
-        <ip-input :ip="object.dns" @handle="handleDns"/>
+        <el-input v-if="disabled" :value="object.dns" disabled class="select-change-p"/>
+        <ip-input v-else :ip="object.dns" @handle="handleDns"/>
       </el-form-item>
     </div>
   </el-form>
@@ -86,6 +93,10 @@ export default {
     networkType: {
       type: [Number, String],
       default: 0
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

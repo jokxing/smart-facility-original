@@ -46,10 +46,10 @@ test('login and bootstrap preserve the exact contracts consumed by existing page
   const info = await establishSession();
   expect(info.items).toMatchObject({loginId: 'demo', roleId: 1});
   expect(hasDemoSession()).toBe(true);
-  expect((await client.get('/department/list')).data.items.list).toHaveLength(1);
+  expect((await client.get('/department/list')).data.items.list).toHaveLength(2);
   expect(Array.isArray((await client.get('/instrumentCategoryInfo/superior/cat')).data.items)).toBe(true);
   expect((await client.get('/role/menu')).data.items[0].subMenu[0]).toHaveProperty('path');
-  expect((await client.get('/equipment/dashboard')).data.items).toEqual({total: 0, alarmCount: 0});
+  expect((await client.get('/role/menu')).data.items[0].subMenu[0].path).toBe('/lhd/hardware/home');
   expect((await client.get('/user/language', {params: {code: 2}})).data.code).toBe(1);
 });
 

@@ -1,7 +1,29 @@
-import {DEMO_CREDENTIALS, DEMO_USER, DEMO_DEPARTMENTS, DEMO_CATEGORIES, DEMO_MENUS, DEMO_OVERVIEW} from '../fixtures/auth';
+import {DEMO_CREDENTIALS, DEMO_USER, DEMO_STAFF, DEMO_DEPARTMENTS, DEMO_CATEGORIES, DEMO_MENUS} from '../fixtures/auth';
 import {readSession, saveSession, newSession, authenticateSession} from '../session';
 import {createCaptchaImage} from '../captcha';
 import {success, failure, protectedRoute} from '../response';
+
+function listDemoStaff(params = {}) {
+  const pageNum = Math.max(1, Number(params.pageNum) || 1);
+  const pageSize = Math.max(1, Number(params.pageSize) || 20);
+  let list = DEMO_STAFF.map(item => ({...item}));
+  if (params.departmentId != null && params.departmentId !== '' && params.departmentId !== '0') {
+    list = list.filter(item => Number(item.departmentId) === Number(params.departmentId));
+  }
+  if (params.keyword != null && String(params.keyword).trim() !== '') {
+    const q = String(params.keyword).trim().toLowerCase();
+    list = list.filter(item =>
+      String(item.name).toLowerCase().includes(q) || String(item.loginId).toLowerCase().includes(q)
+    );
+  }
+  const start = (pageNum - 1) * pageSize;
+  return {
+    list: list.slice(start, start + pageSize),
+    total: list.length,
+    pageNum,
+    pageSize
+  };
+}
 
 export default [
   {method: 'GET', path: '/captchaCode', handle: ({params}) => {
@@ -23,6 +45,7 @@ export default [
     return success({token: authenticateSession(session).token});
   }},
   protectedRoute('GET', '/user/info', () => success(DEMO_USER)),
+  protectedRoute('GET', '/user/list', ({params}) => success(listDemoStaff(params || {}))),
   protectedRoute('POST', '/logout', () => {
     // The existing logout UI still reads USERINFO before clearing localStorage.
     saveSession({...readSession(), authenticated: false, token: ''});
@@ -32,7 +55,7 @@ export default [
   protectedRoute('GET', '/role/menu', () => success(DEMO_MENUS)),
   protectedRoute('GET', '/department/list', () => success({list: DEMO_DEPARTMENTS})),
   protectedRoute('GET', '/instrumentCategoryInfo/superior/cat', () => success(DEMO_CATEGORIES)),
-  protectedRoute('GET', '/equipment/dashboard', () => success(DEMO_OVERVIEW)),
+  // /equipment/dashboard lives in handlers/equipment.js (same seed as sort/list).
   // Layout Navbar / MessageNotification shell — empty stubs so SaaS chrome can mount.
   protectedRoute('GET', '/company/getLogo', () => success({logoUrl: ''})),
   protectedRoute('GET', '/activiti/unread', () => success({activitiUnread: 0, notifyUnread: 0})),
