@@ -48,8 +48,9 @@ test('login and bootstrap preserve the exact contracts consumed by existing page
   expect(hasDemoSession()).toBe(true);
   expect((await client.get('/department/list')).data.items.list).toHaveLength(2);
   expect(Array.isArray((await client.get('/instrumentCategoryInfo/superior/cat')).data.items)).toBe(true);
-  expect((await client.get('/role/menu')).data.items[0].subMenu[0]).toHaveProperty('path');
-  expect((await client.get('/role/menu')).data.items[0].subMenu[0].path).toBe('/lhd/hardware/home');
+  const menus = (await client.get('/role/menu')).data.items;
+  expect(menus[0].subMenu[0]).toHaveProperty('path');
+  expect(menus.map(menu => menu.path)).toEqual(expect.arrayContaining(['/ld/labdevice', '/lhd/hardware/home']));
   expect((await client.get('/user/language', {params: {code: 2}})).data.code).toBe(1);
 });
 

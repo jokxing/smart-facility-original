@@ -41,7 +41,7 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div v-if="!isDemo">
 <!--                        <el-button-->
 <!--                            v-if="isLimit"-->
 <!--                            class="margin-small-right"-->
@@ -73,7 +73,7 @@
                 </div>
 
                 <el-descriptions :title="$t('common.basicInformation')">
-                    <template #extra>
+                    <template v-if="!isDemo" #extra>
                         <el-button type="primary" class="icon-edit" @click="handleEdit(detail)">&nbsp;{{
                                 $t('common.edit')
                             }}
@@ -153,7 +153,7 @@
                                 <span :class="{'abnormal': detail.monitorStatus === 3}">{{
                                         statusText(detail.monitorStatus, ASSETTAGSTATUS) || $t('common.notMessage')
                                     }}</span>
-                                <el-link type="primary" v-if="detail.labelId" :underline="false"
+                                <el-link type="primary" v-if="!isDemo && detail.labelId" :underline="false"
                                          @click="handleUnbindLabel"> &nbsp;&nbsp;{{ $t('common.unBind') }}
                                 </el-link>
                             </el-descriptions-item>
@@ -168,7 +168,7 @@
                     </div>
                 </div>
 
-                <el-row v-if="detail">
+                <el-row v-if="detail && !isDemo">
                     <el-popover
                         placement="right"
                         width="550"
@@ -467,6 +467,7 @@ export default {
             statusText,
             getStatusColor,
             isLimit: JSON.parse(localStorage.getItem('USERINFO')).roleId <= 4,
+            isDemo: process.env.VUE_APP_DEMO === 'true',
             loading: false,
             isFullcalendar: false,
             isStandbyPower: false,

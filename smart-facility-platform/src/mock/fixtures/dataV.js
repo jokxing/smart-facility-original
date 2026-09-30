@@ -3,6 +3,7 @@ import {DEMO_FLOOR_ROOMS} from './floor';
 import {DEMO_USER} from './auth';
 import {listInstrumentsByRoomId, listInstrumentsForFloorRooms} from './instrument';
 import {getDemoScenario, statusForScenario} from './scenario';
+import {EQUIPMENT_TYPE_META} from './equipment';
 
 /**
  * FloorDataV (POST /map/floor/screenV1) projection from shared space/room seeds.
@@ -109,8 +110,9 @@ export function listFloorScreen(body = {}) {
 
 export {listAlarmThingStatistics, listAlarmThingSensorsStatistics} from './alarm';
 
+/** SearchForm related-hardware select: {code, name} from EQUIPMENT_TYPE_META. */
 export function listBindEquipmentTypes() {
-  return [];
+  return EQUIPMENT_TYPE_META.map(meta => ({code: meta.type, name: meta.name}));
 }
 
 /**

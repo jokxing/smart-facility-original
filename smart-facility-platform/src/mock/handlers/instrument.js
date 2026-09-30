@@ -1,10 +1,13 @@
 import {
+  DEMO_INSTRUMENTS,
   emptyInstrumentSchedulerPage,
   emptyMonitorHistoryPage,
   getDemoInstrumentDetail,
   getDemoMonitorFlag,
   getDemoMonitorInfo,
   getDemoOpenMonitorFlag,
+  getInstrumentDashboardNew,
+  listInstruments,
   listRoonInstrumentInfo,
   resetRoomInstrumentLayout,
   saveRoomInstrumentLayout
@@ -13,8 +16,13 @@ import {getEquipmentMonitorInfo} from '../fixtures/equipment';
 import {getDemoScenario, setDemoScenario} from '../fixtures/scenario';
 import {failure, protectedRoute, success} from '../response';
 
-// Room instrument layout + device read-only detail + MonitorInfo series.
-// historyPage is an empty stub so the dialog does not 501; export remains blocked.
+const WRITE_BLOCKED = '本阶段演示未开放仪器写操作。';
+const removeRoutes = DEMO_INSTRUMENTS.map(item =>
+  protectedRoute('POST', `/instrument/remove/${item.id}`, () => failure(WRITE_BLOCKED))
+);
+
+// Room instrument layout + device list/dashboard + read-only detail + MonitorInfo series.
+// historyPage is an empty stub so the dialog does not 501; writes are explicitly rejected.
 export default [
   protectedRoute('POST', '/map/element/getRoonInstrumentInfoList', ({params}) => {
     return success(listRoonInstrumentInfo(params.roomId));
@@ -38,10 +46,19 @@ export default [
     }
     return success({scenario: next});
   }),
+  protectedRoute('POST', '/instrument/list', ({body}) => success(listInstruments(body || {}))),
+  protectedRoute('GET', '/instrument/dashboard/new', () => success(getInstrumentDashboardNew())),
   protectedRoute('GET', '/instrument/detail', ({params}) => {
     const detail = getDemoInstrumentDetail(params.id);
     return detail ? success(detail) : failure('演示设备不存在。');
   }),
+  protectedRoute('POST', '/instrument/add', () => failure(WRITE_BLOCKED)),
+  protectedRoute('POST', '/instrument/update/basic', () => failure(WRITE_BLOCKED)),
+  protectedRoute('POST', '/instrument/batch/delete', () => failure(WRITE_BLOCKED)),
+  protectedRoute('POST', '/instrument/batch/update', () => failure(WRITE_BLOCKED)),
+  protectedRoute('POST', '/instrument/export', () => failure(WRITE_BLOCKED)),
+  protectedRoute('GET', '/instrument/unbind', () => failure(WRITE_BLOCKED)),
+  ...removeRoutes,
   protectedRoute('GET', '/monitorIndicator/getOpenMonitorFlag', ({params}) => {
     if (Number(params.objType) !== 2) {
       return failure('本切片仅支持设备监测标签。');

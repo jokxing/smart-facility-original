@@ -7,6 +7,11 @@ import roomRoutes from './handlers/room';
 import instrumentRoutes from './handlers/instrument';
 import alarmLogRoutes from './handlers/alarmLog';
 import equipmentRoutes from './handlers/equipment';
+import {setBoundEquipmentTypesResolver} from './fixtures/instrument';
+import {listBoundEquipmentTypesForInstrument} from './fixtures/equipment';
+
+// Wire instrument list objType filter after both fixtures load (avoids circular import).
+setBoundEquipmentTypesResolver(listBoundEquipmentTypesForInstrument);
 
 // Register only verified contracts. Unknown requests never fall through to HTTP.
 export default createMockAdapter([

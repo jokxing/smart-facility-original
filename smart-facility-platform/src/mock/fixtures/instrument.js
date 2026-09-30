@@ -25,20 +25,35 @@ function floorPctToRoomLocal(roomId, pctLeft, pctTop) {
   return {x: (fx - bounds.minX) * frame.scale + frame.x, y: (fy - bounds.minY) * frame.scale + frame.y};
 }
 
-/** Shared entities — one device belongs to exactly one room. */
+const DEPT_OPS = 900101;
+const DEPT_RD = 900102;
+const TYPE_NAME = '演示设备';
+
+/** Room → garden/building/floor for list address filters (floor 930001 only). */
+export const INSTRUMENT_ROOM_SPACE = Object.freeze({
+  950001: {gardenId: 910001, buildingId: 920001, floorId: 930001, roomName: '演示房间 A'},
+  950002: {gardenId: 910001, buildingId: 920001, floorId: 930001, roomName: '演示走廊'},
+  950003: {gardenId: 910001, buildingId: 920001, floorId: 930001, roomName: '演示房间 B'}
+});
+
+/**
+ * Shared entities — one device belongs to exactly one room.
+ * departmentId: mostly ops; a few RD rows so department filter can empty/partial-match.
+ * daysAgo: staggered createDate for client/table sort display.
+ */
 export const DEMO_INSTRUMENTS = Object.freeze([
-  {id: 970001, name: '演示培养箱', roomId: 950001, assetKey: 'demo-device-incubator', types: 1},
-  {id: 970002, name: '演示冷藏柜', roomId: 950001, assetKey: 'demo-device-lab-refrigerator', types: 1},
-  {id: 970003, name: '演示温湿度仪', roomId: 950003, assetKey: 'demo-device-monitor-terminal', types: 1},
-  {id: 970004, name: '演示检测仪 A', roomId: 950001, assetKey: 'demo-device-analyzer', types: 1},
-  {id: 970005, name: '演示示波器 A', roomId: 950001, assetKey: 'demo-device-oscilloscope', types: 1},
-  {id: 970006, name: '演示设备机柜 B', roomId: 950003, assetKey: 'demo-device-equipment-rack', types: 1},
-  {id: 970007, name: '演示检测仪 B', roomId: 950003, assetKey: 'demo-device-analyzer', types: 1},
-  {id: 970008, name: '演示示波器 B', roomId: 950003, assetKey: 'demo-device-oscilloscope', types: 1},
-  {id: 970009, name: '演示培养箱 B', roomId: 950003, assetKey: 'demo-device-incubator', types: 1},
-  {id: 970010, name: '演示冷藏柜 B', roomId: 950003, assetKey: 'demo-device-lab-refrigerator', types: 1},
-  {id: 970011, name: '演示监测终端 A', roomId: 950001, assetKey: 'demo-device-monitor-terminal', types: 1},
-  {id: 970012, name: '演示设备机柜 A', roomId: 950001, assetKey: 'demo-device-equipment-rack', types: 1}
+  {id: 970001, name: '演示培养箱', roomId: 950001, assetKey: 'demo-device-incubator', types: 1, departmentId: DEPT_OPS, daysAgo: 29},
+  {id: 970002, name: '演示冷藏柜', roomId: 950001, assetKey: 'demo-device-lab-refrigerator', types: 1, departmentId: DEPT_OPS, daysAgo: 28},
+  {id: 970003, name: '演示温湿度仪', roomId: 950003, assetKey: 'demo-device-monitor-terminal', types: 1, departmentId: DEPT_OPS, daysAgo: 27},
+  {id: 970004, name: '演示检测仪 A', roomId: 950001, assetKey: 'demo-device-analyzer', types: 1, departmentId: DEPT_OPS, daysAgo: 26},
+  {id: 970005, name: '演示示波器 A', roomId: 950001, assetKey: 'demo-device-oscilloscope', types: 1, departmentId: DEPT_OPS, daysAgo: 25},
+  {id: 970006, name: '演示设备机柜 B', roomId: 950003, assetKey: 'demo-device-equipment-rack', types: 1, departmentId: DEPT_OPS, daysAgo: 24},
+  {id: 970007, name: '演示检测仪 B', roomId: 950003, assetKey: 'demo-device-analyzer', types: 1, departmentId: DEPT_RD, daysAgo: 23},
+  {id: 970008, name: '演示示波器 B', roomId: 950003, assetKey: 'demo-device-oscilloscope', types: 1, departmentId: DEPT_RD, daysAgo: 22},
+  {id: 970009, name: '演示培养箱 B', roomId: 950003, assetKey: 'demo-device-incubator', types: 1, departmentId: DEPT_RD, daysAgo: 21},
+  {id: 970010, name: '演示冷藏柜 B', roomId: 950003, assetKey: 'demo-device-lab-refrigerator', types: 1, departmentId: DEPT_OPS, daysAgo: 20},
+  {id: 970011, name: '演示监测终端 A', roomId: 950001, assetKey: 'demo-device-monitor-terminal', types: 1, departmentId: DEPT_OPS, daysAgo: 19},
+  {id: 970012, name: '演示设备机柜 A', roomId: 950001, assetKey: 'demo-device-equipment-rack', types: 1, departmentId: DEPT_OPS, daysAgo: 18}
 ]);
 
 const LAYOUT_SEEDS = Object.freeze([
@@ -180,9 +195,172 @@ export function clearAllRoomLayoutOverrides() {
 }
 
 function roomNameForId(roomId) {
-  if (Number(roomId) === 950001) return '演示房间 A';
-  if (Number(roomId) === 950003) return '演示房间 B';
-  return '';
+  const space = INSTRUMENT_ROOM_SPACE[Number(roomId)];
+  return space ? space.roomName : '';
+}
+
+function departmentNameForId(departmentId) {
+  return Number(departmentId) === DEPT_RD ? '演示研发部' : '演示运维部';
+}
+
+function instrumentNo(id) {
+  return 'DEMO-EQ-' + id;
+}
+
+function createDateFor(entity) {
+  const days = entity.daysAgo == null ? 29 : Number(entity.daysAgo);
+  return formatDemoDateTime(DEMO_NOW_MS - days * 86400000);
+}
+
+/** Shared list/detail row fields from one instrument entity + current scenario. */
+export function buildInstrumentRow(entity) {
+  const {status, senorStatus} = statusForScenario(getDemoScenario());
+  return {
+    id: entity.id,
+    name: entity.name,
+    no: instrumentNo(entity.id),
+    types: entity.types,
+    detailType: 1,
+    departmentId: entity.departmentId,
+    departmentName: departmentNameForId(entity.departmentId),
+    status,
+    bingStatus: senorStatus,
+    brand: '演示品牌',
+    managerName: '演示负责人',
+    price: 0,
+    model: 'DEMO-M1',
+    typeName: TYPE_NAME,
+    roomId: entity.roomId,
+    roomName: roomNameForId(entity.roomId),
+    userName: '演示账号',
+    createDate: createDateFor(entity),
+    companyName: '智慧设施演示空间',
+    buyDate: '',
+    nextMaintenanceDate: '',
+    gradeName: '',
+    labelNo: '',
+    monitorStatus: null,
+    logoUrl: '',
+    qrUrl: '',
+    labelId: null,
+    standbyPowerFlag: false,
+    bindingDeviceId: null,
+    openTwoSystem: true
+  };
+}
+
+function asIdList(value) {
+  if (value == null || value === '') return [];
+  const raw = Array.isArray(value) ? value : [value];
+  return raw.map(Number).filter(n => !Number.isNaN(n));
+}
+
+function matchRunningStatus(status, filter) {
+  const key = Number(filter);
+  if (Number.isNaN(key)) return true;
+  if (key === 1) return Number(status) === 1;
+  if (key === 0) return [0, -1, 2, -100].includes(Number(status));
+  if (key === 4) return [3, 4].includes(Number(status));
+  return Number(status) === key;
+}
+
+function matchSensorStatus(bingStatus, filter) {
+  const key = Number(filter);
+  if (Number.isNaN(key)) return true;
+  if (key === 1) return Number(bingStatus) === 1;
+  if (key === 2) return [2, -1].includes(Number(bingStatus));
+  if (key === 3) {
+    const n = Number(bingStatus);
+    return n !== 1 && n !== 2 && n !== -1;
+  }
+  return Number(bingStatus) === key;
+}
+
+function matchSpace(entity, body) {
+  const space = INSTRUMENT_ROOM_SPACE[entity.roomId];
+  if (!space) return false;
+  const roomIds = asIdList(body.roomIdList);
+  if (roomIds.length) return roomIds.includes(entity.roomId);
+  const floorIds = asIdList(body.floorIds);
+  if (floorIds.length) return floorIds.includes(space.floorId);
+  if (body.buildingId != null && String(body.buildingId).trim() !== '') {
+    return Number(body.buildingId) === space.buildingId;
+  }
+  if (body.gardenId != null && String(body.gardenId).trim() !== '') {
+    return Number(body.gardenId) === space.gardenId;
+  }
+  return true;
+}
+
+/**
+ * Optional hook: bound hardware type codes for an instrument (objType filter).
+ * Injected from equipment fixture to avoid circular imports at module load.
+ */
+let boundEquipmentTypesForInstrument = () => [];
+
+export function setBoundEquipmentTypesResolver(fn) {
+  boundEquipmentTypesForInstrument = typeof fn === 'function' ? fn : (() => []);
+}
+
+function matchObjType(instrumentId, objType) {
+  if (objType == null || objType === '') return true;
+  const code = Number(objType);
+  if (Number.isNaN(code)) return true;
+  return boundEquipmentTypesForInstrument(instrumentId).includes(code);
+}
+
+/**
+ * POST /instrument/list — labDevice table; derived from DEMO_INSTRUMENTS only.
+ */
+export function listInstruments(body = {}) {
+  const pageNum = Math.max(1, Number(body.pageNum) || 1);
+  const pageSize = Math.max(1, Number(body.pageSize) || 10);
+  const keyword = String(body.keyword || '').trim().toLowerCase();
+  const deptIds = asIdList(body.departmentIdList);
+  const typesList = asIdList(body.typesList);
+  const statusFilter = body.status;
+  const sensorFilter = body.sensorStatus;
+
+  const rows = DEMO_INSTRUMENTS
+    .filter(entity => matchSpace(entity, body))
+    .filter(entity => !deptIds.length || deptIds.includes(Number(entity.departmentId)))
+    .filter(entity => !typesList.length || typesList.includes(Number(entity.types)))
+    .filter(entity => matchObjType(entity.id, body.objType))
+    .map(buildInstrumentRow)
+    .filter(row => {
+      if (!keyword) return true;
+      return [row.name, row.no, row.roomName].some(v => String(v).toLowerCase().includes(keyword));
+    })
+    .filter(row => statusFilter == null || statusFilter === '' || matchRunningStatus(row.status, statusFilter))
+    .filter(row => sensorFilter == null || sensorFilter === '' || matchSensorStatus(row.bingStatus, sensorFilter));
+
+  const start = (pageNum - 1) * pageSize;
+  return {
+    list: rows.slice(start, start + pageSize),
+    total: rows.length,
+    pageNum,
+    pageSize
+  };
+}
+
+/**
+ * GET /instrument/dashboard/new — gather cards; universe counts (not list filters).
+ */
+export function getInstrumentDashboardNew() {
+  const rows = DEMO_INSTRUMENTS.map(buildInstrumentRow);
+  const runNormal = rows.filter(r => Number(r.status) === 1).length;
+  const runAbnormal = rows.filter(r => [0, -1, 2, -100].includes(Number(r.status))).length;
+  const runRest = rows.filter(r => [3, 4].includes(Number(r.status))).length;
+  const paramNormal = rows.filter(r => Number(r.bingStatus) === 1).length;
+  const paramAbnormal = rows.filter(r => [2, -1].includes(Number(r.bingStatus))).length;
+  const paramRest = rows.length - paramNormal - paramAbnormal;
+  return {
+    totalCount: rows.length,
+    data: [
+      {linaType: 5, normalCount: runNormal, abnormalCount: runAbnormal, restsCount: runRest},
+      {linaType: 6, normalCount: paramNormal, abnormalCount: paramAbnormal, restsCount: paramRest}
+    ]
+  };
 }
 
 /**
@@ -206,38 +384,7 @@ export function sensorReadingForInstrument(elementId) {
  */
 export function getDemoInstrumentDetail(id) {
   const entity = instrumentById(id);
-  if (!entity) return null;
-  const {status, senorStatus} = statusForScenario(getDemoScenario());
-  return {
-    id: entity.id,
-    name: entity.name,
-    no: 'DEMO-EQ-' + entity.id,
-    types: entity.types,
-    detailType: 1,
-    status,
-    bingStatus: senorStatus,
-    brand: '演示品牌',
-    departmentName: '演示运维部',
-    managerName: '演示负责人',
-    price: 0,
-    model: 'DEMO-M1',
-    typeName: '演示设备',
-    roomId: entity.roomId,
-    roomName: roomNameForId(entity.roomId),
-    userName: '演示账号',
-    createDate: '2026-09-01 10:00:00',
-    companyName: '智慧设施演示空间',
-    buyDate: '',
-    nextMaintenanceDate: '',
-    gradeName: '',
-    labelNo: '',
-    monitorStatus: null,
-    logoUrl: '',
-    qrUrl: '',
-    labelId: null,
-    standbyPowerFlag: false,
-    bindingDeviceId: null
-  };
+  return entity ? buildInstrumentRow(entity) : null;
 }
 
 /**

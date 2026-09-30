@@ -1213,3 +1213,47 @@
 - 验证限制：没有运行生产构建或全站浏览器回归；仍只在本地 Edge 1440×900 验收。规则保存不等于真实设备下发；状态/新事件自动重算、房间/仪器反向绑定联动、真实通信不在此次范围。
 - 文档：复盘报告与 1B 契约补收尾结论；next-task-prompt.md 已重写为设备管理 2A，目标为 /ld/labdevice 的共享仪器列表、筛选统计及已有详情入口。未开始 2A，未暂存/提交/推送。
 - 如提交整个当前硬件工作区，建议：feat: 接通智能硬件演示并完善监测语义与配置绑定校验。若只提交本轮收尾，建议：fix: 修复智能硬件指标语义与配置绑定一致性。
+
+## 追加：设备管理 2A 统一仪器列表（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（设备管理 2A）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| 契约 | `docs/device-management-2a-contract.md` |
+| Mock | `listInstruments` / `getInstrumentDashboardNew`；写接口明确拒绝；分类补 `types`+`childrenList`；`bindEquipmentType` 返回硬件类型；房间 keyword 搜索 |
+| Handler | `POST /instrument/list`；`GET /instrument/dashboard/new`；add/update/remove/batch/export/unbind 拒绝 |
+| 导航 | `permission` 放行 `/ld/labdevice`；`DEMO_MENUS` 增加设备管理 |
+| UI | 列表/详情 demo 隐藏写入口；复用 `LabDeviceDrawer` 只读 |
+| 测试 | `instrument-list.spec.js`；浏览器 `check-demo-device-2a.cjs` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 2B 编辑闭环 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：15 套 / **93** 项通过。
+- `DEMO_PORT=8088 npm run test:demo:device:2a`：通过，`externalAttempts:0`；证据 `docs/evidence/device-management-2a`（01–08）。
+- 已查看列表与详情截图：总数 12、分页两页、DEMO-EQ-970xxx、只读详情含监测卡。
+
+### 能用 / 不能用
+
+- **能用**：首页「设备管理」→ 仪器列表筛选/分页/统计 → 点名称打开只读详情与监测曲线。
+- **不能用**：仪器新增/编辑/删除/批量/导入导出/解绑；兄弟路由（关注设备、行政设备、使用统计等）。
+
+### 设计决定
+
+- 列表/详情/布局/bindable 共用 `DEMO_INSTRUMENTS`；研发部 3 台便于部门筛选；页大小 10 验两页。
+- `floorIds` 按页面实际为楼层 id；离线运行状态计入「未运行」桶。
+- `objType` 按当前硬件绑定关系过滤（无绑定则空结果）。
+
+### 未验证
+
+- 未跑生产构建 / 全站浏览器回归；未在非 Edge 浏览器验收。
+- 详情内预约/维保 Tab 仅依赖既有空桩，未做完整 Tab 点检。
+- 未验证硬件 1B 全量脚本本轮是否仍绿（本切片未改硬件写路径；建议提交前按需复跑）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（2B 一种仪器编辑持久化）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器列表与只读详情演示`。

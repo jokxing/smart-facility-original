@@ -159,7 +159,15 @@ test('room screenV1 projects instrumentList for building scope', async () => {
 test('garden tree stays local; alarm ranking returns seeded history; designer writes blocked', async () => {
   await establishSession();
   expect((await client.get('/map/garden')).data.items).toEqual(listMapGardenTree());
-  expect((await client.get('/equipment/bindEquipmentType', {params: {objType: 2}})).data.items).toEqual([]);
+  expect((await client.get('/equipment/bindEquipmentType', {params: {objType: 2}})).data.items).toEqual([
+    {code: 0, name: '记录仪'},
+    {code: 10, name: '设备管理器'},
+    {code: 7, name: '声光报警器'},
+    {code: 8, name: '断电报警器'},
+    {code: 14, name: '信号接收器'},
+    {code: 13, name: '移液枪架'},
+    {code: 16, name: '资产网关'}
+  ]);
   const monthBody = {
     thingsType: 11,
     sensorType: 0,

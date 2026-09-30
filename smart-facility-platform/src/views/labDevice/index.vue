@@ -135,7 +135,7 @@
                                                     </div>
                                                     <div>
                                                         <el-button
-                                                            v-if="roleId != 5"
+                                                            v-if="roleId != 5 && !isDemo"
                                                             class="defaultBtn"
                                                             icon="el-icon-plus"
                                                             type="primary"
@@ -144,6 +144,7 @@
                                                             {{ $t('common.add1') }}
                                                         </el-button>
                                                         <el-button
+                                                            v-if="!isDemo"
                                                             class="defaultBtn icon-setup"
                                                             @click="showSetUp = !showSetUp"
                                                         >
@@ -152,6 +153,7 @@
                                                             }}
                                                         </el-button>
                                                         <el-button
+                                                            v-if="!isDemo"
                                                             class="defaultBtn icon-upload"
                                                             @click="importFileVisible = true"
                                                         >
@@ -159,6 +161,7 @@
 
                                                         </el-button>
                                                         <el-button
+                                                            v-if="!isDemo"
                                                             class="defaultBtn icon-download1"
                                                             @click="handleExport"
                                                         >
@@ -277,7 +280,7 @@
                                                     </template>
                                                 </el-table-column>
                                                 <el-table-column
-                                                    v-if="roleId != 5"
+                                                    v-if="roleId != 5 && !isDemo"
                                                     slot="operate"
                                                     fixed="right"
                                                     :label="$t('common.handle')"
@@ -489,6 +492,7 @@ export default {
             loading: false,
             // 用户层级
             roleId: JSON.parse(localStorage.getItem('USERINFO')).roleId,
+            isDemo: process.env.VUE_APP_DEMO === 'true',
             // 根据房间模糊搜索
             detailId: '',
             isBottom: null,

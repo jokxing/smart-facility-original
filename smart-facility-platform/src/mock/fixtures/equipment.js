@@ -1015,6 +1015,22 @@ export function listEquipmentBindings(params = {}) {
   return bindingsFor(equipmentId);
 }
 
+/**
+ * Instrument list objType filter: equipmentTypeCodes currently bound to this instrument.
+ */
+export function listBoundEquipmentTypesForInstrument(instrumentId) {
+  const key = Number(instrumentId);
+  if (!Number.isFinite(key)) return [];
+  const codes = new Set();
+  const store = readEquipmentBindingsStore();
+  for (const [equipmentId, bucket] of Object.entries(store)) {
+    if (!Array.isArray(bucket) || !bucket.some(item => Number(item.type) === 4 && Number(item.id) === key)) continue;
+    const row = equipmentById(equipmentId);
+    if (row && row.equipmentTypeCode != null) codes.add(Number(row.equipmentTypeCode));
+  }
+  return [...codes];
+}
+
 function pushBinding(equipmentId, thing) {
   const store = {...readEquipmentBindingsStore()};
   const key = String(equipmentId);

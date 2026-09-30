@@ -30,9 +30,9 @@ router.beforeEach(async (to, from, next) => {
       || to.path === '/floor/designer' || to.path === '/room/view' || to.path === '/room/designer'
       || to.path === '/floorDataV' || to.path === '/roomDataV' || to.path === '/roomDataV/'
       || to.path === '/sys/a/log'
-      || to.path === '/lhd/hardware/home' || to.path === '/pro';
+      || to.path === '/lhd/hardware/home' || to.path === '/ld/labdevice' || to.path === '/pro';
     if (!demoAllowed) {
-      Message.info('本演示已开放中控地图、大屏、报警记录、智能硬件总览及支持类型详情；当前管理页面尚未接入。');
+      Message.info('本演示已开放中控地图、大屏、报警记录、智能硬件、设备管理列表及支持类型详情；当前管理页面尚未接入。');
       next('/dashboard');
       NProgress.done();
       return;

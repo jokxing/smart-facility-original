@@ -1,8 +1,8 @@
-# 本地演示：含房间设备布局配置（8C）
+# 本地演示：含设备管理列表（2A）
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览列表（1A）** + **记录仪/设备管理器详情（1B）** + **声光/断电/信号/枪架/网关只读详情**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表与只读详情（2A）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`。
 
-首页「智能硬件」进入总览列表：关键词/部门/类型筛选、分页、排序。点**记录仪或设备管理器**打开详情（曲线、告警、间隔阈值、负责人、绑定）；点**声光 / 断电 / 信号 / 枪架 / 网关**打开对应只读详情。设备管理器/断电/网关可打开**联网配置**只读弹窗。未知类型仍提示未接入。
+首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开只读详情（基础信息、监测标签、曲线）。新增/编辑/删除/批量/导入导出在演示下隐藏，接口明确拒绝。
 
 ## 启动
 
@@ -17,7 +17,8 @@ npm run demo
 登录 → 楼宇 → 1F → **查看设备布局** → 悬停看读数 / **点击设备**打开只读详情与曲线 → **进入配置**拖动保存。  
 顶栏 **系统 → 报警记录**：查看设备告警列表，单条「添加处理」后刷新为已处理。  
 楼层/房间可用 **场景·正常/异常/离线**；切换不改坐标。  
-楼层「进入配置」仍只读；不支持从侧栏新增/删除设备。
+楼层「进入配置」仍只读；不支持从侧栏新增/删除设备。  
+首页或顶栏 **设备管理**：仪器列表筛选分页 → 点名称打开只读详情。
 
 ## Mock 要点
 
@@ -28,8 +29,10 @@ npm run demo
 | 房间设备布局写 | `POST /map/element/config`（仅 type:4；演示会话 + 校验） |
 | 布局重置 | `POST /demo/room-layout/reset` |
 | 演示场景 | `GET/POST /demo/scenario` |
+| 仪器列表 / 统计 | `POST /instrument/list`；`GET /instrument/dashboard/new`（970xxx 共享实体） |
 | 设备只读详情 | `GET /instrument/detail`；监测标签 `getOpenMonitorFlag` / `getMonitorFlag` |
 | 设备历史曲线 | `GET /monitorIndicator/monitorInfo`（离线为空）；`historyPage` 空表桩 |
+| 仪器写操作 | `add` / `update/basic` / `remove` / `batch/*` / `export` / `unbind` **明确拒绝** |
 | 报警记录处理 | `POST …/historyAlarmRecord/summary`；`POST …/exceptionHandle/batch`；`GET /alarm/errorList` |
 | 硬件告警处理 | `POST /monitorIndicator/historyAlarmRecord`；`POST /monitorIndicator/exceptionHandle`（objSensorId+time） |
 | 硬件间隔/阈值 | `POST /device/update/interval/report|alarm`；`POST /device/update/sensors` |
@@ -51,7 +54,8 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:hardware:1b
+npm run test:demo:device:2a
+# 可选：npm run test:demo:hardware:1b
 ```
 
 顶栏「系统 → 报警记录」支持多选批量处理（须有处理时间与类型）。曲线非法自定义日期应失败/空态，不再变成默认窗口。

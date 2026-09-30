@@ -15,10 +15,14 @@ export const DEMO_DEPARTMENTS = [
   {id: 900101, name: '演示运维部', departmentName: '演示运维部', parentId: 0, children: [], subDivisions: []},
   {id: 900102, name: '演示研发部', departmentName: '演示研发部', parentId: 0, children: [], subDivisions: []}
 ];
+/** Cascader (SearchForm) expects `types` + `childrenList`; store bootstrap still accepts `children`. */
 export const DEMO_CATEGORIES = [
-  {id: 900201, name: '演示设备', catName: '演示设备', parentId: 0, children: []}
+  {id: 900201, name: '演示设备', catName: '演示设备', types: 1, parentId: 0, children: [], childrenList: []}
 ];
 export const DEMO_MENUS = [
+  {id: 'ld', name: '设备管理', englishName: 'labDevice', path: '/ld/labdevice', subMenu: [
+    {id: 'demo-labdevice', name: '实验室设备', englishName: 'labDevice', path: '/ld/labdevice', icon: 'icon-home1', subMenu: []}
+  ]},
   {id: 'lhd', name: '智能硬件', englishName: 'hardware', path: '/lhd/hardware/home', subMenu: [
     {id: 'demo-hardware-home', name: '主页', englishName: 'home', path: '/lhd/hardware/home', icon: 'icon-home1', subMenu: []}
   ]},
