@@ -729,9 +729,23 @@
 
 ## 第二批项目元数据与文本品牌（2026-09-29）
 
-- 修改：`package.json` / `package-lock.json` 根名称与作者、去掉内部仓库字段、license 标为 UNLICENSED；`i18n` 中英文品牌文案；Building/Dashboard/Navbar/Login/permission 及若干选择器回退公司名；删除客户登录路由与失效/退出时的客户跳转；`floorConfiguar` 去掉客户专用布局与配色分支；`labDevice` 注释去掉外部文档地址；`UpkeepPlan` 改为合成样例；TransportMap 注释轨迹改为合成坐标；`iconfontSource/iconfont.json` 仅改 name 元数据。同步审查清单、本 STATUS、next-task-prompt。
+- 修改：`package.json` / `package-lock.json` 根名称与作者、去掉内部仓库字段、license 标为 UNLICENSED；`i18n` 中英文品牌文案；Building/Dashboard/Navbar/Login/permission 及若干选择器回退公司名；删除客户登录路由与失效/退出时的客户跳转；`floorConfiguar` 去掉客户专用布局与配色分支；`labDevice` 注释去掉外部文档地址；`UpkeepPlan` 改为合成样例；TransportMap 内硬编码轨迹样例改为合成坐标；`iconfontSource/iconfont.json` 仅改 name 元数据。同步审查清单、本 STATUS、next-task-prompt。
 - 设计决定：保留 Vue 2 与现有接口路径（含 `/map/runpengData`）；不重命名 `ChuxouUpload` 组件目录以免大范围改引用；不换品牌 PNG/XLS；不重写历史。
 - 验证：`npm run test:demo -- --watch=false` → 11 文件 / **65** 用例通过；重启演示服务后 `DEMO_PORT=8088` 完整 Edge 回归通过，`externalAttempts: 0`，`uncaughtExceptions: 0`。（中途一次失败疑为热更新残留，干净重启后复测通过。）
 - 未验证：维保页/运输地图浏览器专项、客户旧登录 URL 书签、素材视觉与 XLS 内容、历史提交中的品牌与 Key。
 - 明确未做：素材与模板批、组件文件重命名、历史清理、暂存/提交/推送。
 - 下一最小任务：第三批图像/字体/XLS 及授权（单独处理）；等待用户指定。
+
+## 第二批已提交复盘（2026-09-30）
+
+- 复盘 fc7f35f，新增 review-sanitization-batch2.md；仅文档修改。元数据/锁文件一致，依赖节点未变，65 单测重跑通过，未重复浏览器回归。
+- 无需回退本批；发现一项 P2：中英文微信公众号文案将未接入能力表述成演示可用，应另作小提交明确未接入，保持键名和功能范围。
+- 客户专用死 helper 可后续清理；运输轨迹修改为硬编码数组而非仅注释，文档描述需校正。第三批素材/XLS 与历史 Key 仍待处理，不据此批准公开推送。
+- 下一最小任务先修微信文案，再安排第三批素材审查；未改业务或提交推送。
+
+## 微信未接入文案修正（2026-09-30）
+
+- 修改：`i18n` zh/en 的 `system.bindWechat1–7` 与 `login` 扫码相关文案，统一标明本演示未接入微信绑定/公众号登录/提醒；保留键名与 User/Login 结构，不新增微信服务、不开放系统用户页。校正 STATUS/审查清单中运输轨迹为「硬编码样例」表述；更新 review-sanitization-batch2、next-task-prompt。
+- 验证：`npm run test:demo -- --watch=false` → 11 文件 / **65** 用例通过；未重跑浏览器（登录页文案变更，账号登录链路未改行为）。
+- 未验证：系统用户页微信绑定 UI 点击、扫码面板真实交互。
+- 下一最小任务：第三批图像/字体/XLS 及授权审查；客户专用死 helper 可顺带清理但不阻塞。等待用户指定。
