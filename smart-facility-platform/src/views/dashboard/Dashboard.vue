@@ -35,10 +35,10 @@
         </div>
       </div>
       <div class="bashboard-session">
-        <img alt="" class="logo" src="../../../src/assets/systemImages/logo2.png"/>
+        <img alt="" class="logo" src="../../../src/assets/systemImages/facility-logo.svg"/>
         <div class="title">
-          <img class="img1" v-if="languageName == '中文'" src="../../../src/assets/systemImages/company-title.png" alt="">
-          <img class="img2" v-else src="../../../src/assets/systemImages/company-title1.png" alt="">
+          <span class="facility-title" v-if="languageName == '中文'">智慧设施智能监控平台</span>
+          <span class="facility-title" v-else>Smart Facility Monitoring</span>
         </div>
         <div class="session-t">
           <div class="box-button">

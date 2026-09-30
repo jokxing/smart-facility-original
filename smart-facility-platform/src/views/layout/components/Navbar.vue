@@ -3,7 +3,7 @@
         <div class="a">
             <div class="navbar-logo" @click="$router.push('/dashboard')">
                 <img v-if="$store.state.logoUrl" alt="" :src="BASE_URL + $store.state.logoUrl"/>
-                <img v-else alt="" src="../../../../src/assets/systemImages/logo.png"/>
+                <img v-else alt="" src="../../../../src/assets/systemImages/facility-logo.svg"/>
 <!--                <h3 class="navbar-title">{{ title }}</h3>-->
             </div>
             <div class="top-navigation">

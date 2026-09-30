@@ -1,5 +1,30 @@
 # 工作状态
 
+## 当前收尾：品牌页面验收完成（2026-09-30）
+
+- 修复 check-demo-brand-ui.cjs 的验收条件：等待转场退出、Logo 可见且未遮挡、前页 DOM 移除和楼宇 canvas/加载遮罩就绪；截图前等待绘制。语言通过真实菜单切换，读取演示命名空间配置；favicon 实际 HTTP 加载、解码及透明像素断言。
+- 运行：本地 demo 编译成功（实际端口 8090）；Edge 验收通过，已查看英文登录、楼宇和后台截图。原楼宇截图为首页、导航叠层均因截图过早，稳定后未复现，不改业务代码。
+- 产物：docs/evidence/brand-ui 下 6 张中英文登录/首页、楼宇、导航截图；移除 public 中 5 份旧截图/文本，避免错误证据作为应用资源。生成器及品牌资源保持。
+- 检查：favicon SVG/ICO 均成功加载、解码，角点透明；中英文首页标题无横向溢出；登录浅底、首页/楼宇/导航深底 Logo 可辨认；脚本语法通过。
+- 限制：1440×900 Edge 本地验收；未做旧浏览器历史缓存、所有分辨率、生产构建与完整英文业务翻译验收。本轮仅测试脚本/文档/证据变化，未重复业务单测。
+- 下一任务扩大到大屏/中控装饰素材、残留敏感文案、素材授权记录。楼宇环境图可见未核实字样，下一批优先追踪；不代表本轮全量脱敏。未暂存、提交或推送。
+
+## 最新复盘：品牌清理通过，页面视觉验收需补验（2026-09-30）
+
+- 独立检查：六份已删除旧品牌图片在 src/public/config/scripts 中未发现运行时引用（README 历史清单除外）；生成器旧 --replace-brand 分支已拒绝执行；两份脚本语法检查通过。ICO 766 字节，目录项终点 766，无旧尾部。
+- P2：04-building.png 实际为首页画面；05-navbar.png 存在首页背景/内容与后台导航叠加，不能作为稳定页面验收证据。脚本等待 DOM/图片加载，但未验证转场结束、页面可见性或楼宇渲染就绪。不能据此认定业务页面存在稳定复现的叠层问题，需补验区分。
+- 验证缺口：02-login-en.txt 只读取 i18n 字典，没有切换英文页面；favicon 只断言 link 存在，没有浏览器加载及缓存验证。深浅背景适配尚无完整证据。
+- 本次只读复盘源码和现有截图，未重跑浏览器/单测，未改业务代码，未提交推送。下一最小任务是修验收等待条件、补真实截图并更正文档结论，暂不扩展其他残留审查。
+
+## 最新补充：统一透明楼宇标识（2026-09-30）
+
+- 新增 facility-logo.svg（楼宇节点 + SF，深浅青蓝双层线条）和 public/favicon.svg；登录、首页、楼宇及后台导航默认 Logo 切换到 SVG。首页中英文标题由图片改为页面文字，bashboard.less 增加标题排版。
+- generate-demo-brand-assets.cjs 的 favicon 改为同造型透明楼宇，保留 File.Create 截断；仅运行 --favicon-only 更新 ICO，favicon-preview.png 同步。public/index.html 优先提供 SVG，保留 ICO 兼容入口。
+- 验证：四份修改的 Vue 模板编译通过；生成器语法检查通过；ICO 文件终点与目录项一致，无额外尾部；预览可解码、左上角 alpha=0，已查看图标。
+- 未验证：本轮未做浏览器页面截图、缓存与深浅主题实际验收；未跑生产构建。没有更改业务逻辑。
+- 残留：原六份品牌 PNG 尚在磁盘，旧 --replace-brand 生成分支尚在；不可宣称全量品牌脱敏。下一任务交另 AI 做页面验收、引用核实后移除旧资产与过时生成逻辑，详见 next-task-prompt.md。
+- 未暂存、提交或推送；不自动进入下一批。
+
 更新时间：2026-09-23。
 
 ## 当前状态：任务 3B 已完成并停止
@@ -749,3 +774,54 @@
 - 验证：`npm run test:demo -- --watch=false` → 11 文件 / **65** 用例通过；未重跑浏览器（登录页文案变更，账号登录链路未改行为）。
 - 未验证：系统用户页微信绑定 UI 点击、扫码面板真实交互。
 - 下一最小任务：第三批图像/字体/XLS 及授权审查；客户专用死 helper 可顺带清理但不阻塞。等待用户指定。
+
+## 第三批图像 / 字体演示页 / XLS（2026-09-30）
+
+- 修改：新增 `scripts/generate-demo-brand-assets.cjs`、`generate-demo-xls.cjs`；替换 `logo*.png`、`company-title*.png`、`building-logo.png`、`favicon.ico`、微信/二维码占位图、`loginImages/weixin.jpg`；`public/static` 下 28 份 xls 改为合成空表；`iconfontSource/demo.css`、`demo_index.html` 改为离线 stub，去掉外链 CDN；`iconfont.css` 注释去掉原项目 id；补充 `public/static/README.md`、`public/demo/brand/README.md`；`package.json` 增加 `demo:brand` / `demo:xls`。同步审查清单、本 STATUS、next-task-prompt。
+- 设计决定：保留布局引用路径与 ImportFile 文件名；演示仍 403 拦截模板下载；不整批替换 DataV 装饰图；保留 GLB CC BY 署名；不重写历史。
+- 验证：65 单测通过；`DEMO_PORT=8088` Edge 回归通过，`externalAttempts: 0`，`uncaughtExceptions: 0`。
+- 未验证：每张装饰 PNG 的 OCR/嵌入元数据、iconfont 字形再授权、导入流程真实打开合成 xls（演示路由未开放导入）。
+- 明确未做：历史 Key 清理、ChuxouUpload 重命名、自动提交/推送。
+- 下一最小任务：可选继续装饰图/字形许可审查，或由用户决定提交本批；公开推送仍受历史 Key 限制。
+
+## 第三批未提交复盘（2026-09-30）
+
+- 新增 review-sanitization-batch3.md，更新 STATUS；仅文档修改，未运行生成器或改业务素材，未暂存提交。
+- 确认 P1：favicon 使用 OpenWrite 未截断，4286 字节文件中仅前 766 字节为新图标引用范围，尾部 3520 字节与 HEAD 旧文件完全相同。
+- P2：标题/Logo 不透明黑底；weixin.jpg 实际 PNG；28 份 XLS 实际占位 HTML 且无业务表头契约；生成器“从 Git 清除原工作簿”注释不准确。
+- 验证方式：差异及源码、直接图片查看、ICO 目录与旧尾部逐字节比较、文件签名检查；不重复全链路单测/浏览器，已有通过记录不足以验收这些产物问题。
+- 决定：暂不提交第三批，先修生成器/产物及文档，补格式/透明通道/页面截图验证；装饰图和字形授权残留另批处理，不自动扩展。
+
+## 按用户要求恢复 Logo/标题（2026-09-30）
+
+- 从当前 HEAD 恢复第三批修改前的 logo.png、logo2.png、logo-gold.png、company-title.png、company-title1.png、building-logo.png，其他第三批改动保留。
+- 生成器默认不覆盖上述六张图片；仅显式 --replace-brand 时替换。可选生成的 Logo/标题改透明背景及 AntiAliasGridFit，防止黑底/黑边。未运行整批生成器，避免覆盖用户其他素材。
+- 验证：恢复文件来自 Git 原始字节，直接查看 Logo；检查五张系统图片左上角 alpha，脚本 node --check。未重复单测或浏览器，未提交推送。
+- 恢复素材包含原品牌，不能继续称为已脱敏，品牌 README 已注明。favicon 旧尾部、伪 XLS/JPG 等第三批问题仍待单独修复。
+# P2 文件格式修正（2026-09-30，最新补充）
+
+- 修改：weixin.jpg 更名 weixin.png，PNG 字节保留；Login.vue、generate-demo-brand-assets.cjs 同步引用。
+- 修改：移除 public/static 下 28 份 HTML 伪 XLS、generate-demo-xls.cjs 和 demo:xls 命令；ImportFile 下载改为中英文未接入提示，适用于本副本所有模式。保留原文件名定义和演示 HTTP 防护。
+- 文档：public/static/README.md、next-task-prompt.md、第三批复盘说明同步。
+- 验证：PNG 签名、伪 XLS 移除、生成器语法检查通过；新增模板下载提示测试，12 套 67 项演示单测通过。
+- 未验证：本轮未跑浏览器和生产构建；真实模板字段及导入流程未实现。全量 diff --check 有既有 precommit-content-audit.md 四处行尾空格，未顺带修改。
+- 决定：不伪造业务模板；原品牌 Logo 暂保留，不能宣称全量脱敏；favicon 未改。
+- 下一最小任务：另 AI 仅修 favicon 截断写入与重生成，见 next-task-prompt.md。未暂存、提交或推送。
+
+## favicon 截断写入修复（2026-09-30）
+
+- 修改：`generate-demo-brand-assets.cjs` 的 `New-Favicon` 使用 `File.Create` 截断写入；新增 `--favicon-only` 与 `npm run demo:favicon`；仅重写 `public/favicon.ico`；补充 `favicon-preview.png` 与 brand README 说明。未运行完整 `demo:brand`，未改六份已恢复 Logo/标题。
+- 验证：两次生成长度均为 766；ICO 目录与图像块终点一致（offset 22 + 744 = 766）；无 4286 旧尾；DIB `biSize=40`；预览图可见 SF；`node --check` 通过。六份品牌图路径 git 无变更。
+- 未验证：浏览器标签页缓存图标专项、多尺寸 ICO、非 Windows 生成路径。
+- 决定：本项 P1 已关闭；原品牌 Logo 仍未脱敏；伪 XLS 移除与模板未接入提示保持。未暂存、提交或推送。
+- 建议 commit（不自动执行）：`fix: 截断写入演示 favicon 避免残留旧图标尾部`
+- 下一最小任务：由用户决定是否提交当前工作区（含第三批其余改动与本修复），或继续其他残留审查。
+
+## 新 Logo 页面验收与旧品牌 PNG 清理（2026-09-30）
+
+- 验收：`scripts/check-demo-brand-ui.cjs`（Edge CDP，`DEMO_PORT=8088`）通过。登录/首页/楼宇/报警记录导航均加载 `facility-logo.svg`；比例约 2.5；登录标题「智慧设施」，i18n en「Smart Facility」；首页标题「智慧设施智能监控平台」无溢出；租户名「智慧设施演示空间」；`getLogo`→`logoUrl:''`，导航回退 SVG；`favicon.ico`+`favicon.svg` 均已链接。截图在 `public/demo/brand/ui-shots/`（先写缓存目录再复制，避免 public 写入触发热更新打断登录）。
+- 样式：登录/首页 Logo 改为 `height:auto` 保比例；首页标题略缩字号并 `nowrap`。
+- 引用检索后删除未使用的六份 PNG（logo/logo2/logo-gold/company-title/company-title1/building-logo）。生成器移除 `--replace-brand` 旧 SF 占位分支（调用即报错退出）；仅保留微信占位 + favicon。
+- 未验证：生产构建、标签页缓存专项、全量装饰图 OCR、Git 历史脱敏。不可宣称全量素材已脱敏。
+- 未暂存、提交或推送。建议 commit：`chore: 验收新楼宇 Logo 并移除未引用旧品牌 PNG`
+- 下一最小任务：由用户决定提交当前工作区，或继续 DataV/字形许可等残留审查。

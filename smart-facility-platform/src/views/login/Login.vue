@@ -5,7 +5,7 @@
         <img
             alt=""
             class="logo"
-            src="../../../src/assets/systemImages/logo-gold.png"/>
+            src="../../../src/assets/systemImages/facility-logo.svg"/>
         <h3 class="title">{{ $t("login.companyName") }}</h3>
           <div class="language">
               <el-dropdown trigger="click" @command="handleCutLang">
@@ -42,7 +42,7 @@
             <img
                 v-if="isLoginType"
                 alt=""
-                src="../../../src/assets/loginImages/weixin.jpg"/>
+                src="../../../src/assets/loginImages/weixin.png"/>
             <img
                 v-else
                 alt=""

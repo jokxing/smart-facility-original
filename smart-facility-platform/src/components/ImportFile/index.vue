@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import {downloadFile} from "@/utils/methods";
+
 import request from "@/utils/request";
 
 export default {
@@ -161,10 +161,10 @@ export default {
       this.$emit('hiddenModalVisible')
     },
     handleDownImport() {
-      const lang = localStorage.getItem("lang");
-      const url = "/static/" + (lang === 'en' ? this.importType[this.title].enFileName : this.importType[this.title].fileName);
-      const fileName = lang === 'en' ? this.importType[this.title].enFileName : this.importType[this.title].fileName;
-      downloadFile(url, fileName);
+      this.$message.warning(localStorage.getItem('lang') === 'en'
+        ? 'Import templates are not available in this demo.'
+        : '本演示未接入导入模板，暂不可下载。');
+      return false;
     },
     handleExceedFile(files, fileList) {
       this.$message.warning(this.$t('hardware.importTemplate6') +` ${files.length + fileList.length} ` + this.$t('common.individual'));

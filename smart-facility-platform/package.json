@@ -5,6 +5,8 @@
   "scripts": {
     "demo": "node scripts/demo.js",
     "demo:models": "node scripts/generate-demo-models.cjs",
+    "demo:brand": "node scripts/generate-demo-brand-assets.cjs",
+    "demo:favicon": "node scripts/generate-demo-brand-assets.cjs --favicon-only",
     "test:demo": "vue-cli-service test:unit --runInBand tests/unit/demo",
     "test:demo:browser": "node scripts/check-demo-browser.cjs",
     "serve": "vue-cli-service serve",
