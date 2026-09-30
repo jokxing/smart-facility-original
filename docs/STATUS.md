@@ -1257,3 +1257,45 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（2B 一种仪器编辑持久化）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通设备管理仪器列表与只读详情演示`。
+
+## 追加：设备管理 2B 仪器编辑持久化（2026-09-30）
+
+依据 `docs/next-task-prompt.md`（设备管理 2B）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| Mock | `updateInstrumentBasic` + `instrumentMeta`（name/departmentId/types）；列表/详情/布局/bindable 叠加 |
+| 分类 | 增加 `types:2` 演示辅助设备 |
+| Handler | `POST /instrument/update/basic` 可写；grade/file/room.tree 空桩；其它写仍拒绝 |
+| 房间列表 | 设计器 `floorId` 无 keyword 仍空；编辑弹窗无 floorId 返回共享房间 |
+| UI | 列表/详情开放「编辑」；删除/新增/导入导出仍隐藏 |
+| 测试 | `instrument-edit.spec.js`；浏览器 `check-demo-device-2b.cjs` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 2C 删除 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：16 套 / **97** 项通过。
+- `DEMO_PORT=8088 npm run test:demo:device:2b`：通过，`externalAttempts:0`；证据 `docs/evidence/device-management-2b`（01–04）。
+- 已查看编辑后列表与详情截图：名称「演示培养箱二编」、部门「演示研发部」、分类「演示辅助设备」。
+
+### 能用 / 不能用
+
+- **能用**：列表/详情编辑名称、部门、分类；刷新后列表、详情、布局名、bindable 一致。
+- **不能用**：新增/删除/批量/导入导出/解绑；房间/品牌等其它字段虽可提交但不持久化。
+
+### 设计决定
+
+- 对标硬件 `equipmentMeta`，仅持久化本轮三字段；分类补第二叶以便改 types。
+- SelectTree `getNode` 在弹窗打开时有既有噪声，浏览器验收已忽略，不视为本切片回归。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归 / 硬件 1B 全量脚本。
+- 未验编辑房间/负责人/图片上传；`file/policy` 为空桩。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（2C 仪器删除）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器名称部门分类编辑演示`。

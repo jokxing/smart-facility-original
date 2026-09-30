@@ -10,7 +10,8 @@
 | `POST /instrument/list` 筛选/分页 | **已开放** |
 | `GET /instrument/dashboard/new` 统计卡 | **已开放** |
 | 点击名称 → `LabDeviceDrawer` 只读详情 | **已开放**（复用 `GET /instrument/detail` + 监测标签） |
-| 新增/编辑/删除/批量/导入/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
+| 编辑基本信息（名称/部门/分类） | **2B 已开放**（`POST /instrument/update/basic` + `instrumentMeta`） |
+| 新增/删除/批量/导入/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
 
 ## 实体与 ID
 
@@ -77,11 +78,30 @@
 | GET | `/instrumentCategoryInfo/superior/cat` | `{name, types, childrenList}` |
 | GET | `/department/list` | 既有部门 |
 | GET | `/equipment/bindEquipmentType` | `EQUIPMENT_TYPE_META` → `{code,name}` |
-| POST | `/room/list` | 有 `keyword` 时返回共享房间；无 keyword 保持空（设计器侧栏） |
+| POST | `/room/list` | 设计器：`floorId` 且无 keyword → 空；编辑弹窗/keyword → 共享房间 |
+| POST | `/room/tree` | 编辑弹窗房间树（园区→楼→层→房间，level=4 可选） |
+| GET | `/grade/getlist` | 空数组桩 |
+| GET | `/file/policy` | 空策略桩（不上传） |
+| GET | `/file/instrument/pic/search` | 空图片列表桩 |
 
-## 写操作（拒绝）
+## 写操作
 
-`POST /instrument/add|update/basic|remove/:id|batch/delete|batch/update|export`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
+### 2B 已开放：`POST /instrument/update/basic`
+
+持久化键：`smart-facility-demo:v1:instrumentMeta`。
+
+| 字段 | 规则 |
+| --- | --- |
+| `id` | 必须存在于 `DEMO_INSTRUMENTS` |
+| `name` | trim 后 2–26 字 |
+| `departmentId` | `900101` / `900102` |
+| `types` | `1` 演示设备 / `2` 演示辅助设备 |
+
+成功后列表、详情、房间布局名称、bindable 目录立即反映 overlay。其它 body 字段接受但忽略。
+
+### 仍拒绝
+
+`POST /instrument/add|remove/:id|batch/delete|batch/update|export`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
 
 ## 导航
 
@@ -91,5 +111,5 @@
 
 ## 验证
 
-- 单测：列表分页/筛选/统计/拒绝写/会话保护；分类与 bindable 同源
-- 浏览器：证据 `docs/evidence/device-management-2a`
+- 单测：列表分页/筛选/统计；编辑成功/校验失败/会话；列表详情布局 bindable 一致
+- 浏览器：证据 `docs/evidence/device-management-2a`、`docs/evidence/device-management-2b`

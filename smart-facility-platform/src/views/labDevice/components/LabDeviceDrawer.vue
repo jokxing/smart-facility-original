@@ -73,12 +73,12 @@
                 </div>
 
                 <el-descriptions :title="$t('common.basicInformation')">
-                    <template v-if="!isDemo" #extra>
+                    <template #extra>
                         <el-button type="primary" class="icon-edit" @click="handleEdit(detail)">&nbsp;{{
                                 $t('common.edit')
                             }}
                         </el-button>
-                        <el-button @click="$refs.addWarehous.open(2, detail.id)">{{
+                        <el-button v-if="!isDemo" @click="$refs.addWarehous.open(2, detail.id)">{{
                                 $t('labDevice.assetDetail')
                             }}
                         </el-button>
@@ -689,6 +689,8 @@ export default {
             if (this.isDrawer) {
                 this.getDetail();
             }
+            // Detail-drawer edit must also refresh the outer list.
+            this.$emit('instrument-updated');
         },
         // 获取详情
         getDetail() {

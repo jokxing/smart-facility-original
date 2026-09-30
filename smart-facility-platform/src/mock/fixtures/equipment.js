@@ -7,7 +7,7 @@ import {formatDemoDateTime, DEMO_NOW_MS, parseDemoDateTime} from '../clock';
 import storage from '../storage';
 import {DEMO_STAFF} from './auth';
 import {DEMO_FLOOR_ROOMS} from './floor';
-import {DEMO_INSTRUMENTS} from './instrument';
+import {DEMO_INSTRUMENTS, resolveInstrumentEntity} from './instrument';
 
 const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
@@ -1000,8 +1000,13 @@ function catalogThing(type, thingsId) {
 /** Demo picker options for DeviceBindRelationship. */
 export function listBindableCatalog(kind) {
   if (kind === 'room') return BINDABLE_ROOMS.map(clone);
-  if (kind === 'instrument') return BINDABLE_INSTRUMENTS.map(clone);
-  return BINDABLE_ROOMS.map(clone).concat(BINDABLE_INSTRUMENTS.map(clone));
+  if (kind === 'instrument') {
+    return DEMO_INSTRUMENTS.map(seed => {
+      const entity = resolveInstrumentEntity(seed);
+      return {id: entity.id, name: entity.name, type: 4, openTwoSystem: true};
+    });
+  }
+  return BINDABLE_ROOMS.map(clone).concat(listBindableCatalog('instrument'));
 }
 
 /**

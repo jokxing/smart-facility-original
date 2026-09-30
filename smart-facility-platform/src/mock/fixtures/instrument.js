@@ -27,7 +27,12 @@ function floorPctToRoomLocal(roomId, pctLeft, pctTop) {
 
 const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
-const TYPE_NAME = '演示设备';
+const INSTRUMENT_META_KEY = 'instrumentMeta';
+const ALLOWED_TYPES = new Set([1, 2]);
+
+function typeNameFor(types) {
+  return Number(types) === 2 ? '演示辅助设备' : '演示设备';
+}
 
 /** Room → garden/building/floor for list address filters (floor 930001 only). */
 export const INSTRUMENT_ROOM_SPACE = Object.freeze({
@@ -73,6 +78,71 @@ const LAYOUT_SEEDS = Object.freeze([
 
 function instrumentById(id) {
   return DEMO_INSTRUMENTS.find(item => item.id === Number(id)) || null;
+}
+
+function readInstrumentMeta() {
+  try {
+    const raw = storage.getItem(INSTRUMENT_META_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function writeInstrumentMeta(map) {
+  storage.setItem(INSTRUMENT_META_KEY, JSON.stringify(map));
+}
+
+/** Seed + overlay (name / departmentId / types). Used by list, detail, layout, bindable. */
+export function resolveInstrumentEntity(entity) {
+  if (!entity) return null;
+  const patch = readInstrumentMeta()[String(entity.id)] || {};
+  return {
+    ...entity,
+    name: patch.name != null ? patch.name : entity.name,
+    departmentId: patch.departmentId != null ? patch.departmentId : entity.departmentId,
+    types: patch.types != null ? patch.types : entity.types
+  };
+}
+
+export function clearInstrumentMeta() {
+  storage.removeItem(INSTRUMENT_META_KEY);
+}
+
+/**
+ * POST /instrument/update/basic — persist name + department + category (types).
+ * Other body fields accepted but ignored for demo overlay.
+ */
+export function updateInstrumentBasic(body = {}) {
+  const id = Number(body && body.id);
+  const seed = instrumentById(id);
+  if (!seed) return {ok: false, message: '演示设备不存在。'};
+  const name = String(body.name == null ? '' : body.name).trim();
+  if (name.length < 2 || name.length > 26) {
+    return {ok: false, message: '请填写 2–26 字的设备名称。'};
+  }
+  const departmentId = Number(body.departmentId);
+  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
+    return {ok: false, message: '请选择有效部门。'};
+  }
+  const types = body.types == null || body.types === '' ? seed.types : Number(body.types);
+  if (!ALLOWED_TYPES.has(types)) {
+    return {ok: false, message: '请选择有效设备分类。'};
+  }
+  const next = {...readInstrumentMeta()};
+  next[String(id)] = {name, departmentId, types};
+  writeInstrumentMeta(next);
+  return {
+    ok: true,
+    id,
+    name,
+    departmentId,
+    departmentName: departmentNameForId(departmentId),
+    types,
+    typeName: typeNameFor(types)
+  };
 }
 
 function readOverrides() {
@@ -214,26 +284,27 @@ function createDateFor(entity) {
 
 /** Shared list/detail row fields from one instrument entity + current scenario. */
 export function buildInstrumentRow(entity) {
+  const resolved = resolveInstrumentEntity(entity);
   const {status, senorStatus} = statusForScenario(getDemoScenario());
   return {
-    id: entity.id,
-    name: entity.name,
-    no: instrumentNo(entity.id),
-    types: entity.types,
+    id: resolved.id,
+    name: resolved.name,
+    no: instrumentNo(resolved.id),
+    types: resolved.types,
     detailType: 1,
-    departmentId: entity.departmentId,
-    departmentName: departmentNameForId(entity.departmentId),
+    departmentId: resolved.departmentId,
+    departmentName: departmentNameForId(resolved.departmentId),
     status,
     bingStatus: senorStatus,
     brand: '演示品牌',
     managerName: '演示负责人',
     price: 0,
     model: 'DEMO-M1',
-    typeName: TYPE_NAME,
-    roomId: entity.roomId,
-    roomName: roomNameForId(entity.roomId),
+    typeName: typeNameFor(resolved.types),
+    roomId: resolved.roomId,
+    roomName: roomNameForId(resolved.roomId),
     userName: '演示账号',
-    createDate: createDateFor(entity),
+    createDate: createDateFor(resolved),
     companyName: '智慧设施演示空间',
     buyDate: '',
     nextMaintenanceDate: '',
@@ -245,7 +316,8 @@ export function buildInstrumentRow(entity) {
     labelId: null,
     standbyPowerFlag: false,
     bindingDeviceId: null,
-    openTwoSystem: true
+    openTwoSystem: true,
+    workingHours: 7.5
   };
 }
 
@@ -322,6 +394,7 @@ export function listInstruments(body = {}) {
   const sensorFilter = body.sensorStatus;
 
   const rows = DEMO_INSTRUMENTS
+    .map(resolveInstrumentEntity)
     .filter(entity => matchSpace(entity, body))
     .filter(entity => !deptIds.length || deptIds.includes(Number(entity.departmentId)))
     .filter(entity => !typesList.length || typesList.includes(Number(entity.types)))
@@ -547,7 +620,7 @@ export function listRoonInstrumentInfo(roomId) {
 
   const {status, senorStatus} = statusForScenario(getDemoScenario());
   const list = placementsForRoom(key).map(place => {
-    const entity = instrumentById(place.elementId);
+    const entity = resolveInstrumentEntity(instrumentById(place.elementId));
     return {
       id: place.elementId,
       elementId: place.elementId,

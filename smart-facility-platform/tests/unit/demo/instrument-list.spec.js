@@ -138,11 +138,10 @@ test('detail id matches list row; bindable catalog stays same 970xxx set', async
   expect(listBindableCatalog('instrument').map(item => item.id)).toEqual(DEMO_INSTRUMENTS.map(item => item.id));
 });
 
-test('writes are rejected and categories/menus support labdevice entry', async () => {
+test('writes except update/basic stay rejected; categories/menus support labdevice entry', async () => {
   await establishSession();
   for (const [method, url] of [
     ['post', '/instrument/add'],
-    ['post', '/instrument/update/basic'],
     ['post', '/instrument/batch/delete'],
     ['post', '/instrument/export'],
     ['post', '/instrument/remove/970001'],
@@ -154,17 +153,19 @@ test('writes are rejected and categories/menus support labdevice entry', async (
     expect(res.code).toBe(0);
     expect(res.message).toContain('未开放');
   }
-  expect(DEMO_CATEGORIES[0].types).toBe(1);
-  expect(DEMO_CATEGORIES[0].childrenList).toEqual([]);
+  expect(DEMO_CATEGORIES.map(item => item.types).sort()).toEqual([1, 2]);
+  expect(DEMO_CATEGORIES.every(item => item.code && !String(item.code).includes('undefined'))).toBe(true);
   const cats = (await client.get('/instrumentCategoryInfo/superior/cat')).data;
-  expect(cats.items[0].types).toBe(1);
+  expect(cats.items.some(item => item.types === 1)).toBe(true);
   expect(DEMO_MENUS.some(menu => menu.path === '/ld/labdevice')).toBe(true);
 });
 
-test('room list keyword search returns shared rooms; empty keyword stays empty for designer', async () => {
+test('room list: designer floorId empty; modal/keyword returns shared rooms', async () => {
   await establishSession();
-  const empty = (await client.post('/room/list', {pageNum: 1, pageSize: 10})).data;
-  expect(empty.items.total).toBe(0);
+  const designer = (await client.post('/room/list', {floorId: 930001, pageNum: 1, pageSize: 10000})).data;
+  expect(designer.items.total).toBe(0);
+  const modal = (await client.post('/room/list', {pageNum: 1, pageSize: 10000})).data;
+  expect(modal.items.total).toBe(3);
   const hit = (await client.post('/room/list', {keyword: '房间', pageNum: 1, pageSize: 10})).data;
   expect(hit.items.total).toBe(2);
   expect(hit.items.list.map(item => item.id).sort()).toEqual([950001, 950003]);

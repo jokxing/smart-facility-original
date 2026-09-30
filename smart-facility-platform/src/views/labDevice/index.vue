@@ -280,7 +280,7 @@
                                                     </template>
                                                 </el-table-column>
                                                 <el-table-column
-                                                    v-if="roleId != 5 && !isDemo"
+                                                    v-if="roleId != 5"
                                                     slot="operate"
                                                     fixed="right"
                                                     :label="$t('common.handle')"
@@ -292,6 +292,7 @@
                                                         </el-button
                                                         >
                                                         <el-button
+                                                            v-if="!isDemo"
                                                             class="abnormal"
                                                             type="text"
                                                             @click="handleDelete(scope.row)"
@@ -318,7 +319,7 @@
 
                             <!-- 详情弹窗 -->
                             <!-- 开通2.0打开新详情 -->
-                            <LabDeviceDrawer :id="detailId" :is-drawer.sync="isDrawer"/>
+                            <LabDeviceDrawer :id="detailId" :is-drawer.sync="isDrawer" @instrument-updated="handleInstrumentList"/>
                             <!-- 没开通2.0打开旧详情 -->
                             <Drawer>
                                 <DrawerPage :detailId="detailId"></DrawerPage>
@@ -832,9 +833,7 @@ export default {
             this.handleInstrumentList()
         },
         handleUpdate() {
-            if (!this.isDrawer) {
-                this.handleInstrumentList();
-            }
+            this.handleInstrumentList();
         },
         // 获取列表
         handleInstrumentList() {
@@ -1215,10 +1214,8 @@ export default {
     watch: {
 
         isReflesh: {
-            handler(newVal) {
-                if (!newVal) {
-                    this.handleInit()
-                }
+            handler() {
+                this.handleInstrumentList();
             }
         },
         isDrawVisible: {

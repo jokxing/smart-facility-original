@@ -15,9 +15,10 @@ export const DEMO_DEPARTMENTS = [
   {id: 900101, name: '演示运维部', departmentName: '演示运维部', parentId: 0, children: [], subDivisions: []},
   {id: 900102, name: '演示研发部', departmentName: '演示研发部', parentId: 0, children: [], subDivisions: []}
 ];
-/** Cascader (SearchForm) expects `types` + `childrenList`; store bootstrap still accepts `children`. */
+/** Cascader (SearchForm) expects `types` + `childrenList`; SelectAssetClassify label uses `code`. */
 export const DEMO_CATEGORIES = [
-  {id: 900201, name: '演示设备', catName: '演示设备', types: 1, parentId: 0, children: [], childrenList: []}
+  {id: 900201, name: '演示设备', catName: '演示设备', types: 1, code: 'DEMO-1', parentId: 0, children: [], childrenList: []},
+  {id: 900202, name: '演示辅助设备', catName: '演示辅助设备', types: 2, code: 'DEMO-2', parentId: 0, children: [], childrenList: []}
 ];
 export const DEMO_MENUS = [
   {id: 'ld', name: '设备管理', englishName: 'labDevice', path: '/ld/labdevice', subMenu: [
