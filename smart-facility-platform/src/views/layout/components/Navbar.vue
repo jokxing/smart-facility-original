@@ -110,7 +110,7 @@ export default {
     },
     data() {
         return {
-            title: '楚秀科技',
+            title: '智慧设施',
             url: require("../../../assets/bashboard/head-portrait.png"),
             name: localStorage.getItem("username"),
             activeIndex: "lhd",
@@ -214,10 +214,6 @@ export default {
                 logout().then((res) => {
                     if (res.code) {
                         let path = "/login";
-                        const runpengId = JSON.parse(localStorage.getItem("USERINFO")).companyId;
-                        if (runpengId == 189) {
-                            path = "/runpeng/login"
-                        }
                         localStorage.clear();
                         this.$message.success(this.$t('login.logoutMessage'));
                         setTimeout(() => {

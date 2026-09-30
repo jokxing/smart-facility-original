@@ -3,7 +3,7 @@
     <div class="map-set-left">
       <div class="left-top">
         <p :title="companyName" class="icon-building1">
-          {{ companyName ? companyName : "广州楚秀信息科技有限公司" }}
+          {{ companyName ? companyName : "智慧设施" }}
         </p>
       </div>
       <div class="scrollbar">
@@ -166,7 +166,7 @@ export default {
       isImage: false,
       dialogImageUrl: "",
       companyNames: [],
-      companyName: "楚秀信息科技有限公司",
+      companyName: "智慧设施",
       building: [],
       breadcrumb: [],
       tableType: TABLE_ARRAY[1],

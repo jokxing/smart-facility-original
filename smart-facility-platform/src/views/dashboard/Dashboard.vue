@@ -23,7 +23,7 @@
         <div class="right-menu">
           <el-dropdown trigger="click" @command="handleDropdownMenu">
             <div class="avatar-wrapper">
-              <div class="company-title">{{ companyName ? companyName : "广州楚秀信息科技有限公司" }}</div>
+              <div class="company-title">{{ companyName ? companyName : "智慧设施" }}</div>
               <i class="icon-down"></i>
             </div>
             <el-dropdown-menu slot="dropdown">
@@ -148,10 +148,6 @@ export default {
         logout().then((res) => {
           if (res.code) {
             let path = "/login";
-            const runpengId = JSON.parse(localStorage.getItem("USERINFO")).companyId;
-            if (runpengId == 189) {
-              path = "/runpeng/login"
-            }
             localStorage.clear();
             this.$message.success("退出登录成功，正在跳至首页……");
             setTimeout(() => {

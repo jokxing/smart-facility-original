@@ -11,7 +11,7 @@
             <div class="header">
                 <div class="logo" @click="$router.push('/dashboard')">
                     <img alt="" src="../../../src/assets/systemImages/logo2.png"/>
-                    <h4>{{ companyName ? companyName : "广州楚秀信息科技有限公司" }}</h4>
+                    <h4>{{ companyName ? companyName : "智慧设施" }}</h4>
                 </div>
                 <el-select
                     v-model="buildingVal"

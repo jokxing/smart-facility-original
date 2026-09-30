@@ -64,7 +64,7 @@ router.beforeEach(async (to, from, next) => {
     }
     return;
   }
-  document.title = i18n.t('route.' + title) || "楚秀科技";
+  document.title = i18n.t('route.' + title) || "智慧设施";
   //是否登录界面
   if (to.path === '/502') {
     next();

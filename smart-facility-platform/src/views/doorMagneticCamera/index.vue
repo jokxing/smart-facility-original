@@ -351,7 +351,7 @@ export default {
   computed: {
     // 判断是否是超管
     isSuperAdministrator() {
-      // 1-楚秀管理员，2-系统管理员，3-超级管理员，4-部门管理员，5-普通成员
+      // 1-平台管理员，2-系统管理员，3-超级管理员，4-部门管理员，5-普通成员
       let roleId =
         JSON.parse(localStorage.getItem('USERINFO')) &&
         JSON.parse(localStorage.getItem('USERINFO')).roleId

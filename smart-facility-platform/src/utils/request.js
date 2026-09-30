@@ -48,12 +48,6 @@ instance.interceptors.response.use(
                     return Promise.reject(new Error('演示登录已失效。'));
                 }
                 let path = "/login"
-                if (JSON.parse(localStorage.getItem("USERINFO"))) {
-                    const runpengId = JSON.parse(localStorage.getItem("USERINFO")).companyId;
-                    if (runpengId == 189) {
-                        path = "/runpeng/login"
-                    }
-                }
                 localStorage.removeItem("sessionId");
 
                 localStorage.clear();

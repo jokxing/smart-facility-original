@@ -372,30 +372,26 @@ export const postInstrumentUseCountStatistics = data => {
     headers: { "content-type": "application/json" },
   });
 };
-// 使用率统计V3负责人
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/useRateV5UsingPOST
+// 使用率统计V3负责人（原外部文档链接已移除）
 export const queryUseRateV3ManagerStatistics = data => {
   return post("/instrument/useRateV3/manager/statistics", data, {
     headers: { "content-type": "application/json" },
   });
 };
-// 使用率统计V3部门
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/useRateV4UsingPOST
+// 使用率统计V3部门（原外部文档链接已移除）
 export const queryUseRateV3DepartmentStatistics = data => {
   return post("/instrument/useRateV3/department/statistics", data, {
     headers: { "content-type": "application/json" },
   });
 };
-// 使用率统计V3房间
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/useRateV3UsingPOST
+// 使用率统计V3房间（原外部文档链接已移除）
 export const queryUseRateV3RoomStatistics = data => {
   return post("/instrument/useRateV3/room/statistics", data, {
     headers: { "content-type": "application/json" },
   });
 };
 
-// 使用率统计V3设备
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/useRateV7UsingPOST
+// 使用率统计V3设备（原外部文档链接已移除）
 export const queryUseRateV3InstrumentStatistics = data => {
   return post("/instrument/useRateV3/instrument/statistics", data, {
     headers: { "content-type": "application/json" },
@@ -403,8 +399,7 @@ export const queryUseRateV3InstrumentStatistics = data => {
 };
 
 
-// 使用率分级统计
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/classificationStatisticsV3UsingPOST
+// 使用率分级统计（原外部文档链接已移除）
 export const queryClassificationV3Statistics = data => {
   return post("/instrument/classificationV3/statistics", data, {
     headers: { "content-type": "application/json" },
@@ -412,16 +407,14 @@ export const queryClassificationV3Statistics = data => {
 };
 //
 
-// 根据设备类型获取设备名称
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/instrumentTypeNameUsingPOST
+// 根据设备类型获取设备名称（原外部文档链接已移除）
 export const queryinstrumentTypeByName = data => {
   return post("/instrument/instrumentType/name", data, {
     headers: { "content-type": "application/json" },
   });
 };
 
-// 导出设备使用率情况
-// http://47.107.102.103:9005/doc.html#/default/%E5%AE%9E%E9%AA%8C%E5%AE%A4%E8%AE%BE%E5%A4%87%E6%8E%A5%E5%8F%A3/exportInstrumentUseRateUsingPOST
+// 导出设备使用率情况（原外部文档链接已移除）
 export function exportUseRate(data) {
   return request({
     url: "/instrument/export/useRate",

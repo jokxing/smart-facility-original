@@ -134,7 +134,6 @@
 import {getCaptchaCode, getLang, getUserInfo, getWeixin, login} from "@/api/login";
 import { postDataAuthDistribute } from "@/api/dataAuth";
 import store from "@/store"
-import { getQuery } from "@/utils/methods";
 import {DEMO_CREDENTIALS} from "@/mock/fixtures/auth";
 
 let time;
@@ -270,16 +269,7 @@ export default {
         if (this.isDemo) {
           return this.$router.push('/dashboard');
         }
-        const path = decodeURIComponent(getQuery().redirect);
-        if (path.indexOf("runpeng") !== -1) {
-          if (res.items.companyId === 189) {
-            this.$router.push("/floor/view");
-          } else {
-            this.$router.push("/dashboard");
-          }
-        } else {
-          this.$router.push("/dashboard");
-        }
+        this.$router.push("/dashboard");
 
         if(res.items.roleId === 2){
           if(res.items.deviceSeeFlag === 0){

@@ -1,5 +1,5 @@
 {
-  "name": "chuxou-saas-web",
+  "name": "smart-facility-platform",
   "version": "2.1.1",
   "private": true,
   "scripts": {
@@ -77,15 +77,11 @@
     "preset": "@vue/cli-plugin-unit-jest"
   },
   "main": "index.js",
-  "author": "chuxouxinxi",
-  "license": "MIT",
-  "description": "## 下载第三方依赖 ``` yarn install或 npm install ```",
+  "author": "local-demo",
+  "license": "UNLICENSED",
+  "description": "智慧设施平台 Vue 2 本地演示副本（脱敏修改中）",
   "directories": {
     "test": "tests"
   },
-  "keywords": [],
-  "repository": {
-    "type": "git",
-    "url": "gitlab.chuxou.com/groups/chuxou-web-2.0/chuxou-saas-web-v2.git"
-  }
+  "keywords": ["smart-facility", "demo", "vue2"]
 }

@@ -59,10 +59,10 @@ export default {
         keyword: ""
       },
       upkeepPlan: [
-        {name: "空调系统定期保养20220601", no: "9000010120", userName: "段三石",thenDate: "2022-06-01", nextDate: "2022-07-01", assetName: "冷冻机组"},
-        {name: "冷冻机系统定期保养20220523", no: "9000010121", userName: "段三石",thenDate: "2022-05-23", nextDate: "2022-06-22", assetName: "冷冻机组"},
-        {name: "除臭系统定期保养20220528", no: "9000010122", userName: "许佳佳",thenDate: "2022-05-28", nextDate: "2022-06-27", assetName: "冷冻机组"},
-        {name: "水循环系统定期保养20220510", no: "9000010123", userName: "莫小熙",thenDate: "2022-05-10", nextDate: "2022-07-10", assetName: "冷冻机组"},
+        {name: "演示空调保养计划-A", no: "DEMO-UPKEEP-001", userName: "演示员甲", thenDate: "2026-01-01", nextDate: "2026-02-01", assetName: "演示冷冻机组"},
+        {name: "演示冷冻机保养计划-B", no: "DEMO-UPKEEP-002", userName: "演示员乙", thenDate: "2026-01-08", nextDate: "2026-02-08", assetName: "演示冷冻机组"},
+        {name: "演示除臭系统保养-C", no: "DEMO-UPKEEP-003", userName: "演示员丙", thenDate: "2026-01-15", nextDate: "2026-02-15", assetName: "演示冷冻机组"},
+        {name: "演示水循环保养-D", no: "DEMO-UPKEEP-004", userName: "演示员丁", thenDate: "2026-01-22", nextDate: "2026-03-22", assetName: "演示冷冻机组"},
       ],
       pickerOptions: picker
     }

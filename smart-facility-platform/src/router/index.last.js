@@ -12,7 +12,7 @@ export const routes = [
     component: () =>
       import(/* webpackChunkName: "login" */ "../views/login/Login"),
     meta: {
-      title: "楚秀科技-登录"
+      title: "智慧设施-登录"
     }
   },
   {
@@ -20,7 +20,7 @@ export const routes = [
     component: () =>
       import(/* webpackChunkName: "login" */ "../views/login/Login"),
     meta: {
-      title: "楚秀科技-登录"
+      title: "智慧设施-登录"
     }
   },
   {
@@ -31,7 +31,7 @@ export const routes = [
         /* webpackChunkName: "dashboard" */ "../views/dashboard/Dashboard"
       ),
     meta: {
-      title: "楚秀科技-首页"
+      title: "智慧设施-首页"
     }
   },
   {
@@ -45,7 +45,7 @@ export const routes = [
         component: () =>
           import(/* webpackChunkName: "gateway" */ "../views/gateway/Gateway"),
         meta: {
-          title: "楚秀科技-集中器",
+          title: "智慧设施-集中器",
           name: "集中器管理",
           icon: "icon-gateway",
           noCache: true,
@@ -58,7 +58,7 @@ export const routes = [
         component: () =>
           import(/* webpackChunkName: "device" */ "../views/device/Device"),
         meta: {
-          title: "楚秀科技-记录仪",
+          title: "智慧设施-记录仪",
           name: "记录仪管理",
           icon: "icon-set-up",
           noCache: true,
@@ -74,7 +74,7 @@ export const routes = [
             /* webpackChunkName: "gatewayDetail" */ "../views/gateway/GatewayDetail"
           ),
         meta: {
-          title: "楚秀科技-集中器详情",
+          title: "智慧设施-集中器详情",
           name: "集中器详情",
           icon: "icon-networkequipment",
           noCache: true,
@@ -87,7 +87,7 @@ export const routes = [
     path: "/lab",
     component: () => import("../views/labDevice"),
     meta: {
-      title: "楚秀科技-实验室设备管理"
+      title: "智慧设施-实验室设备管理"
     }
   }
 ];

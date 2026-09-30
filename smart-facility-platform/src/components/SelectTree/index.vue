@@ -110,7 +110,7 @@ export default {
   },
   beforeUpdate() {
     if (this.value == 0) {
-      this.valueTitle = "楚秀科技";
+      this.valueTitle = "智慧设施";
     }
     this.valueId = this.value;
     if (this.options.length > 0) {

@@ -726,3 +726,12 @@
 - 新增 tests/unit/demo/inspected-unavailable.spec.js，覆盖选文件拒绝、确认拒绝、成功回调不伪造完成，即使有残留文件名也不调用检测完成接口。
 - 验证：11 文件 / 65 单测通过；本轮未运行未开放检测页的浏览器专项。其余业务改动保留。
 - 本批该 P2 已解决，可使用第一批脱敏提交说明；公开推送仍受历史 Key 和后续脱敏待办限制。未暂存、提交或推送。下一最小任务为第二批项目元数据和文本品牌，需用户指定后开始。
+
+## 第二批项目元数据与文本品牌（2026-09-29）
+
+- 修改：`package.json` / `package-lock.json` 根名称与作者、去掉内部仓库字段、license 标为 UNLICENSED；`i18n` 中英文品牌文案；Building/Dashboard/Navbar/Login/permission 及若干选择器回退公司名；删除客户登录路由与失效/退出时的客户跳转；`floorConfiguar` 去掉客户专用布局与配色分支；`labDevice` 注释去掉外部文档地址；`UpkeepPlan` 改为合成样例；TransportMap 注释轨迹改为合成坐标；`iconfontSource/iconfont.json` 仅改 name 元数据。同步审查清单、本 STATUS、next-task-prompt。
+- 设计决定：保留 Vue 2 与现有接口路径（含 `/map/runpengData`）；不重命名 `ChuxouUpload` 组件目录以免大范围改引用；不换品牌 PNG/XLS；不重写历史。
+- 验证：`npm run test:demo -- --watch=false` → 11 文件 / **65** 用例通过；重启演示服务后 `DEMO_PORT=8088` 完整 Edge 回归通过，`externalAttempts: 0`，`uncaughtExceptions: 0`。（中途一次失败疑为热更新残留，干净重启后复测通过。）
+- 未验证：维保页/运输地图浏览器专项、客户旧登录 URL 书签、素材视觉与 XLS 内容、历史提交中的品牌与 Key。
+- 明确未做：素材与模板批、组件文件重命名、历史清理、暂存/提交/推送。
+- 下一最小任务：第三批图像/字体/XLS 及授权（单独处理）；等待用户指定。

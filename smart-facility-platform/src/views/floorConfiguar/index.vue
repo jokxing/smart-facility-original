@@ -130,32 +130,14 @@
                   y: 30  / (item.scaleY ? item.scaleY : 1),
                   width: 240 / (item.scaleX ? item.scaleX : 1),
                   height: 95 / (item.scaleY ? item.scaleY : 1),
-                  fill: runpengId === 189 ? '' : '#335c90e0',
+                  fill: '#335c90e0',
                   cornerRadius: 10
                 }"
               />
               <div v-for="(sensors, index1) in handleSensors(item)" :key="index1">
                 <div v-if="isData || downId == item.id">
                   <div v-if="index1 <= 5">
-                    <!-- 润鹏 --- 开始 -->
-                    <div v-if="runpengId === 189">
-                      <v-text
-                          :key="index1"
-                          :config="handleAliasValConfigRP(index1,item,sensors)"
-                      >
-                      </v-text>
-                      <!-- <v-text
-                          :key="index1"
-                          :config="handleAliasConfigRP(index1,item,sensors)"
-                      >
-                      </v-text> -->
-                      <!-- <v-text
-                          :key="sensors.id"
-                          :config="handleValConfigRP(index1,item,sensors)">
-                      </v-text> -->
-                    </div>
-                    <!-- 润鹏 --- 结束 -->
-                    <div v-else>
+                    <div>
                       <v-text
                           v-if="index1 %3 === 0"
                           :key="index1"
@@ -278,7 +260,6 @@ import RoomDrawerNew from "@/views/room/components/RoomDrawerNew";
 import {getDepartment} from "@/api/department";
 import {getRoomDetail} from "@/api/room";
 import "@/plugins/konva";
-import {getBuilding} from "@/api/map";
 
 const isDemo = process.env.VUE_APP_DEMO === "true";
 const DEMO_LAYOUT_ROOM_IDS = [950001, 950003];
@@ -300,7 +281,6 @@ export default {
   },
   data() {
     return {
-      runpengId: JSON.parse(localStorage.getItem("USERINFO")).companyId,
       loading: true,
       errorImage: null,
       offlineImage: null,
@@ -382,26 +362,7 @@ export default {
         .then((pic) => {
           this.dataBg = pic;
         })
-    const runpengId = JSON.parse(localStorage.getItem("USERINFO")).companyId;
-
-    if (runpengId == 189) {
-      this.isShowFloor = true;
-      this.isFloor = true;
-      var buildingVal = this.$route.query.buildingVal ? this.$route.query.buildingVal : 41;
-      getBuilding({gardenId: buildingVal}).then(res => {
-        this.buildingData = res.items;
-        this.buildingNumIndex = res.items[0].id;
-        this.floorBtns = [];
-        res.items.map(item => {
-          if (item["subDivisions"]) {
-            item.subDivisions.map(sub => {
-              this.floorBtns.unshift(sub)
-            })
-          }
-        })
-        this.handleIsUrlNoQuery();
-      });
-    } else if (this.$route.query) {
+    if (this.$route.query) {
       let {floorId} = this.$route.query;
       this.floorId = floorId * 1;
       if (floorId) {
@@ -533,7 +494,7 @@ export default {
         x: x / (item.scaleX ? item.scaleX : 1),
         y: this.handleTextY(index1) / (item.scaleY ? item.scaleY : 1),
         fontSize: 12 / (item.scaleX ? item.scaleX : 1),
-        fill: this.runpengId === 189 ? '#70d8ff' : '#fff',
+        fill: '#fff',
         text: sensors['sensorType'] ? sensors.sensorType.sensorAlias : '',
       };
       return data
@@ -1119,13 +1080,13 @@ export default {
       let color = "";
       switch (status) {
         case 1:
-          color = this.runpengId === 189 ? "#05c07e" : "#19E98E";
+          color = "#19E98E";
           break;
         case 2:
-          color = this.runpengId === 189 ? "#cf2c2c" : "#F76666";
+          color = "#F76666";
           break;
         case -100:
-          color = this.runpengId === 189 ? "#888" : "#B7C3D9";
+          color = "#B7C3D9";
           break;
         default:
           color = "#ffffff";

@@ -670,14 +670,6 @@ export const routes = [
         }
     },
     {
-        path: "/runpeng/login",
-        name: "Login",
-        component: () => import("../views/login/Login"),
-        meta: {
-            title: "login"
-        }
-    },
-    {
         //楼宇3D
         path: '/building',
         name: "Building",
