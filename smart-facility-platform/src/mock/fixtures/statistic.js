@@ -133,3 +133,60 @@ export function getStatisticEquipmentAlarm() {
     }))
     .filter(item => item.data.length > 0);
 }
+
+function windowDays(params = {}) {
+  const begin = parseAt(params.beginTime);
+  const end = parseAt(params.endTime);
+  if (Number.isFinite(begin) && Number.isFinite(end) && begin <= end) {
+    const beginDay = Math.floor((begin + 8 * 3600000) / 86400000);
+    const endDay = Math.floor((end + 8 * 3600000) / 86400000);
+    return Math.max(1, endDay - beginDay + 1);
+  }
+  const dateType = Number(params.dateType);
+  if (dateType === 2) return 7;
+  if (dateType === 3) return 30;
+  return 1;
+}
+
+function matchUseType(row, typeFilter) {
+  const key = Number(typeFilter);
+  if (!key || Number.isNaN(key)) return true;
+  if (key === 1) return Number(row.types) === 1;
+  if (key === 2) return Number(row.types) === 2;
+  // type=3 IT：演示无对应 types
+  if (key === 3) return false;
+  return true;
+}
+
+/**
+ * GET /statistic/instrument/use — Statistics 4C bar chart.
+ * Derived from active instruments + demo clock window; not live meter samples.
+ * queryType 2 (electricity) → empty list.
+ */
+export function getStatisticInstrumentUse(params = {}) {
+  const queryType = Number(params.queryType);
+  if (queryType === 2) {
+    return {instrumentUseList: []};
+  }
+  const days = windowDays(params);
+  const rows = listActiveInstrumentSeeds()
+    .map(buildInstrumentRow)
+    .filter(Boolean)
+    .filter(row => matchUseType(row, params.type))
+    .map(row => {
+      const hours = Number(row.workingHours);
+      const workHours = Number.isFinite(hours) && hours > 0 ? hours : 7.5;
+      const factor = 0.5 + ((Number(row.id) % 7) / 10);
+      const useTime = Math.round(workHours * days * 3600 * factor);
+      const useCount = Math.max(1, Math.round(days * (1 + (Number(row.id) % 5))));
+      return {
+        instrumentName: row.name,
+        useTime,
+        useCount,
+        electricPower: 0
+      };
+    });
+  const metric = queryType === 1 ? 'useCount' : 'useTime';
+  rows.sort((a, b) => b[metric] - a[metric] || a.instrumentName.localeCompare(b.instrumentName, 'zh'));
+  return {instrumentUseList: rows};
+}

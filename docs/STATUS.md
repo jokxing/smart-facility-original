@@ -1943,3 +1943,28 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`feat: 接通数据统计设备状态饼图演示`。
 - 下一提示词：`docs/next-task-prompt.md`（4C 设备使用统计）。
+
+## 2026-10-01 — 数据统计 4C（设备使用统计）
+
+### 做了什么
+
+- 契约 `docs/statistics-4c-contract.md`；Mock `GET /statistic/instrument/use`（活跃仪器 + 演示时钟窗口派生时长/次数；电量维度空列表；UI 去掉电量按钮）。
+- `Statistics.vue` 开放使用统计条图；使用率排行仍隐藏。
+- 单测 `statistics-4c.spec.js`；浏览器 `test:demo:statistics:4c`，证据 `docs/evidence/statistics-4c`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：29 套 / 155 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:4c` → `externalAttempts=0`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 可用 / 不能用
+
+- **可用**：4A/4B + 使用统计（时长/次数、日周月、类型筛；行政/IT 可空）。
+- **不能用**：使用率排行、真实电量、`/ds/device/chart`。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`feat: 接通数据统计设备使用统计演示`。
+- 下一提示词：`docs/next-task-prompt.md`（4D 使用率排行）。

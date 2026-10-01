@@ -28,8 +28,7 @@
         <div class="">
             <EquipmentStatePieCharts/>
         </div>
-        <!-- 4A/4B：使用统计与使用率仍不开放 -->
-        <template v-if="showDeferredStats">
+        <!-- 4C：设备使用统计已开放 -->
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceUserStat')"></el-descriptions>
         <div class="bg">
             <chart-dimension
@@ -57,6 +56,8 @@
                 <data-empty v-loading="eqiupmentCharts.loading" v-else/>
 
         </div>
+        <!-- 使用率排行仍不开放 -->
+        <template v-if="showDeferredStats">
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceUserRateStat')"></el-descriptions>
         <div class="bg">
             <chart-dimension
@@ -167,7 +168,7 @@ export default {
     data() {
         const _this = this;
         return {
-            // 4B: pie open; use/ranking still behind showDeferredStats
+            // 4C: use chart open; ranking still behind showDeferredStats
             showDeferredStats: false,
             colors: ['#BFBFBF', '#FEC000', '#262626', '#0070c0', '#808080'],
             overview: [
@@ -284,8 +285,7 @@ export default {
             },
             useStatisc: [
                 {index: 0, label: _this.$t('hardware.duration')},
-                {index: 1, label: _this.$t('labDevice.degree')},
-                {index: 2, label: _this.$t('labDevice.electricity1')},
+                {index: 1, label: _this.$t('labDevice.degree')}
             ],
             usePush: [
                 {index: 1, label: _this.$t('common.workday')},
@@ -380,6 +380,7 @@ export default {
                 this.eqiupmentData.rows = labOverview && labOverview.length ? labOverview : [];
                 this.equipmentOverview.rows = equipmentOverview && equipmentOverview.length ? equipmentOverview : [];
             });
+            this.handleEquipmentUsers();
         },
         timeTransform(sec) {
             if (this.equipmentUse.queryType !== 0) {
