@@ -192,7 +192,7 @@
                                         <div class="table-default">
                                             <SelfTable
                                                 ref="multipleTable"
-                                                :columns="TABLECOLUMN"
+                                                :columns="deviceTableColumns"
                                                 v-loading="loading"
                                                 :defaultSort="defaultSort"
                                                 :loading="refreshLoading"
@@ -267,6 +267,14 @@
                                                     </span>
                                                     </template>
                                                 </el-table-column>
+                                                <el-table-column v-if="isDemo" slot="boundHardware" label="智能硬件绑定" width="165">
+                                                    <template slot-scope="scope">
+                                                        <el-tag size="small" :type="scope.row.boundHardware ? 'warning' : 'info'">
+                                                            {{ scope.row.boundHardware ? '已绑定' : '未绑定' }}
+                                                        </el-tag>
+                                                        <el-button v-if="scope.row.boundHardware" type="text" @click="handleSeedDetail(scope.row)">查看 / 解绑</el-button>
+                                                    </template>
+                                                </el-table-column>
                                                 <el-table-column
                                                     slot="createDate"
                                                     :label="$t('common.creatDate')"
@@ -291,6 +299,8 @@
                                                         <el-button
                                                             class="abnormal"
                                                             type="text"
+                                                            :disabled="isDemo && scope.row.boundHardware"
+                                                            :title="isDemo && scope.row.boundHardware ? '请先通过查看 / 解绑解除智能硬件绑定' : ''"
                                                             @click="handleDelete(scope.row)"
                                                         >{{ $t('common.delete') }}
                                                         </el-button>
@@ -992,6 +1002,10 @@ export default {
         },
         // 批量删除
         handleBatchDeleteDevice() {
+            if (this.isDemo && this.multipleSelection.some(row => row.boundHardware)) {
+                this.$message.warning('所选设备包含已绑定智能硬件的设备，请先解绑后删除。');
+                return;
+            }
             this.form.ids = []
             for (var i = 0; i < this.multipleSelection.length; i++) {
                 this.form.ids.push(this.multipleSelection[i].id)
@@ -1218,6 +1232,15 @@ export default {
         }
     },
     computed: {
+        deviceTableColumns() {
+            if (!this.isDemo) return this.TABLECOLUMN;
+            const columns = this.TABLECOLUMN.slice();
+            const index = columns.findIndex(item => item.dataIndex === 'createDate');
+            columns.splice(index < 0 ? columns.length : index, 0, {
+                title: '智能硬件绑定', dataIndex: 'boundHardware', slot: 'boundHardware'
+            });
+            return columns;
+        },
         ...mapState('lab', {
             modalVisible: 'modalVisible',
             isReflesh: 'isReflesh',

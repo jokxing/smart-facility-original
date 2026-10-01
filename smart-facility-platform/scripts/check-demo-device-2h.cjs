@@ -181,27 +181,10 @@ const findDrawer = `(() => {
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.dataSource.some(r => r.id === 970001 && r.boundHardware)`, 'row shows bound');
     await screenshot('01-bound-list');
 
-    // Delete while bound must be blocked (UI early return)
-    await evaluate(`(() => {
-      const page = ${findLab};
-      window.__demoLastError = '';
-      const original = page.$message;
-      page.$message = function(opts) {
-        if (opts && opts.message) window.__demoLastError = String(opts.message);
-        if (typeof original === 'function') return original(opts);
-      };
-      page.$message.error = (msg) => { window.__demoLastError = String(msg); };
-      page.$message.success = () => {};
-      page.$message.warning = () => {};
-      page.$message.info = () => {};
-      page.$confirm = () => Promise.resolve();
-      const row = page.dataSource.find(r => r.id === 970001);
-      page.handleDelete(row);
-    })()`);
-    await sleep(400);
-    assert.match(await evaluate('window.__demoLastError || ""'), /先解绑/);
-    assert.equal(await evaluate(`${findLab}.dataSource.some(r => r.id === 970001)`), true);
-    await screenshot('02-delete-blocked');
+    // Assert rendered status and actual disabled button, not just fixture fields.
+    const rowDom = "Array.from(document.querySelectorAll('.el-table__body tr')).find(row => row.textContent.includes('DEMO-EQ-970001'))";
+    assert.equal(await evaluate(`${rowDom}.textContent.includes('已绑定')`), true);
+    assert.equal(await evaluate("Array.from(document.querySelectorAll('.el-table__body tr')).some(row => row.textContent.includes('演示培养箱') && row.querySelector('button.abnormal:disabled'))"), true);
 
     // Open detail and unbind
     await evaluate(`(() => {
@@ -214,26 +197,32 @@ const findDrawer = `(() => {
 
     await evaluate(`(() => {
       const drawer = ${findDrawer};
-      drawer.$confirm = () => Promise.resolve();
       return drawer.handleUnbindHardware();
     })()`);
+    await sleep(500);
+    await screenshot('03b-confirm');
+    await waitPage("!!Array.from(document.querySelectorAll('.el-message-box button')).find(el => el.textContent.trim() === '确定')", 'unbind confirmation');
+    await evaluate("Array.from(document.querySelectorAll('.el-message-box button')).find(el => el.textContent.trim() === '确定').click()");
     await waitPage(`!!(${findDrawer} && ${findDrawer}.detail && !${findDrawer}.detail.boundHardware)`, 'drawer unbound');
     await screenshot('04-drawer-unbound');
 
     await evaluate(`(() => {
       const page = ${findLab};
       page.isDrawer = false;
-      page.handleInstrumentList();
     })()`);
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.dataSource.some(r => r.id === 970001 && !r.boundHardware)`, 'list unbound');
+    assert.equal(await evaluate(`${rowDom}.textContent.includes('未绑定')`), true);
+    assert.equal(await evaluate("Array.from(document.querySelectorAll('.el-table__body tr')).some(row => row.textContent.includes('演示培养箱') && row.querySelector('button.abnormal:not(:disabled)'))"), true);
+    await screenshot('04b-list-unbound');
 
     await evaluate(`(() => {
       const page = ${findLab};
-      page.$confirm = () => Promise.resolve();
       const row = page.dataSource.find(r => r.id === 970001);
       if (!row || row.boundHardware) throw new Error('row still bound or missing');
       page.handleDelete(row);
     })()`);
+    await waitPage("!!Array.from(document.querySelectorAll('.el-message-box button')).find(el => el.textContent.trim() === '确定')", 'delete confirmation');
+    await evaluate("Array.from(document.querySelectorAll('.el-message-box button')).find(el => el.textContent.trim() === '确定').click()");
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 11`, 'deleted total');
     assert.equal(await evaluate(`${findLab}.dataSource.every(r => r.id !== 970001)`), true);
     await screenshot('05-deleted-after-unbind');

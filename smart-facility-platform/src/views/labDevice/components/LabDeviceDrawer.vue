@@ -158,7 +158,7 @@
                                 </el-link>
                             </el-descriptions-item>
                             <el-descriptions-item v-if="isDemo" :label="$t('labDevice.bindDevice')">
-                                <span v-if="!detail.boundHardware">{{ $t('common.notMessage') }}</span>
+                                <span v-if="!detail.boundHardware">未绑定</span>
                                 <template v-else>
                                     <span class="abnormal">已绑定智能硬件</span>
                                     <el-link type="primary" :underline="false" @click="handleUnbindHardware">
