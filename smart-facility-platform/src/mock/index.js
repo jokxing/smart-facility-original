@@ -7,6 +7,7 @@ import roomRoutes from './handlers/room';
 import instrumentRoutes from './handlers/instrument';
 import alarmLogRoutes from './handlers/alarmLog';
 import equipmentRoutes from './handlers/equipment';
+import statisticRoutes from './handlers/statistic';
 import {setBoundEquipmentTypesResolver} from './fixtures/instrument';
 import {listBoundEquipmentTypesForInstrument} from './fixtures/equipment';
 
@@ -22,5 +23,6 @@ export default createMockAdapter([
   ...roomRoutes,
   ...instrumentRoutes,
   ...alarmLogRoutes,
-  ...equipmentRoutes
+  ...equipmentRoutes,
+  ...statisticRoutes
 ]);

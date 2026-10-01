@@ -299,4 +299,33 @@ export function listDemoSensorTypesV2() {
   ];
 }
 
+/**
+ * Statistics 4A — instrument historical alarms with process overlay (same ids as alarm log).
+ * Unprocessed: status !== 1 / process !== true.
+ */
+export function listInstrumentAlarmEventsForStatistics() {
+  return seedAlarmLogRecords().map(applyHandles).map(record => ({
+    thingsId: record.thingsId,
+    thingsName: record.equipmentName,
+    sensorId: record.sensorCatId,
+    sensorName: record.sensorAlias,
+    at: record.monitorAlarmStartTime,
+    process: !!record.process,
+    status: Number(record.status)
+  }));
+}
+
+/** Statistics 4A — room historical alarms (no process path). */
+export function listRoomAlarmEventsForStatistics() {
+  return DEMO_ALARM_EVENTS.filter(event => event.thingsType === 11).map(event => ({
+    thingsId: event.thingsId,
+    thingsName: event.thingsName,
+    sensorId: event.sensorId,
+    sensorName: event.sensorName,
+    at: event.at,
+    process: false,
+    status: 2
+  }));
+}
+
 export {ALARM_HANDLE_STORAGE_KEY};

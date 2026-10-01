@@ -628,6 +628,26 @@ const DEMO_EQUIPMENT_OFFLINE_ALARMS = Object.freeze([
 ]);
 
 /**
+ * Statistics 4A — all hardware historical alarms with handle overlay.
+ * kind: threshold | offline；已处理看 process / status===1。
+ */
+export function listEquipmentAlarmEventsForStatistics() {
+  return DEMO_EQUIPMENT_ALARMS.concat(DEMO_EQUIPMENT_OFFLINE_ALARMS).map(item => {
+    const merged = applyEquipmentAlarmHandle(item);
+    return {
+      id: merged.id,
+      equipmentId: merged.equipmentId,
+      equipmentName: merged.equipmentName,
+      kind: merged.kind,
+      typeName: merged.kind === 'offline' ? '离线' : '阈值',
+      at: merged.alarmStartTime || merged.time,
+      process: !!merged.process,
+      status: Number(merged.status)
+    };
+  });
+}
+
+/**
  * POST /monitorIndicator/historyAlarmRecord — hardware drawer alarm table (type=1).
  * objSensorIds → threshold events; objId without sensor ids → offline events only.
  */

@@ -23,6 +23,7 @@
     "test:demo:room:3b": "node scripts/check-demo-room-3b.cjs",
     "test:demo:room:3c": "node scripts/check-demo-room-3c.cjs",
     "test:demo:room:3d": "node scripts/check-demo-room-3d.cjs",
+    "test:demo:statistics:4a": "node scripts/check-demo-statistics-4a.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",

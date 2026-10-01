@@ -23,6 +23,8 @@
         <div class="bg">
             <histogram-chart :height="'400px'" :data-charts="eqiupmentAlarmData" :legend-show="true"/>
         </div>
+        <!-- 4A：以下区块暂不开放，避免请求未接入接口 -->
+        <template v-if="showDeferredStats">
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceStatusStat')"></el-descriptions>
         <div class="">
             <EquipmentStatePieCharts/>
@@ -121,6 +123,7 @@
             </div>
         </div>
         <use-ran-high-search ref="UseRanHighSearch" @handle="handleHigthSearch"/>
+        </template>
     </div>
 </template>
 
@@ -163,6 +166,8 @@ export default {
     data() {
         const _this = this;
         return {
+            // 4A slice: keep overview + alarm charts only
+            showDeferredStats: false,
             colors: ['#BFBFBF', '#FEC000', '#262626', '#0070c0', '#808080'],
             overview: [
                 {
@@ -332,7 +337,7 @@ export default {
                     },
                     {
                         title: this.$t('statistics.deviceAll'),
-                        path: "/lhd/device",
+                        path: "/lhd/hardware/home",
                         id: "lhd",
                         total: items.equipmentTotal ? items.equipmentTotal : 0,
                         normal: items.equipmentNormalCount ? items.equipmentNormalCount : 0,
@@ -345,18 +350,20 @@ export default {
             this.eqiupmentAlarmData.loading = true;
             getStatisticEquipmentAlarm().then(res => {
                 this.eqiupmentAlarmData.loading = false;
-                for (let i = 0; i < res.items.length; i++) {
-                    let obj = {lineName: res.items[i].lineName};
-                    for (let j = 0; j < res.items[i].data.length; j++) {
-                        let str = res.items[i].data[j].typeName;
+                this.eqiupmentAlarmData.columns = ["lineName"];
+                this.eqiupmentAlarmData.rows = [];
+                const items = (res && res.items) || [];
+                for (let i = 0; i < items.length; i++) {
+                    let obj = {lineName: items[i].lineName};
+                    for (let j = 0; j < items[i].data.length; j++) {
+                        let str = items[i].data[j].typeName;
                         this.eqiupmentAlarmData.columns.push(str)
-                        obj[str] = res.items[i].data[j].count;
+                        obj[str] = items[i].data[j].count;
                     }
                     this.eqiupmentAlarmData.columns = [...new Set(this.eqiupmentAlarmData.columns)];
                     this.$set(this.eqiupmentAlarmData.rows, i, obj);
                 }
             });
-            this.handleEquipmentUsers();
             this.instrumentOverview.loading = true;
             this.equipmentOverview.loading = true;
             this.eqiupmentData.loading = true;
@@ -368,11 +375,10 @@ export default {
                 this.equipmentOverview.columns = ["name", "count"];
                 this.instrumentOverview.columns = ["name", "count"];
                 this.eqiupmentData.columns = ["name", "count"];
-                this.instrumentOverview.rows = instrumentOverview.length ? instrumentOverview : this.eqiupmentData.rows;
-                this.eqiupmentData.rows = labOverview.length && labOverview;
-                this.equipmentOverview.rows = equipmentOverview.length ? equipmentOverview : this.eqiupmentData.rows;
+                this.instrumentOverview.rows = instrumentOverview && instrumentOverview.length ? instrumentOverview : [];
+                this.eqiupmentData.rows = labOverview && labOverview.length ? labOverview : [];
+                this.equipmentOverview.rows = equipmentOverview && equipmentOverview.length ? equipmentOverview : [];
             });
-            this.handleGetInstrumentUserRanKing();
         },
         timeTransform(sec) {
             if (this.equipmentUse.queryType !== 0) {

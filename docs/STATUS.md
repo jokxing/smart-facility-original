@@ -1892,3 +1892,29 @@
 - 页码2由脚本设置以构造回归前提，实际点击分类与搜索；编辑分类分支由单测验证。未跑生产构建、全站浏览器、真实后端或其它浏览器。
 - 同步复盘、契约、指南及下一任务。下一任务为数据统计4A总览与告警统计只读演示，交另AI；本轮未修改统计模块。
 - 未安装依赖、未提交推送。建议commit：fix: 修复房间设备分类筛选分页与素材展示。
+
+## 2026-10-01 — 数据统计 4A（总览与告警只读）
+
+### 做了什么
+
+- 契约 `docs/statistics-4a-contract.md`：钉死 overview / alarm/overview / equipment/alarm 字段与当前状态 vs 历史告警口径。
+- Mock：`fixtures/statistic.js` + `handlers/statistic.js`；复用活跃仪器、房间 dashboard、硬件种子与共享告警（仪器报警记录处理、硬件阈值/离线告警处理影响环/柱）。
+- 放行 `/ds/statistics`（permission + DEMO_MENUS）；`Statistics.vue` 隐藏利用率/电量/排行/状态饼图且不发未接请求；硬件卡跳转修正为 `/lhd/hardware/home`。
+- 单测 `statistics-4a.spec.js`；浏览器 `test:demo:statistics:4a`，证据 `docs/evidence/statistics-4a`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：27 套 / 149 项通过。
+- 演示编译 `http://127.0.0.1:8090`；`$env:DEMO_PORT='8090'; npm run test:demo:statistics:4a` → `externalAttempts=0`。
+- 未跑生产构建、全站浏览器回归、真实后端。
+
+### 可用 / 不能用
+
+- **可用**：首页「数据统计」→ 总览三卡 + 报警三环 + 硬件告警柱图；增删仪器与告警处理影响对应统计。
+- **不能用**：设备状态饼图、使用统计、使用率排行、电量、`/ds/device/chart`。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`feat: 接通数据统计总览与告警只读演示`。
+- 下一提示词：`docs/next-task-prompt.md`（4B 设备状态饼图）。
