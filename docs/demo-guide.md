@@ -1,10 +1,10 @@
-# 本地演示：含房间管理列表与只读详情（3A）
+# 本地演示：含房间管理至筛选导出（3A–3C）
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表与只读详情（3A）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/rm/room`。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/rm/room`。
 
 首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开详情；可编辑名称/部门/分类；可单条/批量删除（**已绑定智能硬件须先解绑**）；可手填新增；可 XLSX 导入（先预览再确认）；可导出。批量改部门等仍拒绝。
 
-首页「房间管理」进入房间列表：关键词/部门/位置/状态筛选、分页、统计卡。点房间名称打开只读详情（基本信息 + 已上图关联仪器）。**不开放**新增/编辑/删除/导入/导出；关联硬件类型筛选取消（不假生效）。
+首页「房间管理」进入房间列表：关键词/部门/位置/状态筛选、分页、统计卡；可**导出**当前筛选全部匹配行。点房间名称打开只读详情（基本信息 + 已上图关联仪器 + 已绑定智能硬件只读表）。**不开放**新增/编辑/删除/导入/绑定解绑；列表上的关联硬件类型筛选取消（不假生效）。
 
 ## 启动
 
@@ -42,7 +42,9 @@ npm run demo
 | 仪器解绑 | `GET /instrument/unbind?instrumentId=`（清智能硬件绑定；绑定中不可删） |
 | 房间列表 / 统计 | `POST /room/list`；`GET /room/dashboardV1`（950xxx 共享空间；设计器仅 `floorId` 仍空侧栏） |
 | 房间详情 / 已上图仪器 | `GET /room/detail`；`GET /room/monitor/instrument`（空间归属且已上图） |
-| 房间写 | add/update/remove/batch/export/goods/remove **明确拒绝** |
+| 房间关联硬件只读 | `GET /monitorIndicator/things/newList?objType=3`（共享 `equipmentBindings` type:11） |
+| 房间导出 | `POST /room/export`（当前筛选 → 本地 XLSX，忽略分页） |
+| 房间写 | add/update/remove/batch/goods/remove **明确拒绝**；导入未开放 |
 | 设备只读详情 | `GET /instrument/detail`；监测标签 `getOpenMonitorFlag` / `getMonitorFlag` |
 | 设备历史曲线 | `GET /monitorIndicator/monitorInfo`（离线为空）；`historyPage` 空表桩 |
 | 仪器其它写 | `batch/update` **明确拒绝** |
@@ -67,9 +69,9 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:room:3a
-# 可选：npm run test:demo:device:2h
-# 可选：npm run test:demo:hardware:1b
+npm run test:demo:room:3c
+# 可选：npm run test:demo:room:3b
+# 可选：npm run test:demo:room:3a
 ```
 
 顶栏「系统 → 报警记录」支持多选批量处理（须有处理时间与类型）。曲线非法自定义日期应失败/空态，不再变成默认窗口。
@@ -112,3 +114,11 @@ npm run test:demo:room:3a
 ### 房间管理列表与只读详情（3A）
 
 首页「房间管理」→ 三间演示房（A/走廊/B）。支持关键词、部门、位置、状态筛选与分页；统计卡跟位置范围。点名称打开只读详情，可见已上图关联仪器。走廊无仪器计为未监测。不提供新增/编辑/删除/导入/导出；关联硬件类型筛选已隐藏。
+
+### 房间关联硬件只读（3B）
+
+详情内「绑定设备」表只读：房间 A 预置设备管理器 A（EQ-SK-001），房间 B 预置温湿度记录仪 C（EQ-TH-003），走廊为空。数据与硬件详情绑定共用 `equipmentBindings`；房间侧不提供绑定/解绑。
+
+### 房间筛选导出（3C）
+
+列表设好筛选后点「导出」，下载当前筛选全部匹配行的本地 XLSX（忽略分页）；空结果仅表头。不开放导入。

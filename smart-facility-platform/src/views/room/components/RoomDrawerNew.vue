@@ -65,6 +65,10 @@
                         <el-button slot="reference">{{ $t('labDevice.bindDevice') }}</el-button>
                     </el-popover>
                 </el-row>
+                <div v-if="detail && isDemo" class="demo-room-bound-hardware">
+                    <el-descriptions :column="1" :title="$t('labDevice.bindDevice')"/>
+                    <BindHardwareTable :type="3" :id="detail.id" />
+                </div>
             </div>
 
             <div class="detail-padding-nocolor" ><!-- 这个div要始终显示 -->

@@ -974,10 +974,21 @@ export function emptyUseStatusPage() {
 
 const EQUIPMENT_BINDINGS_KEY = 'equipmentBindings';
 
+/** Seed: 设备管理器 A → 房间 A；温湿度记录仪 C → 房间 B. */
+const DEMO_SEED_EQUIPMENT_BINDINGS = Object.freeze({
+  '980010': [{id: 950001, name: '演示房间 A', type: 11, openTwoSystem: true}],
+  '980018': [{id: 950003, name: '演示房间 B', type: 11, openTwoSystem: true}]
+});
+
 const BINDABLE_ROOMS = Object.freeze(Object.values(DEMO_FLOOR_ROOMS).flat()
   .map(({id, name}) => ({id, name, type: 11, openTwoSystem: true})));
 
 function readEquipmentBindingsStore() {
+  // Cold demo: never-written key exposes seed room binds (980010/980018 — not 980001,
+  // so hardware bind unit tests that expect 980001 empty stay valid).
+  if (storage.getItem(EQUIPMENT_BINDINGS_KEY) == null) {
+    return JSON.parse(JSON.stringify(DEMO_SEED_EQUIPMENT_BINDINGS));
+  }
   return readJsonMap(EQUIPMENT_BINDINGS_KEY);
 }
 
@@ -1035,6 +1046,65 @@ export function listBoundEquipmentTypesForInstrument(instrumentId) {
     if (row && row.equipmentTypeCode != null) codes.add(Number(row.equipmentTypeCode));
   }
   return [...codes];
+}
+
+/**
+ * Reverse lookup: hardware currently bound to this room (type:11 in equipmentBindings).
+ */
+export function listBoundEquipmentForRoom(roomId) {
+  const key = Number(roomId);
+  if (!Number.isFinite(key)) return [];
+  const rows = [];
+  const store = readEquipmentBindingsStore();
+  for (const [equipmentId, bucket] of Object.entries(store)) {
+    if (!Array.isArray(bucket) || !bucket.some(item => Number(item.type) === 11 && Number(item.id) === key)) continue;
+    const eq = equipmentById(equipmentId);
+    if (!eq) continue;
+    rows.push({
+      id: eq.id,
+      equipmentId: eq.id,
+      equipmentName: eq.name,
+      equipmentNo: eq.no,
+      equipmentTypeCode: eq.equipmentTypeCode
+    });
+  }
+  return rows.sort((a, b) => Number(a.id) - Number(b.id));
+}
+
+/**
+ * GET /monitorIndicator/things/newList — BindHardwareTable (objType 3=room, 2=instrument).
+ */
+export function listMonitorIndicatorThingsNewList(params = {}) {
+  const pageNum = Math.max(1, Number(params.pageNum) || 1);
+  const pageSize = Math.max(1, Number(params.pageSize) || 10);
+  const objType = Number(params.objType);
+  const objId = Number(params.objId);
+  let rows = [];
+  if (objType === 3 && Number.isFinite(objId)) {
+    rows = listBoundEquipmentForRoom(objId);
+  } else if (objType === 2 && Number.isFinite(objId)) {
+    const store = readEquipmentBindingsStore();
+    for (const [equipmentId, bucket] of Object.entries(store)) {
+      if (!Array.isArray(bucket) || !bucket.some(item => Number(item.type) === 4 && Number(item.id) === objId)) continue;
+      const eq = equipmentById(equipmentId);
+      if (!eq) continue;
+      rows.push({
+        id: eq.id,
+        equipmentId: eq.id,
+        equipmentName: eq.name,
+        equipmentNo: eq.no,
+        equipmentTypeCode: eq.equipmentTypeCode
+      });
+    }
+    rows.sort((a, b) => Number(a.id) - Number(b.id));
+  }
+  const start = (pageNum - 1) * pageSize;
+  return {
+    list: rows.slice(start, start + pageSize),
+    total: rows.length,
+    pageNum,
+    pageSize
+  };
 }
 
 function pushBinding(equipmentId, thing) {

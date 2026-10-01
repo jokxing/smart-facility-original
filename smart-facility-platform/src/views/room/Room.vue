@@ -59,7 +59,7 @@
                     <el-button v-if="$store.state.level && !isDemo" class="icon-upload"
                                @click="importFileVisible = !importFileVisible"> {{ $t('common.importHandle') }}
                     </el-button>
-                    <el-button v-if="$store.state.level && !isDemo" class="icon-download1" @click="handleExport">
+                    <el-button v-if="$store.state.level" class="icon-download1" @click="handleExport">
                         {{ $t('common.export') }}
                     </el-button>
                 </div>
@@ -415,20 +415,31 @@ export default {
             return row.id;
         },
         handleExport() {
+            const payload = this.isDemo ? {
+                keyword: this.items.keyword,
+                status: this.items.status,
+                departmentId: this.items.departmentId,
+                objType: this.items.objType,
+                gardenId: this.dashboardItem.gardenId,
+                buildingId: this.dashboardItem.buildingId,
+                floorId: this.dashboardItem.floorId,
+                pageNum: 1,
+                pageSize: 10000
+            } : {...this.items};
+            this.$message.warning(i18n.t("common.exportMessage"));
+            const run = () => getExportRoom(payload).then(res => {
+                const stamp = moment(new Date()).format("YYYYMMDDHHmmss");
+                mixin.methods.download(
+                    res,
+                    decodeURIComponent(i18n.t("room.roomExport") + stamp + (this.isDemo ? '.xlsx' : ''), "UTF-8")
+                );
+            }).catch(err => {
+                this.$message.error((err && err.message) || err);
+            });
+            if (this.isDemo) return run();
             new Promise(resolve => {
-                this.$message.warning(i18n.t("common.exportMessage"));
-                setTimeout(() => {
-                    resolve();
-                }, 1500)
-            }).then(() => {
-                getExportRoom(this.items).then(res => {
-                    const data = moment(new Date()).format("YYYYMMDDHHmmss");
-                    mixin.methods.download(
-                        res,
-                        decodeURIComponent(i18n.t("room.roomExport") + data, "UTF-8")
-                    )
-                })
-            })
+                setTimeout(() => resolve(), 1500);
+            }).then(run);
         },
         // 上传成功后更新初始化
         handleUpdateInit() {

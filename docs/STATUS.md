@@ -1705,3 +1705,96 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（3B 建议）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通房间管理列表与只读详情演示`。
+
+
+## 2026-10-01 — 房间管理 3B：详情关联硬件只读
+
+### 做了什么
+
+- 共享 `equipmentBindings` 增加按房间反查 `listBoundEquipmentForRoom`；冷启动种子 `980010→950001`、`980018→950003`（不碰 `980001`）。
+- 接通 `GET /monitorIndicator/things/newList`（objType 3/2）；`RoomDrawerNew` 演示区只读展示 `BindHardwareTable`。
+- 单测 `room-hardware-bind.spec.js`；浏览器 `test:demo:room:3b`，证据 `docs/evidence/room-management-3b`。
+- 更新契约 / demo-guide / next-task-prompt（3C 建议）。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/mock/fixtures/equipment.js` | 种子 + 反查 + newList |
+| `src/mock/handlers/equipment.js` | 注册 newList |
+| `src/views/room/components/RoomDrawerNew.vue` | 演示只读绑定表 |
+| `tests/unit/demo/room-hardware-bind.spec.js` | 覆盖 |
+| `scripts/check-demo-room-3b.cjs`、`package.json` | 浏览器验收 |
+| `docs/*` | 契约/指南/STATUS/下一刀 |
+
+### 验证
+
+- `npm run test:demo`：24 套 / 136 项通过。
+- `$env:DEMO_PORT='8089'; npm run test:demo:room:3b`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：房间详情见已绑定硬件名称/编号；与硬件详情绑定同源。
+- **不能用**：房间侧绑定/解绑；列表硬件类型筛选仍隐藏。
+
+### 设计决定
+
+- 种子避开 `980001`，避免破坏既有硬件绑定单测「初始为空」断言。
+- 详情用 inline 表而非 popover，便于演示与脚本验收。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归。
+- 未从硬件详情改绑后再回房间详情的人工跨页路径（单测覆盖写后反查）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（3C 建议）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通房间详情关联硬件只读演示`。
+
+
+## 2026-10-01 — 房间管理 3C：筛选导出
+
+### 做了什么
+
+- 接通 `POST /room/export`：与列表同筛选、忽略分页，本地 XLSX「房间列表」。
+- 演示开放导出按钮；导入及其它写仍隐藏/拒绝；`handleExport` 带上位置筛选并补 `.xlsx` 后缀。
+- 单测 `room-export.spec.js`；浏览器 `test:demo:room:3c`，证据 `docs/evidence/room-management-3c`。
+- 更新契约 / demo-guide / next-task-prompt（3D 建议）。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/mock/roomWorkbook.js` | XLSX 表头与行 |
+| `src/mock/fixtures/room.js` | `exportDemoRooms` |
+| `src/mock/handlers/room.js` | 开放 export |
+| `src/views/room/Room.vue` | 演示导出 |
+| `tests/unit/demo/room-export.spec.js` 等 | 覆盖 |
+| `scripts/check-demo-room-3c.cjs`、`package.json` | 浏览器验收 |
+| `docs/*` | 契约/指南/STATUS/下一刀 |
+
+### 验证
+
+- `npm run test:demo`：25 套 / 139 项通过。
+- `$env:DEMO_PORT='8089'; npm run test:demo:room:3c`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：筛选后导出全部匹配行（含空结果仅表头）。
+- **不能用**：导入；房间增删改/批量/绑定写。
+
+### 设计决定
+
+- 导出筛选与 `listRooms` 共用，避免第二套口径。
+- 演示 payload 显式带 `dashboardItem` 位置字段（原页面只传 `items` 会丢楼层筛）。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归。
+- 未人工点选位置抽屉后再导出（脚本用关键词筛）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（3D 建议）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通房间管理筛选导出演示`。

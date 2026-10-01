@@ -7,6 +7,7 @@ import {
   resolveInstrumentEntity
 } from './instrument';
 import {getDemoScenario, statusForScenario} from './scenario';
+import {createRoomExportWorkbook} from '../roomWorkbook';
 
 const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
@@ -222,6 +223,15 @@ export function listRoomReports() {
 
 export function listThingsUsers() {
   return {list: [], pageNum: 1, pageSize: 10, total: 0};
+}
+
+/**
+ * POST /room/export — filtered rooms as local XLSX (ignores pageNum/pageSize).
+ * Reuses listRooms filters; empty filter → empty workbook (no full-list fallback).
+ */
+export async function exportDemoRooms(body = {}) {
+  const filtered = listRooms({...body, pageNum: 1, pageSize: 10000});
+  return createRoomExportWorkbook(filtered.list || []);
 }
 
 /** Empty room-level probe cards (objType 3); device slice keeps objType 2. */

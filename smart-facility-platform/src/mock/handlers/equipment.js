@@ -18,6 +18,8 @@ import {
   listGunPipetteBindings,
   listLabelBindings,
   listBindableCatalog,
+  listBoundEquipmentForRoom,
+  listMonitorIndicatorThingsNewList,
   listSignalReceiverBindings,
   emptyDeviceHistoryAlarmPage,
   addEquipmentUsers,
@@ -71,6 +73,13 @@ export default [
     const equipmentIdStr = (params && params.equipmentIdStr)
       || (body && (body.equipmentIdStr != null ? body.equipmentIdStr : body.equipmentId));
     return success(listEquipmentBindings({equipmentIdStr}));
+  }),
+  protectedRoute('GET', '/monitorIndicator/things/newList', ({params}) => {
+    const objType = Number(params && params.objType);
+    if (objType !== 2 && objType !== 3) {
+      return failure('本切片仅支持房间或仪器关联硬件列表。');
+    }
+    return success(listMonitorIndicatorThingsNewList(params || {}));
   }),
   protectedRoute('POST', '/device/deviceBindThings', ({body}) => {
     return success(listEquipmentBindThingsCheck(body || {}));

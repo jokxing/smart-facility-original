@@ -4,7 +4,8 @@ import {
   listRoomThings,
   listRoomMonitorInstrument,
   listRoomReports,
-  listThingsUsers
+  listThingsUsers,
+  exportDemoRooms
 } from '../fixtures/room';
 import {DEMO_FLOOR_ROOMS} from '../fixtures/floor';
 import {protectedRoute, success, failure} from '../response';
@@ -15,7 +16,7 @@ const removeRoutes = DEMO_ROOM_IDS.map(id =>
   protectedRoute('POST', `/room/remove/${id}`, () => failure('本阶段演示未开放房间删除。'))
 );
 
-// RoomDrawerNew read path + dashboard + explicit write refusals.
+// RoomDrawerNew read path + dashboard + export + explicit write refusals.
 export default [
   protectedRoute('GET', '/room/detail', ({params}) => {
     const detail = getDemoRoomDetail(params.id);
@@ -32,6 +33,6 @@ export default [
   ...removeRoutes,
   protectedRoute('POST', '/room/batch/delete', () => failure('本阶段演示未开放房间批量删除。')),
   protectedRoute('POST', '/room/batch/update', () => failure('本阶段演示未开放房间批量更新。')),
-  protectedRoute('POST', '/room/export', () => failure('本阶段演示未开放房间导出。')),
+  protectedRoute('POST', '/room/export', async ({body}) => exportDemoRooms(body || {})),
   protectedRoute('POST', '/room/goods/remove', () => failure('本阶段演示未开放解绑房间设备。'))
 ];

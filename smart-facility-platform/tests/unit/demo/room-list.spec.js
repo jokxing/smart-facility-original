@@ -154,7 +154,9 @@ test('unknown room / writes refused; menu has room entry', async () => {
   expect((await client.post('/room/remove/950001', {})).data.message).toMatch(/未开放/);
   expect((await client.post('/room/batch/delete', {ids: [950001]})).data.message).toMatch(/未开放/);
   expect((await client.post('/room/batch/update', {})).data.message).toMatch(/未开放/);
-  expect((await client.post('/room/export', {})).data.message).toMatch(/未开放/);
+  // 3C: export returns workbook buffer (not JSON failure envelope)
+  const exported = await client.post('/room/export', {gardenId: ''}, {responseType: 'arraybuffer'});
+  expect(exported.data.byteLength).toBeGreaterThan(100);
   expect((await client.post('/room/goods/remove', {})).data.message).toMatch(/未开放/);
   expect(DEMO_MENUS.some(menu => menu.path === '/rm/room')).toBe(true);
   expect(listRooms({pageNum: 1, pageSize: 10, gardenId: ''}).total).toBe(3);

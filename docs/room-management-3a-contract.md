@@ -11,9 +11,11 @@
 | `GET /room/dashboardV1` 统计卡 | **已开放**（仅跟位置筛选） |
 | 点击名称 → `RoomDrawerNew` 只读详情 | **已开放**（`openTwoSystem` 真值） |
 | 详情内关联仪器（空间归属 / 已上图） | **已开放**（读活跃 `970xxx`） |
-| 关联硬件类型筛选 `objType` | **隐藏**（无可靠房间级绑定口径，不假生效） |
-| 新增 / 编辑 / 删除 / 批量 / 导入 / 导出 | **UI 隐藏** + Mock **明确拒绝** |
-| 详情内探头编辑 / 报警体系 / 巡查模板 / 绑定弹层写 | **UI 隐藏**；解绑等写 **拒绝** |
+| 详情内关联硬件只读 | **3B 已开放**（`things/newList` + 共享 bindings） |
+| 筛选导出 | **3C 已开放**（`POST /room/export` → 本地 XLSX） |
+| 关联硬件类型筛选 `objType` | **隐藏**（列表筛；详情只读列表另见 3B） |
+| 新增 / 编辑 / 删除 / 批量 / 导入 | **UI 隐藏** + Mock **明确拒绝** |
+| 详情内探头编辑 / 报警体系 / 巡查模板 / 绑定解绑写 | **UI 隐藏**；解绑等写 **拒绝** |
 
 ## 入口（源码核实）
 
@@ -115,7 +117,17 @@
 | --- | --- |
 | `GET /thingsUser/list` | 空分页（已有） |
 | `POST /roomReport/list` | 空分页（已有） |
-| `GET /room/things/list` | 空 list（已有；绑定写入口已藏） |
+| `GET /room/things/list` | 空 list（旧抽屉；3B 详情用 newList） |
+| `GET /monitorIndicator/things/newList` | **3B**：`objType=3` 按房间反查共享 `equipmentBindings`（type:11） |
+
+### 3B 房间关联硬件只读
+
+| 项 | 说明 |
+| --- | --- |
+| UI | `RoomDrawerNew` 演示区展示 `BindHardwareTable`（无绑定/解绑按钮） |
+| 种子 | 冷启动（bindings 键未写入）：`980010`→`950001`，`980018`→`950003`；走廊无绑定；**不**预绑 `980001` |
+| 字段 | `equipmentName` / `equipmentNo`（及 id） |
+| 写 | 房间侧仍隐藏；硬件详情既有绑定写路径不变 |
 
 ## 写操作（拒绝）
 
@@ -126,8 +138,11 @@
 | `POST /room/remove/:id` | 未开放房间删除 |
 | `POST /room/batch/delete` | 未开放批量删除 |
 | `POST /room/batch/update` | 未开放批量更新 |
-| `POST /room/export` | 未开放导出 |
 | `POST /room/goods/remove` | 未开放解绑房间设备 |
+
+### 3C 筛选导出
+
+`POST /room/export`：与列表相同筛选（keyword/departmentId/status/gardenId/buildingId/floorId），**忽略分页**，返回本地 XLSX（工作表「房间列表」）。空筛选结果仅表头，不回退全量。导入仍未开放。
 
 ## 验收要点
 
