@@ -7,7 +7,7 @@ import {
 } from '../fixtures/statistic';
 import {protectedRoute, success} from '../response';
 
-// Statistics 4A–4D read path — electricity / device chart stay unregistered.
+// Statistics 4A–4E read path — /statistic/electricity* and /ds/device/chart stay unregistered.
 export default [
   protectedRoute('GET', '/statistic/overview', () => success(getStatisticOverview())),
   protectedRoute('GET', '/statistic/alarm/overview', () => success(getStatisticAlarmOverview())),

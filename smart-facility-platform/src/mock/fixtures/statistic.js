@@ -158,35 +158,48 @@ function matchUseType(row, typeFilter) {
   return true;
 }
 
+/** Demo nameplate kW by instrument assetKey — not live socket samples (4E). */
+const NAMEPLATE_KW = Object.freeze({
+  'demo-device-incubator': 0.8,
+  'demo-device-lab-refrigerator': 0.35,
+  'demo-device-analyzer': 0.45,
+  'demo-device-equipment-rack': 0.6,
+  'demo-device-oscilloscope': 0.12,
+  'demo-device-monitor-terminal': 0.05
+});
+
+function nameplateKw(assetKey) {
+  const kw = NAMEPLATE_KW[assetKey];
+  return Number.isFinite(kw) && kw > 0 ? kw : 0.2;
+}
+
 /**
- * GET /statistic/instrument/use — Statistics 4C bar chart.
- * Derived from active instruments + demo clock window; not live meter samples.
- * queryType 2 (electricity) → empty list.
+ * GET /statistic/instrument/use — Statistics 4C/4E bar chart.
+ * Duration/count derived from active instruments + demo clock window.
+ * queryType 2 electricPower = nameplateKw × (useTime/3600) kW·h — not meter samples.
  */
 export function getStatisticInstrumentUse(params = {}) {
   const queryType = Number(params.queryType);
-  if (queryType === 2) {
-    return {instrumentUseList: []};
-  }
   const days = windowDays(params);
   const rows = listActiveInstrumentSeeds()
-    .map(buildInstrumentRow)
-    .filter(Boolean)
-    .filter(row => matchUseType(row, params.type))
-    .map(row => {
+    .map(seed => {
+      const row = buildInstrumentRow(seed);
+      if (!row || !matchUseType(row, params.type)) return null;
       const hours = Number(row.workingHours);
       const workHours = Number.isFinite(hours) && hours > 0 ? hours : 7.5;
       const factor = 0.5 + ((Number(row.id) % 7) / 10);
       const useTime = Math.round(workHours * days * 3600 * factor);
       const useCount = Math.max(1, Math.round(days * (1 + (Number(row.id) % 5))));
+      const electricPower = Math.round(nameplateKw(seed.assetKey) * (useTime / 3600) * 100) / 100;
       return {
         instrumentName: row.name,
         useTime,
         useCount,
-        electricPower: 0
+        electricPower
       };
-    });
-  const metric = queryType === 1 ? 'useCount' : 'useTime';
+    })
+    .filter(Boolean);
+  const metric = queryType === 2 ? 'electricPower' : (queryType === 1 ? 'useCount' : 'useTime');
   rows.sort((a, b) => b[metric] - a[metric] || a.instrumentName.localeCompare(b.instrumentName, 'zh'));
   return {instrumentUseList: rows};
 }

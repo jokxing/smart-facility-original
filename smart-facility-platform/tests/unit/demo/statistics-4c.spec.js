@@ -60,14 +60,15 @@ test('default day duration list matches fixture and active instruments', async (
     instrumentName: expect.any(String),
     useTime: expect.any(Number),
     useCount: expect.any(Number),
-    electricPower: 0
+    electricPower: expect.any(Number)
   }));
   expect(res.items.instrumentUseList.every(row => row.useTime > 0)).toBe(true);
+  expect(res.items.instrumentUseList.every(row => row.electricPower > 0)).toBe(true);
   const times = res.items.instrumentUseList.map(r => r.useTime);
   expect(times).toEqual([...times].sort((a, b) => b - a));
 });
 
-test('type filter empty; delete shrinks list; electricity query empty; week enlarges useTime', async () => {
+test('type filter empty; delete shrinks list; week enlarges useTime', async () => {
   await establishSession();
   const admin = (await client.get('/statistic/instrument/use', {
     params: {dateType: 1, queryType: 0, type: 2}
@@ -78,11 +79,6 @@ test('type filter empty; delete shrinks list; electricity query empty; week enla
     params: {dateType: 1, queryType: 0, type: 3}
   })).data.items.instrumentUseList;
   expect(it).toEqual([]);
-
-  const power = (await client.get('/statistic/instrument/use', {
-    params: {dateType: 1, queryType: 2, type: 0}
-  })).data.items.instrumentUseList;
-  expect(power).toEqual([]);
 
   const day = getStatisticInstrumentUse({dateType: 1, queryType: 0, type: 0}).instrumentUseList[0].useTime;
   const week = getStatisticInstrumentUse({dateType: 2, queryType: 0, type: 0}).instrumentUseList[0].useTime;

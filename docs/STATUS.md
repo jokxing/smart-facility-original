@@ -1993,3 +1993,29 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`feat: 接通数据统计设备使用率排行演示`。
 - 下一提示词：`docs/next-task-prompt.md`（电量或高级统计页可选）。
+
+## 2026-10-01 — 数据统计 4E（使用统计功耗维度）
+
+### 做了什么
+
+- 契约 `docs/statistics-4e-contract.md`：计量源 = 演示铭牌 kW（按 assetKey）× 4C 派生使用小时；禁止全 0 冒充。
+- Mock：`GET /statistic/instrument/use?queryType=2` 返回正 `electricPower`；时长/次数行同步带功耗字段。
+- `Statistics.vue` 恢复「功耗」维度按钮；未注册 `/statistic/electricity*`。
+- 单测 `statistics-4e.spec.js`；浏览器 `test:demo:statistics:4e`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：31 套 / 161 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:4e` → `externalAttempts=0`；证据 `docs/evidence/statistics-4e`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 可用 / 不能用
+
+- **可用**：`/ds/statistics` 4A–4E（含功耗条图）。
+- **不能用**：真实电表、`/statistic/electricity*`、`/ds/device/chart`、导出。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`feat: 接通数据统计设备功耗维度演示`。
+- 下一提示词：`docs/next-task-prompt.md`（高级统计页或其他模块可选）。

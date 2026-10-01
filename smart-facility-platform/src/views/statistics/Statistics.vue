@@ -166,7 +166,7 @@ export default {
     data() {
         const _this = this;
         return {
-            // 4A–4D stats sections open
+            // 4A–4E stats sections open
             colors: ['#BFBFBF', '#FEC000', '#262626', '#0070c0', '#808080'],
             overview: [
                 {
@@ -282,7 +282,8 @@ export default {
             },
             useStatisc: [
                 {index: 0, label: _this.$t('hardware.duration')},
-                {index: 1, label: _this.$t('labDevice.degree')}
+                {index: 1, label: _this.$t('labDevice.degree')},
+                {index: 2, label: _this.$t('labDevice.electricity1')}
             ],
             usePush: [
                 {index: 1, label: _this.$t('common.workday')},
@@ -448,7 +449,7 @@ export default {
             this.equipmentUse.dateType = null;
             this.handleEquipmentUsers();
         },
-        // 使用统计按时长、次数维度
+        // 使用统计按时长、次数、功耗维度
         handleUserInterval(val) {
             this.equipmentUse.queryType = val;
             if (val === 0) {

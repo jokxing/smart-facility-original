@@ -9,7 +9,7 @@
 | 4A–4C | **保持** |
 | 「设备使用率统计」表 + ChartDimension + 高级查询弹层 | **已开放** |
 | `GET /statistic/instrument/useRanking` | **已开放** |
-| 电量 / 导出 / 高级统计页 | **未开放** |
+| 电量 / 导出 / 高级统计页 | 功耗维度见 **4E**；`/statistic/electricity*` 与 `/ds/device/chart` 仍未开放 |
 
 ## 请求（页面 `useRanKing`）
 

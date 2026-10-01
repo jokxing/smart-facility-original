@@ -102,7 +102,11 @@ npm run test:demo:statistics:4d
 
 ### 设备使用率排行（4D）
 
-同页「设备使用率统计」表：`useRate`/`variationRate`/`changed`；工作日/自然日与高级时段查询。与 4C 同源派生。仍不开放真实电量与 `/ds/device/chart`。
+同页「设备使用率统计」表：`useRate`/`variationRate`/`changed`；工作日/自然日与高级时段查询。与 4C 同源派生。
+
+### 设备功耗维度（4E）
+
+同页「设备使用统计」可切「功耗」：`electricPower`（kW·h）= 演示铭牌功率 × 派生使用小时，**不是**插座/电表采样。`/statistic/electricity*` 与 `/ds/device/chart` 仍未开放。
 
 ## 房间布局缓存升级（P1 修复）
 
