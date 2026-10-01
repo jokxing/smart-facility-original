@@ -10,7 +10,8 @@ import {
   getInstrumentDashboardNew,
   listInstruments,
   listRoonInstrumentInfo,
-  removeInstrument
+  removeInstrument,
+  setBoundEquipmentTypesResolver
 } from '../../../src/mock/fixtures/instrument';
 import {listBindableCatalog} from '../../../src/mock/fixtures/equipment';
 import {resetDemoScenario} from '../../../src/mock/fixtures/scenario';
@@ -77,13 +78,51 @@ test('remove tombstones instrument across list dashboard detail layout bindable'
   expect((await client.get('/instrument/detail', {params: {id: 970001}})).data.code).toBe(1);
 });
 
-test('remove rejects unknown already-deleted; batch delete still blocked', async () => {
+test('remove rejects unknown already-deleted; empty batch delete rejected', async () => {
   await establishSession();
   expect(removeInstrument(999999).ok).toBe(false);
   expect(removeInstrument(970011).ok).toBe(true);
   expect((await client.post('/instrument/remove/970011')).data.message).toContain('已删除');
-  expect((await client.post('/instrument/batch/delete', {ids: [970001]})).data.code).toBe(0);
+  expect((await client.post('/instrument/batch/delete', {ids: []})).data.code).toBe(0);
+  expect((await client.post('/instrument/batch/delete', {})).data.message).toContain('请选择');
   expect((await client.post('/instrument/update/basic', {
     id: 970011, name: '不应成功', departmentId: 900101, types: 1
   })).data.code).toBe(0);
+});
+
+test('batch delete tombstones multiple instruments atomically', async () => {
+  await establishSession();
+  const res = (await client.post('/instrument/batch/delete', {ids: [970011, 970012]})).data;
+  expect(res.code).toBe(1);
+  expect(res.items.count).toBe(2);
+  expect(res.items.ids.sort()).toEqual([970011, 970012]);
+
+  const list = (await client.post('/instrument/list', {pageNum: 1, pageSize: 20})).data;
+  expect(list.items.total).toBe(10);
+  expect(list.items.list.every(row => row.id !== 970011 && row.id !== 970012)).toBe(true);
+  expect(listRoonInstrumentInfo(950001).list.some(item => item.id === 970011)).toBe(false);
+  expect(listRoonInstrumentInfo(950001).list.some(item => item.id === 970012)).toBe(false);
+  expect(listBindableCatalog('instrument').some(item => item.id === 970011)).toBe(false);
+
+  // Already-deleted id aborts whole batch (atomic)
+  clearInstrumentDeleted();
+  expect(removeInstrument(970011).ok).toBe(true);
+  const blocked = (await client.post('/instrument/batch/delete', {ids: [970011, 970012]})).data;
+  expect(blocked.code).toBe(0);
+  expect(blocked.message).toContain('无效或已删除');
+  expect(listInstruments({pageNum: 1, pageSize: 20}).list.some(row => row.id === 970012)).toBe(true);
+});
+
+test('batch delete rejects when any instrument is bound', async () => {
+  await establishSession();
+  setBoundEquipmentTypesResolver(id => (Number(id) === 970012 ? [1] : []));
+  try {
+    const res = (await client.post('/instrument/batch/delete', {ids: [970011, 970012]})).data;
+    expect(res.code).toBe(0);
+    expect(res.message).toContain('绑定');
+    expect(listInstruments({pageNum: 1, pageSize: 20}).list.some(row => row.id === 970011)).toBe(true);
+    expect(listInstruments({pageNum: 1, pageSize: 20}).list.some(row => row.id === 970012)).toBe(true);
+  } finally {
+    setBoundEquipmentTypesResolver(() => []);
+  }
 });

@@ -1125,6 +1125,31 @@ export function removeEquipmentBinding(body = {}) {
   return {ok: true, list: filtered.map(clone)};
 }
 
+/**
+ * GET /instrument/unbind?instrumentId=
+ * Clear all equipment↔instrument (type=4) bindings for one instrument.
+ * Required before delete when the instrument is bound to smart hardware.
+ */
+export function unbindInstrumentHardware(instrumentId) {
+  const key = Number(instrumentId);
+  if (!Number.isFinite(key)) return {ok: false, message: '设备编号无效。'};
+  const alive = listActiveInstrumentSeeds().some(item => Number(item.id) === key && !!resolveInstrumentEntity(item));
+  if (!alive) return {ok: false, message: '演示设备不存在。'};
+  const store = {...readEquipmentBindingsStore()};
+  let removed = 0;
+  for (const eqId of Object.keys(store)) {
+    const bucket = Array.isArray(store[eqId]) ? store[eqId] : [];
+    const next = bucket.filter(row => !(Number(row.type) === 4 && Number(row.id) === key));
+    if (next.length === bucket.length) continue;
+    removed += bucket.length - next.length;
+    if (next.length) store[eqId] = next;
+    else delete store[eqId];
+  }
+  if (!removed) return {ok: false, message: '该设备未绑定智能硬件。'};
+  writeEquipmentBindingsStore(store);
+  return {ok: true, instrumentId: key, count: removed};
+}
+
 /** POST /device/deviceBindThings — delete guard; return bound thing summaries. */
 export function listEquipmentBindThingsCheck(body = {}) {
   const ids = Array.isArray(body.ids) ? body.ids.map(Number).filter(n => Number.isFinite(n)) : [];

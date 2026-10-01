@@ -157,6 +157,15 @@
                                          @click="handleUnbindLabel"> &nbsp;&nbsp;{{ $t('common.unBind') }}
                                 </el-link>
                             </el-descriptions-item>
+                            <el-descriptions-item v-if="isDemo" :label="$t('labDevice.bindDevice')">
+                                <span v-if="!detail.boundHardware">{{ $t('common.notMessage') }}</span>
+                                <template v-else>
+                                    <span class="abnormal">已绑定智能硬件</span>
+                                    <el-link type="primary" :underline="false" @click="handleUnbindHardware">
+                                        &nbsp;&nbsp;{{ $t('common.unBind') }}
+                                    </el-link>
+                                </template>
+                            </el-descriptions-item>
                             <el-descriptions-item :label="$t('labDevice.labQrCode')">
                                 <span v-if="!detail.qrUrl">{{ $t('common.notMessage') }}</span>
                                 <div v-else class="qrcode">
@@ -794,6 +803,26 @@ export default {
             }).catch(() => {
             });
         },
+        // Demo: unbind smart hardware before delete is allowed
+        handleUnbindHardware() {
+            this.$confirm(this.$t('labDevice.unbindDeviceAndLab'), this.$t('common.hint'), {
+                confirmButtonText: this.$t('common.confirm'),
+                cancelButtonText: this.$t('common.cancel'),
+                type: 'warning'
+            }).then(() => {
+                getInstrumentUnbind({instrumentId: this.id}).then(res => {
+                    if (res.code === 1) {
+                        this.$message.success(this.$t('common.unBindSuccess'));
+                        this.getDetail(this.id);
+                        this.$emit('instrument-updated');
+                    } else {
+                        this.$message.error(res.message || '解绑失败');
+                    }
+                }).catch(() => {
+                    this.$message.error(this.$t('common.networkError') || '网络错误');
+                });
+            }).catch(() => {});
+        },
         // tag
         handleTagPane(activeName, row) {
             if (activeName === '1') {
@@ -967,7 +996,6 @@ export default {
 .LabDevice-drawer {
     /deep/ .el-descriptions-item__container {
         position: relative;
-        line-height: 26px;
         align-items: center;
 
         .qrcode {
@@ -985,7 +1013,7 @@ export default {
     }
 
     /deep/ .el-descriptions-item__label {
-        width: 100px;
+        width: 105px;
     }
 
     /deep/ .el-descriptions-row {

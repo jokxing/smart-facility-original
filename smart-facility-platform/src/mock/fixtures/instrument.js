@@ -275,6 +275,60 @@ export async function importDemoInstruments(body = {}) {
   return {...entities[0], ok: true, count: entities.length, ids: entities.map(item => item.id)};
 }
 
+/**
+ * POST /instrument/add — create one instrument into the same import id pool.
+ * Persists name/departmentId/types/roomId; other body fields accepted but ignored.
+ * Marked imported:true so it is registered but not auto-placed on room layout.
+ */
+export function addDemoInstrument(body = {}) {
+  const name = String(body.name == null ? '' : body.name).trim();
+  if (name.length < 2 || name.length > 26) {
+    return {ok: false, message: '请填写 2–26 字的设备名称。'};
+  }
+  const departmentId = Number(body.departmentId);
+  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
+    return {ok: false, message: '请选择有效部门。'};
+  }
+  const types = Number(body.types);
+  if (!ALLOWED_TYPES.has(types)) {
+    return {ok: false, message: '请选择有效设备分类。'};
+  }
+  const roomId = Number(body.roomId);
+  if (!INSTRUMENT_ROOM_SPACE[roomId]) {
+    return {ok: false, message: '请选择有效房间。'};
+  }
+  const dupKey = roomId + ':' + name;
+  const known = activeInstrumentSeeds()
+    .map(resolveInstrumentEntity)
+    .filter(Boolean)
+    .some(item => item.roomId + ':' + String(item.name).trim() === dupKey);
+  if (known) return {ok: false, message: '同房间设备名称重复。'};
+  const {created, free} = freeImportIds();
+  if (!free.length) return {ok: false, message: '剩余导入容量为 0 台，本条未写入。'};
+  const entity = {
+    id: free[0],
+    name,
+    departmentId,
+    types,
+    roomId,
+    assetKey: 'demo-device-incubator',
+    daysAgo: 0,
+    imported: true
+  };
+  try { writeCreatedInstruments(created.concat([entity])); }
+  catch (_) { return {ok: false, message: '本地保存失败，请检查浏览器存储空间后重试。'}; }
+  return {
+    ok: true,
+    id: entity.id,
+    name: entity.name,
+    count: 1,
+    ids: [entity.id],
+    departmentId: entity.departmentId,
+    roomId: entity.roomId,
+    types: entity.types
+  };
+}
+
 function pruneDeletedFromLayouts(deletedId) {
   const key = Number(deletedId);
   const map = readOverrides();
@@ -312,6 +366,33 @@ export function removeInstrument(id) {
   }
   pruneDeletedFromLayouts(key);
   return {ok: true, id: key, roomId: seed.roomId};
+}
+
+/**
+ * POST /instrument/batch/delete — atomic tombstone; same guards as single remove.
+ * Body: {ids: number[]}
+ */
+export function batchRemoveInstruments(body = {}) {
+  const ids = [...new Set((Array.isArray(body && body.ids) ? body.ids : [])
+    .map(Number)
+    .filter(n => !Number.isNaN(n)))];
+  if (!ids.length) return {ok: false, message: '请选择要删除的设备。'};
+  for (const id of ids) {
+    const seed = instrumentById(id);
+    if (!seed || isInstrumentDeleted(id)) {
+      return {ok: false, message: '存在无效或已删除的设备，本批次未删除。'};
+    }
+    if (boundEquipmentTypesForInstrument(id).length) {
+      return {ok: false, message: '存在已绑定智能硬件的设备，请先解绑后删除。'};
+    }
+  }
+  const deleted = [];
+  for (const id of ids) {
+    const result = removeInstrument(id);
+    if (!result.ok) return {ok: false, message: result.message || '批量删除失败。'};
+    deleted.push(result.id);
+  }
+  return {ok: true, count: deleted.length, ids: deleted};
 }
 
 function readInstrumentMeta() {
@@ -528,6 +609,7 @@ export function buildInstrumentRow(entity) {
   const resolved = resolveInstrumentEntity(entity);
   if (!resolved) return null;
   const {status, senorStatus} = statusForScenario(getDemoScenario());
+  const boundHardware = boundEquipmentTypesForInstrument(resolved.id).length > 0;
   return {
     id: resolved.id,
     name: resolved.name,
@@ -556,6 +638,7 @@ export function buildInstrumentRow(entity) {
     logoUrl: '',
     qrUrl: '',
     labelId: null,
+    boundHardware,
     standbyPowerFlag: false,
     bindingDeviceId: null,
     openTwoSystem: true,

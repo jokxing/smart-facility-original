@@ -1,6 +1,7 @@
 import {instrumentImportOptions} from '../fixtures/instrument';
 import {
   DEMO_INSTRUMENTS,
+  batchRemoveInstruments,
   emptyInstrumentSchedulerPage,
   emptyMonitorHistoryPage,
   getDemoInstrumentDetail,
@@ -11,6 +12,7 @@ import {
   importDemoInstruments,
   previewDemoInstruments,
   exportDemoInstruments,
+  addDemoInstrument,
   listImportRemoveIds,
   listInstruments,
   listRoonInstrumentInfo,
@@ -19,7 +21,7 @@ import {
   saveRoomInstrumentLayout,
   updateInstrumentBasic
 } from '../fixtures/instrument';
-import {getEquipmentMonitorInfo} from '../fixtures/equipment';
+import {getEquipmentMonitorInfo, unbindInstrumentHardware} from '../fixtures/equipment';
 import {getDemoScenario, setDemoScenario} from '../fixtures/scenario';
 import {listRoomTree} from '../fixtures/roomTree';
 import {failure, protectedRoute, success} from '../response';
@@ -104,11 +106,31 @@ export default [
       types: result.types
     });
   }),
-  protectedRoute('POST', '/instrument/add', () => failure(WRITE_BLOCKED)),
-  protectedRoute('POST', '/instrument/batch/delete', () => failure(WRITE_BLOCKED)),
+  protectedRoute('POST', '/instrument/add', ({body}) => {
+    const result = addDemoInstrument(body || {});
+    if (!result.ok) return failure(result.message || '新增失败');
+    return success({
+      id: result.id,
+      name: result.name,
+      count: result.count,
+      ids: result.ids,
+      departmentId: result.departmentId,
+      roomId: result.roomId,
+      types: result.types
+    });
+  }),
+  protectedRoute('POST', '/instrument/batch/delete', ({body}) => {
+    const result = batchRemoveInstruments(body || {});
+    if (!result.ok) return failure(result.message || '批量删除失败');
+    return success({count: result.count, ids: result.ids});
+  }),
   protectedRoute('POST', '/instrument/batch/update', () => failure(WRITE_BLOCKED)),
   protectedRoute('POST', '/instrument/export', async ({body}) => exportDemoInstruments(body || {})),
-  protectedRoute('GET', '/instrument/unbind', () => failure(WRITE_BLOCKED)),
+  protectedRoute('GET', '/instrument/unbind', ({params}) => {
+    const result = unbindInstrumentHardware(params && params.instrumentId);
+    if (!result.ok) return failure(result.message || '解绑失败');
+    return success({instrumentId: result.instrumentId, count: result.count});
+  }),
   ...removeRoutes,
   // Edit modal dependencies (empty / local stubs so form can open without 501).
   protectedRoute('GET', '/grade/getlist', () => success([])),

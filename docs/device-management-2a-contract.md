@@ -14,7 +14,10 @@
 | 单条删除 | **2C 已开放**（`POST /instrument/remove/:id` + `instrumentDeleted` tombstone） |
 | 导入 | **2D 已开放**（XLSX + 预览确认） |
 | 导出 | **2E 已开放**（`POST /instrument/export` → 本地 XLSX） |
-| 新增/批量删除/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
+| 批量删除 | **2F 已开放**（`POST /instrument/batch/delete` + 同 tombstone） |
+| 新增 | **2G 已开放**（`POST /instrument/add` → 同 `instrumentCreated` 池） |
+| 解绑智能硬件 | **2H 已开放**（`GET /instrument/unbind`；绑定后不可删） |
+| 批量改 / 其它 | `batch/update` **明确拒绝** |
 
 ## 实体与 ID
 
@@ -112,21 +115,44 @@
 | 副作用 | 清除该 id 的 `instrumentMeta`；从 `roomLayoutOverrides` 剪掉对应点 |
 | 读路径 | 列表 total/dashboard、详情、房间布局、`bindable?kind=instrument` 均排除已删 id |
 
-列表操作列「删除」已开放（无 `labelId` 时确认后直删；有标签时仍走解绑，解绑接口仍拒绝）。批量删除入口仍隐藏且 Mock 拒绝。
+列表操作列「删除」已开放（无 `labelId` 时确认后直删；有标签时仍走解绑，解绑接口仍拒绝）。
 
-### 2D 已开放：`POST /instrument/import`
+### 2D 已开放：导入（见文末 XLSX / 预览确认）
 
-持久化键：`smart-facility-demo:v1:instrumentCreated`。
+列表「导入」已开放；`POST /instrument/import/preview` + `POST /instrument/import`。详情见文末「XLSX 导入契约更新」。
+
+### 2F 已开放：`POST /instrument/batch/delete`
 
 | 规则 | 说明 |
 | --- | --- |
-| 请求 | multipart `files`；解析**文本 CSV** 首行数据：`名称,部门ID,分类types,房间ID` |
-| 校验 | 名称 2–26 字；部门 `900101/900102`；types `1/2`；房间 `950001/950002/950003` |
-| 新建 | 分配 id `970101`–`970150`；字段取自 CSV；`imported: true` |
-| 读路径 | 进入列表/dashboard/详情/bindable；**不**计入房间布局保存集合 |
-| 模板 | 下载 `设备导入.csv`；**二进制 .xls/.xlsx 拒绝**（项目无表格解析库）；其它导入类型仍不可用 |
+| 请求 | `{ids: number[]}`；空数组/缺省 → failure「请选择要删除的设备」 |
+| 校验 | 全部 id 须为活跃实体且**均未绑定**智能硬件；任一条无效/已删/已绑定 → **整批不删**（原子） |
+| 副作用 | 逐条复用 `removeInstrument` tombstone（同 2C：清 meta、剪布局） |
+| 成功 | `items: {count, ids}` |
 
-列表「导入」按钮已开放。新增/批量/解绑仍拒绝。
+列表「多选」已开放；演示下批量操作条**仅**「批量删除」（其它批量改部门/房间等仍隐藏且 `batch/update` 拒绝）。
+
+### 2G 已开放：`POST /instrument/add`
+
+| 规则 | 说明 |
+| --- | --- |
+| 字段 | `name`（2–26）、`departmentId`（900101/900102）、`types`（1/2）、`roomId`（950001/950002/950003） |
+| 其它 body | 接受但忽略（编号由 `DEMO-EQ-{id}` 派生） |
+| 持久化 | 同导入：`instrumentCreated`，id 段 `970101`–`970150`；`imported: true` |
+| 查重 | 同房间名称不可与活跃设备重复 |
+| 读路径 | 列表/dashboard/详情/bindable；**不**自动上图 |
+
+列表「新增」按钮已开放（原 Modal type=4）。
+
+### 2H 已开放：`GET /instrument/unbind?instrumentId=`
+
+| 规则 | 说明 |
+| --- | --- |
+| 作用 | 清除该仪器上全部智能硬件绑定（`equipmentBindings` 中 type=4） |
+| 未绑定 | failure「该设备未绑定智能硬件」 |
+| 与删除 | 列表行/详情带 `boundHardware`；**已绑定不可删**（UI 提示 + Mock 拒绝）；解绑后方可单删/批量删 |
+
+详情抽屉演示区展示绑定状态与「解绑」；硬件侧 `POST /instrument/things/remove` 仍可用。
 
 ### 2E 已开放：`POST /instrument/export`
 
@@ -136,11 +162,11 @@
 | --- | --- |
 | 名称 / 设备编号 / 部门 / 房间 / 分类 / 运行状态 / 参数状态 | 与列表同源 `listInstruments` |
 
-无外部下载服务；批量删除仍拒绝。
+无外部下载服务。
 
 ### 仍拒绝
 
-`POST /instrument/add|batch/delete|batch/update`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
+`POST /instrument/batch/update` → `failure('本阶段演示未开放仪器写操作。')`。
 
 ## 导航
 
@@ -150,8 +176,8 @@
 
 ## 验证
 
-- 单测：列表/编辑/删除/导入/导出；批量删除仍拒
-- 浏览器：证据 `docs/evidence/device-management-2a` … `2e`
+- 单测：列表/编辑/删除/导入/导出/批量删除/新增/解绑；batch/update 仍拒
+- 浏览器：证据 `docs/evidence/device-management-2a` … `2h`
 
 ## XLSX 导入契约更新（2026-10-01）
 

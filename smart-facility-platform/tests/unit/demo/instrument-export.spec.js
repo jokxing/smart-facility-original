@@ -83,9 +83,9 @@ test('export returns xlsx for current filters and ignores pagination', async () 
   expect(httpRows.length - 1).toBe(filtered.total);
 });
 
-test('batch delete remains blocked while export works', async () => {
+test('batch/update remains blocked while export works', async () => {
   await establishSession();
-  expect((await client.post('/instrument/batch/delete', {ids: [970001]})).data.code).toBe(0);
+  expect((await client.post('/instrument/batch/update', {})).data.code).toBe(0);
   const buffer = await exportDemoInstruments({});
   const rows = await readSheet(buffer);
   expect(rows.length - 1).toBe(12);

@@ -1491,3 +1491,143 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（批量删除或新增）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通设备管理仪器筛选导出演示`。
+
+## 2026-10-01 — 设备管理 2F：批量删除
+
+### 做了什么
+
+- 接通 `POST /instrument/batch/delete`：`batchRemoveInstruments` 先校验再逐条复用 `removeInstrument` tombstone；空 ids / 无效或已删 / 任一条已绑定 → 整批失败不写。
+- 列表恢复「多选」；演示下 `visibleSetUpList` 仅保留「批量删除」（value=6）；新增仍隐藏，`add` / `batch/update` / `unbind` 仍拒绝。
+- 单测：删除/列表/导出用例更新；原子性与绑定拒绝覆盖。
+- 浏览器：`npm run test:demo:device:2f`，证据 `docs/evidence/device-management-2f`。
+- 文档：契约 / demo-guide / next-task-prompt（下一刀：新增一台）。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/mock/fixtures/instrument.js` | `batchRemoveInstruments` |
+| `src/mock/handlers/instrument.js` | 开放 batch/delete |
+| `src/views/labDevice/index.vue` | 多选入口 + 演示仅批量删除 |
+| `tests/unit/demo/instrument-delete.spec.js` 等 | 断言更新 |
+| `scripts/check-demo-device-2f.cjs`、`package.json` | 浏览器验收 |
+| `docs/device-management-2a-contract.md`、`demo-guide.md`、`STATUS.md`、`next-task-prompt.md` | 复盘与下一刀 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：20 套 / 119 项通过。
+- `$env:DEMO_PORT='8088'; npm run test:demo:device:2f`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：多选勾选 → 批量删除 → 列表/统计/布局/bindable 同步排除。
+- **不能用**：新增表单；批量改部门/房间/图片/保管人；解绑。
+
+### 设计决定
+
+- 与单删同一 tombstone 与绑定守卫；先校验后删除保证原子失败。
+- 演示不开放其它批量写，避免假成功。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归 / 硬件 1B。
+- 未在真实已绑定硬件场景做浏览器点击（单测覆盖 resolver）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（新增一台）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器批量删除演示`。
+
+## 2026-10-01 — 设备管理 2G：手填新增一台
+
+### 做了什么
+
+- 接通 `POST /instrument/add`：`addDemoInstrument` 校验名称/部门/分类/房间，写入与导入同一 `instrumentCreated` 池（`imported: true`，不上图）。
+- 列表恢复「新增」按钮（原 Modal）；其它 body 字段接受但忽略。
+- 单测 `instrument-add.spec.js`；列表/导出断言更新。
+- 浏览器：`npm run test:demo:device:2g`，证据 `docs/evidence/device-management-2g`。
+- 文档：契约 / demo-guide / next-task-prompt（下一刀：收口或其它模块）。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/mock/fixtures/instrument.js` | `addDemoInstrument` |
+| `src/mock/handlers/instrument.js` | 开放 add |
+| `src/views/labDevice/index.vue` | 演示显示新增 |
+| `tests/unit/demo/instrument-add.spec.js` 等 | 覆盖与断言 |
+| `scripts/check-demo-device-2g.cjs`、`package.json` | 浏览器验收 |
+| `docs/*` | 复盘与下一刀 |
+
+### 验证
+
+- `npm run test:demo` 相关：21 套 / 123 项通过。
+- `$env:DEMO_PORT='8088'; npm run test:demo:device:2g`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：新增一台 → 列表/统计/详情/bindable；同房间名称查重。
+- **不能用**：解绑；`batch/update`；自动上图。
+
+### 设计决定
+
+- 与导入共用 id 段与持久化键，避免第二套创建路径。
+- 表单仍用原 Modal；Mock 只持久化四字段。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归。
+- 未验人手点选部门树/房间树全部交互路径（脚本经 Vue 赋值提交）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（收口或其它模块）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器手填新增演示`。
+
+## 2026-10-01 — 设备管理 2H：解绑后才能删除
+
+### 做了什么
+
+- 接通 `GET /instrument/unbind`：`unbindInstrumentHardware` 清除该仪器全部智能硬件绑定。
+- 列表/详情增加 `boundHardware`；已绑定删除 UI 直接提示「请先解绑」；Mock 单删/批量删仍拒绝。
+- 详情抽屉演示区展示绑定状态与解绑入口。
+- 单测 `instrument-unbind.spec.js`；浏览器 `test:demo:device:2h`，证据 `docs/evidence/device-management-2h`。
+- 文档：契约 / demo-guide / next-task-prompt。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/mock/fixtures/equipment.js` | `unbindInstrumentHardware` |
+| `src/mock/handlers/instrument.js` | 开放 unbind |
+| `src/mock/fixtures/instrument.js` | 行字段 `boundHardware` |
+| `src/views/labDevice/index.vue` | 绑定中禁止删除 |
+| `src/views/labDevice/components/LabDeviceDrawer.vue` | 解绑入口 |
+| `tests/unit/demo/instrument-unbind.spec.js` 等 | 覆盖 |
+| `scripts/check-demo-device-2h.cjs`、`package.json` | 浏览器验收 |
+| `docs/*` | 复盘与下一刀 |
+
+### 验证
+
+- `npm run test:demo` 相关：22 套 / 126 项通过。
+- `$env:DEMO_PORT='8088'; npm run test:demo:device:2h`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：绑定后不可删 → 详情解绑 → 再删；批量删遇绑定整批失败。
+- **不能用**：`batch/update`。
+
+### 设计决定
+
+- 不解绑后自动删除，强制两步，避免误删已绑设备。
+- 仪器侧 unbind 与硬件侧 things/remove 共用同一绑定存储。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归。
+- 未从硬件抽屉完整点选绑定再回设备管理的人工路径（脚本写入绑定存储）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理绑定解绑与删除守卫`。

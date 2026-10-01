@@ -138,19 +138,9 @@ test('detail id matches list row; bindable catalog stays same 970xxx set', async
   expect(listBindableCatalog('instrument').map(item => item.id)).toEqual(DEMO_INSTRUMENTS.map(item => item.id));
 });
 
-test('writes except update/basic remove and export stay rejected; categories/menus support labdevice entry', async () => {
+test('batch/update stays rejected; categories/menus support labdevice entry', async () => {
   await establishSession();
-  for (const [method, url] of [
-    ['post', '/instrument/add'],
-    ['post', '/instrument/batch/delete'],
-    ['get', '/instrument/unbind']
-  ]) {
-    const res = method === 'get'
-      ? (await client.get(url, {params: {instrumentId: 970001}})).data
-      : (await client.post(url, {})).data;
-    expect(res.code).toBe(0);
-    expect(res.message).toContain('未开放');
-  }
+  expect((await client.post('/instrument/batch/update', {})).data.message).toContain('未开放');
   const exported = await client.post('/instrument/export', {}, {responseType: 'arraybuffer'});
   expect(exported.data.byteLength || exported.data.length).toBeGreaterThan(100);
   expect(DEMO_CATEGORIES.map(item => item.types).sort()).toEqual([1, 2]);

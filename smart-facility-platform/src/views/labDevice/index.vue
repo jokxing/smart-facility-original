@@ -135,7 +135,7 @@
                                                     </div>
                                                     <div>
                                                         <el-button
-                                                            v-if="roleId != 5 && !isDemo"
+                                                            v-if="roleId != 5"
                                                             class="defaultBtn"
                                                             icon="el-icon-plus"
                                                             type="primary"
@@ -144,7 +144,6 @@
                                                             {{ $t('common.add1') }}
                                                         </el-button>
                                                         <el-button
-                                                            v-if="!isDemo"
                                                             class="defaultBtn icon-setup"
                                                             @click="showSetUp = !showSetUp"
                                                         >
@@ -183,7 +182,7 @@
                                             </template>
                                             <template>
                                                 <el-button
-                                                    v-for="item in setUpList"
+                                                    v-for="item in visibleSetUpList"
                                                     :key="item.value"
                                                     @click="handleBatchUpdate(item)"
                                                 >{{ item.title }}
@@ -1126,6 +1125,11 @@ export default {
             }
         },
         handleDelete(record) {
+            // Demo: bound smart hardware must be unbound before delete (no auto-unbind+delete).
+            if (this.isDemo && record.boundHardware) {
+                this.$message.error('该设备已绑定智能硬件，请先解绑后删除。');
+                return;
+            }
             if (record.labelId) {
                 this.$confirm(this.$t('labDevice.bindTag'), this.$t('common.hint'), {
                     confirmButtonText: this.$t('hardware.goOn'),
@@ -1227,6 +1231,11 @@ export default {
             if (!assetClassify.length || Object.prototype.toString.call(assetClassify) === '[object Object]') return []
             let list = this.handleAssetClassifyOptions(assetClassify)
             return list
+        },
+        // Demo: only batch-delete; other batch updates stay blocked.
+        visibleSetUpList() {
+            if (!this.isDemo) return this.setUpList
+            return this.setUpList.filter(item => item.value === 6)
         }
     },
     watch: {
