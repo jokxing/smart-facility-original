@@ -29,7 +29,12 @@ const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
 const INSTRUMENT_META_KEY = 'instrumentMeta';
 const INSTRUMENT_DELETED_KEY = 'instrumentDeleted';
+const INSTRUMENT_CREATED_KEY = 'instrumentCreated';
+const IMPORT_ID_MIN = 970101;
+const IMPORT_ID_MAX = 970150;
 const ALLOWED_TYPES = new Set([1, 2]);
+/** Imported demo devices sit in corridor so room A/B layout save rules stay intact. */
+const IMPORT_DEFAULT_ROOM_ID = 950002;
 
 function typeNameFor(types) {
   return Number(types) === 2 ? '演示辅助设备' : '演示设备';
@@ -77,8 +82,42 @@ const LAYOUT_SEEDS = Object.freeze([
   {elementId: 970003, roomId: 950003, pctLeft: 74.9106, pctTop: 27.2956, rotation: 0, scaleX: 1.1, scaleY: 1.1, sortIndex: 6}
 ]);
 
+function readCreatedInstruments() {
+  try {
+    const raw = storage.getItem(INSTRUMENT_CREATED_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(item => item && Number.isFinite(Number(item.id)));
+  } catch (_) {
+    return [];
+  }
+}
+
+function writeCreatedInstruments(list) {
+  storage.setItem(INSTRUMENT_CREATED_KEY, JSON.stringify(list));
+}
+
+export function clearInstrumentCreated() {
+  storage.removeItem(INSTRUMENT_CREATED_KEY);
+}
+
 function instrumentById(id) {
-  return DEMO_INSTRUMENTS.find(item => item.id === Number(id)) || null;
+  const key = Number(id);
+  const seed = DEMO_INSTRUMENTS.find(item => item.id === key);
+  if (seed) return seed;
+  return readCreatedInstruments().find(item => Number(item.id) === key) || null;
+}
+
+/** Seed + imported overlays still alive (not tombstoned). */
+export function listActiveInstrumentSeeds() {
+  return activeInstrumentSeeds();
+}
+
+export function listImportRemoveIds() {
+  const ids = [];
+  for (let id = IMPORT_ID_MIN; id <= IMPORT_ID_MAX; id++) ids.push(id);
+  return ids;
 }
 
 function readDeletedIds() {
@@ -105,7 +144,176 @@ export function clearInstrumentDeleted() {
 }
 
 function activeInstrumentSeeds() {
-  return DEMO_INSTRUMENTS.filter(item => !isInstrumentDeleted(item.id));
+  const created = readCreatedInstruments().filter(item => !isInstrumentDeleted(item.id));
+  return DEMO_INSTRUMENTS.filter(item => !isInstrumentDeleted(item.id)).concat(created);
+}
+
+function nextImportId() {
+  const used = new Set([
+    ...DEMO_INSTRUMENTS.map(item => item.id),
+    ...readCreatedInstruments().map(item => Number(item.id)),
+    ...readDeletedIds().filter(id => id >= IMPORT_ID_MIN)
+  ]);
+  for (let id = IMPORT_ID_MIN; id <= IMPORT_ID_MAX; id++) {
+    if (!used.has(id)) return id;
+  }
+  return null;
+}
+
+function firstUploadFile(files) {
+  if (files == null) return null;
+  return Array.isArray(files) ? (files[0] || null) : files;
+}
+
+async function readUploadSource(file) {
+  if (file == null) return null;
+  if (typeof file === 'string') return {kind: 'text', text: file};
+  // Prefer bytes + TextDecoder: jsdom Blob#text() may Latin-1-decode UTF-8.
+  if (typeof file.arrayBuffer === 'function') {
+    return {kind: 'bytes', bytes: new Uint8Array(await file.arrayBuffer())};
+  }
+  if (typeof Blob !== 'undefined' && file instanceof Blob && typeof FileReader !== 'undefined') {
+    const buffer = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error || new Error('read failed'));
+      reader.readAsArrayBuffer(file);
+    });
+    return {kind: 'bytes', bytes: new Uint8Array(buffer)};
+  }
+  if (typeof file.text === 'function') {
+    return {kind: 'text', text: await file.text()};
+  }
+  return null;
+}
+
+function decodeDemoImportText(source) {
+  if (!source) return {ok: false, message: '无法读取导入文件。'};
+  if (source.kind === 'text') {
+    const text = String(source.text || '');
+    if (!text.trim()) return {ok: false, message: '导入文件为空。'};
+    if (text.indexOf('\0') >= 0) {
+      return {
+        ok: false,
+        message: '演示仅解析文本 CSV 模板。请使用「下载模板」后编辑，或另存为 CSV 再上传（不要存成 Excel 二进制）。'
+      };
+    }
+    return {ok: true, text: text.replace(/^\uFEFF/, '')};
+  }
+  const bytes = source.bytes;
+  if (!bytes || !bytes.length) return {ok: false, message: '导入文件为空。'};
+  // OLE Compound (.xls) or ZIP (.xlsx) — no spreadsheet parser in demo deps.
+  if ((bytes[0] === 0xD0 && bytes[1] === 0xCF) || (bytes[0] === 0x50 && bytes[1] === 0x4B)) {
+    return {
+      ok: false,
+      message: '演示仅解析文本 CSV 模板。请使用「下载模板」后编辑，或另存为 CSV 再上传（不要存成 Excel 二进制）。'
+    };
+  }
+  for (let i = 0; i < Math.min(bytes.length, 512); i++) {
+    if (bytes[i] === 0) {
+      return {
+        ok: false,
+        message: '演示仅解析文本 CSV 模板。请使用「下载模板」后编辑，或另存为 CSV 再上传（不要存成 Excel 二进制）。'
+      };
+    }
+  }
+  let start = 0;
+  if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) start = 3;
+  const slice = bytes.subarray(start);
+  let text;
+  if (typeof TextDecoder !== 'undefined') {
+    text = new TextDecoder('utf-8').decode(slice);
+  } else if (typeof Buffer !== 'undefined') {
+    text = Buffer.from(slice).toString('utf8');
+  } else {
+    text = decodeURIComponent(Array.from(slice, b => '%' + b.toString(16).padStart(2, '0')).join(''));
+  }
+  return {ok: true, text};
+}
+
+function splitCsvLine(line) {
+  const cells = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (ch === ',' && !inQuotes) {
+      cells.push(cur.trim());
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function parseDemoImportRow(text) {
+  const lines = String(text || '')
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+  if (!lines.length) return {ok: false, message: '导入文件为空。'};
+  const headerCells = splitCsvLine(lines[0]);
+  const headerJoined = headerCells.join('|').toLowerCase();
+  const hasHeader = /名称|name|部门|department|房间|room|types|分类/.test(headerJoined);
+  if (hasHeader && lines.length < 2) return {ok: false, message: '模板至少需要一行数据。'};
+  const cells = splitCsvLine(hasHeader ? lines[1] : lines[0]);
+  const name = String(cells[0] == null ? '' : cells[0]).trim();
+  if (name.length < 2 || name.length > 26) {
+    return {ok: false, message: '请填写 2–26 字的设备名称。'};
+  }
+  const departmentId = Number(cells[1]);
+  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
+    return {ok: false, message: '部门ID仅支持 900101 / 900102。'};
+  }
+  const types = cells[2] == null || cells[2] === '' ? 1 : Number(cells[2]);
+  if (!ALLOWED_TYPES.has(types)) {
+    return {ok: false, message: '分类 types 仅支持 1 / 2。'};
+  }
+  const roomId = cells[3] == null || cells[3] === '' ? IMPORT_DEFAULT_ROOM_ID : Number(cells[3]);
+  if (!INSTRUMENT_ROOM_SPACE[roomId]) {
+    return {ok: false, message: '房间ID仅支持 950001 / 950002 / 950003。'};
+  }
+  return {ok: true, name, departmentId, types, roomId};
+}
+
+/**
+ * POST /instrument/import — parse first data row of demo CSV template
+ * (名称,部门ID,分类types,房间ID). Binary .xls/.xlsx is rejected (no sheet lib).
+ */
+export async function importDemoInstruments(body = {}) {
+  const file = firstUploadFile(body && body.files);
+  if (!file) return {ok: false, message: '请先选择要导入的文件。'};
+  const id = nextImportId();
+  if (id == null) return {ok: false, message: '演示导入数量已达上限。'};
+  const source = await readUploadSource(file);
+  const decoded = decodeDemoImportText(source);
+  if (!decoded.ok) return decoded;
+  const parsed = parseDemoImportRow(decoded.text);
+  if (!parsed.ok) return parsed;
+  const entity = {
+    id,
+    name: parsed.name,
+    roomId: parsed.roomId,
+    assetKey: 'demo-device-incubator',
+    types: parsed.types,
+    departmentId: parsed.departmentId,
+    daysAgo: 0,
+    imported: true
+  };
+  writeCreatedInstruments(readCreatedInstruments().concat(entity));
+  return {ok: true, id, name: entity.name, count: 1, departmentId: entity.departmentId, roomId: entity.roomId, types: entity.types};
 }
 
 function pruneDeletedFromLayouts(deletedId) {
@@ -260,12 +468,13 @@ function placementsForRoom(roomId) {
 export function listInstrumentsByRoomId(roomId) {
   const key = roomId == null || roomId === '' ? null : Number(roomId);
   if (key == null || Number.isNaN(key)) return [];
-  return activeInstrumentSeeds().filter(item => item.roomId === key);
+  // Imported rows appear in list/detail but stay off layout save eligibility.
+  return activeInstrumentSeeds().filter(item => item.roomId === key && !item.imported);
 }
 
 export function listInstrumentsForFloorRooms(roomIds) {
   const idSet = new Set((roomIds || []).map(Number).filter(n => !Number.isNaN(n)));
-  return activeInstrumentSeeds().filter(item => idSet.has(item.roomId));
+  return activeInstrumentSeeds().filter(item => idSet.has(item.roomId) && !item.imported);
 }
 
 /**

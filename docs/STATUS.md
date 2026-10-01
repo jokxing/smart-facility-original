@@ -1340,3 +1340,48 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（2D 导入或新增）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通设备管理仪器单条删除演示`。
+
+## 追加：设备管理 2D 仪器导入（2026-10-01）
+
+依据 `docs/next-task-prompt.md`（设备管理 2D，优先导入）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| Mock | `importDemoInstruments` + `instrumentCreated`（id 970101–970150，走廊 950002） |
+| Handler | `POST /instrument/import`；remove 路由预注册导入 id 段；add/batch/export 仍拒 |
+| 布局 | `imported: true` 不进入 `listInstrumentsByRoomId`，避免破坏 A/B 室布局保存 |
+| UI | 列表开放「导入」；`ImportFile` 仪器模板本地下载示意 CSV |
+| 测试 | `instrument-import.spec.js`；模板单测更新；浏览器 `check-demo-device-2d.cjs` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 2E 导出或批量删除 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：18 套 / **104** 项通过。
+- `DEMO_PORT=8088 npm run test:demo:device:2d`：通过，`externalAttempts:0`；证据 `docs/evidence/device-management-2d`（01–04）。
+- 导入后 total=13、统计卡同步、关键词「演示导入设备」命中 970101。
+
+### 能用 / 不能用
+
+- **能用**：下载 `设备导入.csv`；按首行写入名称/部门/分类/房间；列表/统计/详情/bindable 可见。
+- **不能用**：解析 Excel 二进制 `.xls/.xlsx`（无表格库）；新增表单；批量删除/导出/解绑。
+
+### 设计决定
+
+- 解析文本 CSV 首行；二进制表拒绝并提示另存 CSV。
+- 导入设备 `imported: true` 不进布局集合，避免与「房间须保留全部已上图设备」冲突。
+
+### 追加修复（同日）
+
+- 用户改表后内容不一致：已改为按 CSV 字段落库；请重新下载 CSV 模板编辑上传，勿用 Excel 另存 xls/xlsx。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归 / 硬件 1B 全量脚本。
+- 未验连续导入至 970150 上限后的 UI 文案展示。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（2E 导出或批量删除）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器导入演示`。

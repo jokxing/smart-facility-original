@@ -153,7 +153,6 @@
                                                             }}
                                                         </el-button>
                                                         <el-button
-                                                            v-if="!isDemo"
                                                             class="defaultBtn icon-upload"
                                                             @click="importFileVisible = true"
                                                         >

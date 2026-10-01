@@ -39,7 +39,7 @@
             :on-exceed="handleExceedFile"
             :on-remove="handleRemove"
             :on-success="handleSuccess"
-            accept=".xlsx,.xls">
+            accept=".xlsx,.xls,.csv">
           <div class="el-upload__tip">{{ $t('hardware.importTemplate3') }}</div>
           <div class="footer">
             <el-button slot="trigger">{{ $t('hardware.importTemplate4') }}</el-button>
@@ -161,6 +161,18 @@ export default {
       this.$emit('hiddenModalVisible')
     },
     handleDownImport() {
+      if (process.env.VUE_APP_DEMO === 'true' && this.title === 'instrument') {
+        // UTF-8 CSV (not binary xls). Excel「另存为 xlsx/xls」后演示无法解析。
+        const content = '\uFEFF名称,部门ID,分类types,房间ID\n演示导入设备,900101,1,950002\n';
+        const blob = new Blob([content], {type: 'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = localStorage.getItem('lang') === 'en' ? 'instrument.csv' : '设备导入.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+        return true;
+      }
       this.$message.warning(localStorage.getItem('lang') === 'en'
         ? 'Import templates are not available in this demo.'
         : '本演示未接入导入模板，暂不可下载。');
@@ -187,9 +199,12 @@ export default {
     },
     // 上传文件之前的钩子
     handleBeforeUpload(file) {
-      let extension = file.name.substring(file.name.lastIndexOf('.') + 1);
+      let extension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
       let size = file.size / 1024 / 1024;
-      if (extension !== 'xlsx' && extension !== 'xls') {
+      const allowed = process.env.VUE_APP_DEMO === 'true'
+        ? ['xlsx', 'xls', 'csv']
+        : ['xlsx', 'xls'];
+      if (!allowed.includes(extension)) {
         this.$message.warning(this.$t('hardware.importTemplate3'));
       }
       if (size > 10) {

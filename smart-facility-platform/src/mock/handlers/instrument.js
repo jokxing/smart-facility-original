@@ -7,6 +7,8 @@ import {
   getDemoMonitorInfo,
   getDemoOpenMonitorFlag,
   getInstrumentDashboardNew,
+  importDemoInstruments,
+  listImportRemoveIds,
   listInstruments,
   listRoonInstrumentInfo,
   removeInstrument,
@@ -20,16 +22,17 @@ import {listRoomTree} from '../fixtures/roomTree';
 import {failure, protectedRoute, success} from '../response';
 
 const WRITE_BLOCKED = '本阶段演示未开放仪器写操作。';
-const removeRoutes = DEMO_INSTRUMENTS.map(item =>
-  protectedRoute('POST', `/instrument/remove/${item.id}`, () => {
-    const result = removeInstrument(item.id);
+const removeIds = DEMO_INSTRUMENTS.map(item => item.id).concat(listImportRemoveIds());
+const removeRoutes = removeIds.map(id =>
+  protectedRoute('POST', `/instrument/remove/${id}`, () => {
+    const result = removeInstrument(id);
     if (!result.ok) return failure(result.message || '删除失败');
     return success({id: result.id, roomId: result.roomId});
   })
 );
 
 // Room instrument layout + device list/dashboard + read-only detail + MonitorInfo series.
-// 2B: update/basic persists name/department/types; other writes still rejected.
+// 2B: update/basic; 2C: remove tombstone; 2D: import creates corridor instrument.
 export default [
   protectedRoute('POST', '/map/element/getRoonInstrumentInfoList', ({params}) => {
     return success(listRoonInstrumentInfo(params.roomId));
@@ -69,6 +72,18 @@ export default [
       departmentName: result.departmentName,
       types: result.types,
       typeName: result.typeName
+    });
+  }),
+  protectedRoute('POST', '/instrument/import', async ({body}) => {
+    const result = await importDemoInstruments(body || {});
+    if (!result.ok) return failure(result.message || '导入失败');
+    return success({
+      id: result.id,
+      name: result.name,
+      count: result.count,
+      departmentId: result.departmentId,
+      roomId: result.roomId,
+      types: result.types
     });
   }),
   protectedRoute('POST', '/instrument/add', () => failure(WRITE_BLOCKED)),

@@ -12,7 +12,8 @@
 | 点击名称 → `LabDeviceDrawer` 只读详情 | **已开放**（复用 `GET /instrument/detail` + 监测标签） |
 | 编辑基本信息（名称/部门/分类） | **2B 已开放**（`POST /instrument/update/basic` + `instrumentMeta`） |
 | 单条删除 | **2C 已开放**（`POST /instrument/remove/:id` + `instrumentDeleted` tombstone） |
-| 新增/批量删除/导入/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
+| 导入 | **2D 已开放**（`POST /instrument/import` + `instrumentCreated`；模板本地下载） |
+| 新增/批量删除/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
 
 ## 实体与 ID
 
@@ -112,6 +113,20 @@
 
 列表操作列「删除」已开放（无 `labelId` 时确认后直删；有标签时仍走解绑，解绑接口仍拒绝）。批量删除入口仍隐藏且 Mock 拒绝。
 
+### 2D 已开放：`POST /instrument/import`
+
+持久化键：`smart-facility-demo:v1:instrumentCreated`。
+
+| 规则 | 说明 |
+| --- | --- |
+| 请求 | multipart `files`；解析**文本 CSV** 首行数据：`名称,部门ID,分类types,房间ID` |
+| 校验 | 名称 2–26 字；部门 `900101/900102`；types `1/2`；房间 `950001/950002/950003` |
+| 新建 | 分配 id `970101`–`970150`；字段取自 CSV；`imported: true` |
+| 读路径 | 进入列表/dashboard/详情/bindable；**不**计入房间布局保存集合 |
+| 模板 | 下载 `设备导入.csv`；**二进制 .xls/.xlsx 拒绝**（项目无表格解析库）；其它导入类型仍不可用 |
+
+列表「导入」按钮已开放。新增/批量/导出/解绑仍拒绝。
+
 ### 仍拒绝
 
 `POST /instrument/add|batch/delete|batch/update|export`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
@@ -124,5 +139,5 @@
 
 ## 验证
 
-- 单测：列表分页/筛选/统计；编辑成功/校验失败/会话；删除 tombstone 后列表/统计/详情/布局/bindable 一致；批量删除仍拒绝
-- 浏览器：证据 `docs/evidence/device-management-2a`、`docs/evidence/device-management-2b`、`docs/evidence/device-management-2c`
+- 单测：列表/编辑/删除/导入；模板下载（仪器可用、其它类型仍拒）
+- 浏览器：证据 `docs/evidence/device-management-2a` … `2d`
