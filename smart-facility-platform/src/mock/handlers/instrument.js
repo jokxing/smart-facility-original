@@ -10,6 +10,7 @@ import {
   getInstrumentDashboardNew,
   importDemoInstruments,
   previewDemoInstruments,
+  exportDemoInstruments,
   listImportRemoveIds,
   listInstruments,
   listRoonInstrumentInfo,
@@ -106,7 +107,7 @@ export default [
   protectedRoute('POST', '/instrument/add', () => failure(WRITE_BLOCKED)),
   protectedRoute('POST', '/instrument/batch/delete', () => failure(WRITE_BLOCKED)),
   protectedRoute('POST', '/instrument/batch/update', () => failure(WRITE_BLOCKED)),
-  protectedRoute('POST', '/instrument/export', () => failure(WRITE_BLOCKED)),
+  protectedRoute('POST', '/instrument/export', async ({body}) => exportDemoInstruments(body || {})),
   protectedRoute('GET', '/instrument/unbind', () => failure(WRITE_BLOCKED)),
   ...removeRoutes,
   // Edit modal dependencies (empty / local stubs so form can open without 501).

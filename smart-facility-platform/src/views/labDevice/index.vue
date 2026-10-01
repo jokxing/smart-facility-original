@@ -160,7 +160,6 @@
 
                                                         </el-button>
                                                         <el-button
-                                                            v-if="!isDemo"
                                                             class="defaultBtn icon-download1"
                                                             @click="handleExport"
                                                         >
@@ -1024,7 +1023,21 @@ export default {
         },
         // 导出
         handleExport() {
-            var data = {
+            const data = this.isDemo ? {
+                keyword: this.items.keyword,
+                departmentIdList: this.items.departmentIdList,
+                typesList: this.items.typesList,
+                gardenId: this.items.gardenId,
+                buildingId: this.items.buildingId,
+                floorIds: this.items.floorIds,
+                roomIdList: this.items.roomIdList,
+                status: this.items.status == -1 ? 0 : this.items.status,
+                sensorStatus: this.items.sensorStatus,
+                objType: this.items.objType,
+                type: this.items.type,
+                pageNum: 1,
+                pageSize: 10000
+            } : {
                 keyword: this.items.keyword,
                 pageNum: this.items.pageNum,
                 pageSize: this.items.pageSize,
@@ -1036,20 +1049,22 @@ export default {
             this.$message.warning(this.$t('common.exportMessage'));
             postUserExport(data)
                 .then((res) => {
+                    const finish = () => {
+                        const stamp = moment(new Date()).format('YYYYMMDDHHmmss')
+                        mixin.methods.download(
+                            res,
+                            decodeURIComponent(this.$t('labDevice.deviceExport') + stamp + (this.isDemo ? '.xlsx' : ''), "UTF-8")
+                        )
+                    }
+                    if (this.isDemo) return finish()
                     new Promise((resolve) => {
                         setTimeout(() => {
                             resolve()
                         }, 2500)
-                    }).then(() => {
-                        const data = moment(new Date()).format('YYYYMMDDHHmmss')
-                        mixin.methods.download(
-                            res,
-                            decodeURIComponent(this.$t('labDevice.deviceExport') + data, "UTF-8")
-                        )
-                    })
+                    }).then(finish)
                 })
                 .catch((err) => {
-                    this.$message.error(err.message)
+                    this.$message.error(err.message || err)
                 })
         },
 

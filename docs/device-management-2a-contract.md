@@ -12,8 +12,9 @@
 | 点击名称 → `LabDeviceDrawer` 只读详情 | **已开放**（复用 `GET /instrument/detail` + 监测标签） |
 | 编辑基本信息（名称/部门/分类） | **2B 已开放**（`POST /instrument/update/basic` + `instrumentMeta`） |
 | 单条删除 | **2C 已开放**（`POST /instrument/remove/:id` + `instrumentDeleted` tombstone） |
-| 导入 | **2D 已开放**（`POST /instrument/import` + `instrumentCreated`；模板本地下载） |
-| 新增/批量删除/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
+| 导入 | **2D 已开放**（XLSX + 预览确认） |
+| 导出 | **2E 已开放**（`POST /instrument/export` → 本地 XLSX） |
+| 新增/批量删除/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
 
 ## 实体与 ID
 
@@ -125,11 +126,21 @@
 | 读路径 | 进入列表/dashboard/详情/bindable；**不**计入房间布局保存集合 |
 | 模板 | 下载 `设备导入.csv`；**二进制 .xls/.xlsx 拒绝**（项目无表格解析库）；其它导入类型仍不可用 |
 
-列表「导入」按钮已开放。新增/批量/导出/解绑仍拒绝。
+列表「导入」按钮已开放。新增/批量/解绑仍拒绝。
+
+### 2E 已开放：`POST /instrument/export`
+
+按当前筛选条件导出**全部匹配行**（忽略分页）为本地 XLSX（`设备列表` 工作表）。
+
+| 列 | 说明 |
+| --- | --- |
+| 名称 / 设备编号 / 部门 / 房间 / 分类 / 运行状态 / 参数状态 | 与列表同源 `listInstruments` |
+
+无外部下载服务；批量删除仍拒绝。
 
 ### 仍拒绝
 
-`POST /instrument/add|batch/delete|batch/update|export`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
+`POST /instrument/add|batch/delete|batch/update`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
 
 ## 导航
 
@@ -139,9 +150,8 @@
 
 ## 验证
 
-- 单测：列表/编辑/删除/导入；模板下载（仪器可用、其它类型仍拒）
-- 浏览器：证据 `docs/evidence/device-management-2a` … `2d`
-
+- 单测：列表/编辑/删除/导入/导出；批量删除仍拒
+- 浏览器：证据 `docs/evidence/device-management-2a` … `2e`
 
 ## XLSX 导入契约更新（2026-10-01）
 

@@ -1,4 +1,4 @@
-import {readInstrumentWorkbook} from '../instrumentWorkbook';
+import {readInstrumentWorkbook, createInstrumentExportWorkbook} from '../instrumentWorkbook';
 /**
  * Shared lab instruments + room-local layouts for getRoonInstrumentInfoList.
  *
@@ -657,6 +657,15 @@ export function listInstruments(body = {}) {
     pageNum,
     pageSize
   };
+}
+
+/**
+ * POST /instrument/export — filtered list as local XLSX (no external download service).
+ * Ignores pageNum/pageSize and exports the full filtered set.
+ */
+export async function exportDemoInstruments(body = {}) {
+  const filtered = listInstruments({...body, pageNum: 1, pageSize: 10000});
+  return createInstrumentExportWorkbook(filtered.list || []);
 }
 
 /**

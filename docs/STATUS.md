@@ -1451,3 +1451,43 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（2E 导出或批量删除）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通设备导入预览确认流程`。
+
+## 追加：设备管理 2E 筛选导出（2026-10-01）
+
+依据 `docs/next-task-prompt.md`（设备管理 2E，优先导出）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| Mock | `exportDemoInstruments` + `createInstrumentExportWorkbook`；复用 `listInstruments` 筛选，忽略分页 |
+| Handler | `POST /instrument/export` 返回 XLSX 二进制；`batch/delete` 仍拒绝 |
+| UI | 列表开放「导出」；demo 下传完整筛选字段并立即下载 `.xlsx` |
+| 测试 | `instrument-export.spec.js`；列表单测同步；浏览器 `check-demo-device-2e.cjs` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 批量删除或新增 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false --silent`：20 套 / **117** 项通过。
+- `DEMO_PORT=8088 npm run test:demo:device:2e`：通过，`externalAttempts:0`；关键词「培养箱」筛选后导出 2 行。
+- 证据：`docs/evidence/device-management-2e`。
+
+### 能用 / 不能用
+
+- **能用**：按当前筛选导出全部匹配仪器为本地 XLSX。
+- **不能用**：批量删除/新增/解绑。
+
+### 设计决定
+
+- 导出与列表共用筛选逻辑；不接外部下载任务服务。
+- 批量删除留待下一切片，避免本轮范围膨胀。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归 / 硬件 1B 脚本。
+- 未验超大筛选集（>10000）导出表现。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（批量删除或新增）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器筛选导出演示`。

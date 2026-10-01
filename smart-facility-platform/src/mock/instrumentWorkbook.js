@@ -25,6 +25,43 @@ export async function createInstrumentWorkbook(options) {
   return workbook.xlsx.writeBuffer();
 }
 
+export const EXPORT_HEADERS = ['名称', '设备编号', '部门', '房间', '分类', '运行状态', '参数状态'];
+
+function runningStatusLabel(status) {
+  const n = Number(status);
+  if (n === 1) return '工作中';
+  if ([3, 4].includes(n)) return '未绑定';
+  return '未运行';
+}
+
+function sensorStatusLabel(bingStatus) {
+  const n = Number(bingStatus);
+  if (n === 1) return '正常';
+  if ([2, -1].includes(n)) return '异常';
+  return '其它';
+}
+
+/** Build list-export workbook from instrument list rows (already filtered). */
+export async function createInstrumentExportWorkbook(rows = []) {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('设备列表');
+  sheet.addRow(EXPORT_HEADERS);
+  sheet.getRow(1).font = {bold: true};
+  for (const row of rows) {
+    sheet.addRow([
+      row.name || '',
+      row.no || '',
+      row.departmentName || '',
+      row.roomName || '',
+      row.typeName || '',
+      runningStatusLabel(row.status),
+      sensorStatusLabel(row.bingStatus)
+    ]);
+  }
+  sheet.columns.forEach(column => { column.width = 18; });
+  return workbook.xlsx.writeBuffer();
+}
+
 export async function readInstrumentWorkbook(file) {
   const error = validateImportFile(file);
   if (error) throw new Error(error);
