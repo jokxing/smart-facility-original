@@ -9,6 +9,7 @@ import {
   getDemoOpenMonitorFlag,
   getInstrumentDashboardNew,
   importDemoInstruments,
+  previewDemoInstruments,
   listImportRemoveIds,
   listInstruments,
   listRoonInstrumentInfo,
@@ -74,6 +75,19 @@ export default [
       departmentName: result.departmentName,
       types: result.types,
       typeName: result.typeName
+    });
+  }),
+  protectedRoute('POST', '/instrument/import/preview', async ({body}) => {
+    const result = await previewDemoInstruments(body || {});
+    if (!result.rows) return failure(result.message || '预览失败');
+    // Always return preview payload (ok may be false); parse-level failures have empty rows.
+    if (!result.rows.length && !result.ok) return failure(result.message || '预览失败');
+    return success({
+      ok: result.ok,
+      message: result.message || '',
+      rows: result.rows,
+      validCount: result.validCount || 0,
+      freeCount: result.freeCount || 0
     });
   }),
   protectedRoute('POST', '/instrument/import', async ({body}) => {

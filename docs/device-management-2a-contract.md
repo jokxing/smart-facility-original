@@ -146,3 +146,13 @@
 ## XLSX 导入契约更新（2026-10-01）
 
 POST /instrument/import 接收 FormData 单个files（真实.xlsx）；设备导入页固定名称/部门/分类/房间，填写说明页列出候选名称。GET /__demo/instrument/import-options 返回共享departments/types/rooms，需登录。成功items含count/ids及首条兼容字段；失败code=0/message且整批不写。名称2–26字，同房间名称不能与现有或批次重复；最多50行/10MB、累计50个导入ID（删除不复用）。解析后同步校验分配保存；前端提交锁。绑定使用活跃实体，已绑定单删需先解绑。新设备已登记、未布置，不自动上图；旧CSV模板不再支持。验收见STATUS。
+
+### 导入预览确认（2026-10-01）
+
+| 项 | 说明 |
+| --- | --- |
+| `POST /instrument/import/preview` | 解析+业务校验，**不写**存储；items 含 `ok/message/rows/validCount/freeCount` |
+| 预览行 | `rowNumber, name, department, type, room, error`（及解析出的 id 字段） |
+| 确认 | 仅当 `ok=true` 可点「确认导入」；再次走 `POST /instrument/import`（重新校验名称重复与容量） |
+| 换文件 | 清空预览后重新请求 preview |
+| 共享 | `buildInstrumentImportPlan` 供 preview/import 共用，页面不复制规则 |

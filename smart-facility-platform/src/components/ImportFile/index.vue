@@ -6,9 +6,9 @@
       :visible="true"
       append-to-body
       class="import-dialog"
-      custom-class="modal-default modal-labDevice"
+      :custom-class="'modal-default modal-labDevice' + (isDemoInstrument ? ' import-dialog-wide' : '')"
       destroy-on-close
-      width="400px">
+      :width="isDemoInstrument ? '760px' : '400px'">
     <div class="modal-default-body">
       <el-row>
           {{ $t('hardware.importTemplate') }}
@@ -34,20 +34,47 @@
             :file-list="fileList"
             :http-request="uploadFile"
             :limit="isDemoInstrument ? 1 : 3"
-            :disabled="submitLoading"
+            :disabled="submitLoading || previewLoading"
             :on-change="handleFileList"
             :on-error="handleError"
             :on-exceed="handleExceedFile"
             :on-remove="handleRemove"
             :on-success="handleSuccess"
             :accept="isDemoInstrument ? '.xlsx' : '.xlsx,.xls'">
-          <div class="el-upload__tip">{{ isDemoInstrument ? '仅支持一个 .xlsx 文件，最多 50 行、10MB；整批校验通过后保存。' : $t('hardware.importTemplate3') }}</div>
+          <div class="el-upload__tip">{{ isDemoInstrument ? '仅支持一个 .xlsx 文件，最多 50 行、10MB；选择后先校验预览，确认后才写入。' : $t('hardware.importTemplate3') }}</div>
           <div class="footer">
             <el-button slot="trigger">{{ $t('hardware.importTemplate4') }}</el-button>
-            <el-button type="primary" :loading="submitLoading" @click.stop="handleSubmitUpload">{{ isDemoInstrument ? '导入设备' : $t('hardware.importTemplate5') }}</el-button>
+            <el-button
+                v-if="isDemoInstrument"
+                type="primary"
+                :loading="submitLoading || previewLoading"
+                :disabled="!canConfirmImport"
+                @click.stop="handleSubmitUpload"
+            >确认导入</el-button>
+            <el-button v-else type="primary" :loading="submitLoading" @click.stop="handleSubmitUpload">{{ $t('hardware.importTemplate5') }}</el-button>
           </div>
         </el-upload>
       </el-row>
+
+      <div v-if="isDemoInstrument && previewRows.length" class="import-preview">
+        <div class="import-preview-summary">
+          <span v-if="previewOk">预览通过 {{ previewRows.length }} 行，确认后写入。</span>
+          <span v-else>预览未通过，请修正后重新选择文件。</span>
+        </div>
+        <el-table :data="previewRows" size="mini" border max-height="280">
+          <el-table-column prop="rowNumber" label="行号" width="60" />
+          <el-table-column prop="name" label="名称" min-width="120" show-overflow-tooltip />
+          <el-table-column prop="department" label="部门" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="type" label="分类" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="room" label="房间" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="error" label="错误" min-width="160" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span :class="scope.row.error ? 'import-preview-error' : 'import-preview-ok'">{{ scope.row.error || '通过' }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
       <el-alert v-if="importError" :title="importError" type="error" :closable="false" show-icon />
     </div>
   </el-dialog>
@@ -68,7 +95,10 @@ export default {
       const _this = this;
     return {
       submitLoading: false,
+      previewLoading: false,
       importError: '',
+      previewRows: [],
+      previewOk: false,
       fileData: "",
       fileList: [],
       importType: {
@@ -160,11 +190,19 @@ export default {
     }
   },
   computed: {
-    isDemoInstrument() { return process.env.VUE_APP_DEMO === 'true' && this.title === 'instrument'; }
+    isDemoInstrument() { return process.env.VUE_APP_DEMO === 'true' && this.title === 'instrument'; },
+    canConfirmImport() {
+      return this.isDemoInstrument && this.previewOk && this.fileList.length === 1 && !this.previewLoading && !this.submitLoading;
+    }
   },
   methods: {
+    clearPreview() {
+      this.previewRows = [];
+      this.previewOk = false;
+      this.importError = '';
+    },
     handleModalClose() {
-      if (!this.submitLoading) this.$emit('hiddenModalVisible')
+      if (!this.submitLoading && !this.previewLoading) this.$emit('hiddenModalVisible')
     },
     handleDownImport() {
       if (process.env.VUE_APP_DEMO === 'true' && this.title === 'instrument') {
@@ -197,25 +235,21 @@ export default {
       if (this.isDemoInstrument) { this.$message.warning('每次只能选择一个文件，请先移除当前文件。'); return; }
       this.$message.warning(this.$t('hardware.importTemplate6') +` ${files.length + fileList.length} ` + this.$t('common.individual'));
     },
-    // 文件状态改变时的钩子
-    handleFileList(file, fileList) {
+    async handleFileList(file, fileList) {
       this.fileList = fileList;
-      this.importError = "";
+      this.clearPreview();
+      if (this.isDemoInstrument && fileList.length === 1) await this.previewSelectedFile();
     },
-    // 文件列表移除文件时的钩子
     handleRemove(file, fileList) {
       this.fileList = fileList;
-      this.importError = "";
+      this.clearPreview();
     },
-    // 文件上传成功时的钩子
     handleSuccess(res, file, fileList) {
       this.$message.success(this.$t('hardware.importSuccess'));
     },
-    // 文件上传失败时的钩子
     handleError(err, file, fileList) {
       this.$message.error(this.$t('hardware.importError'));
     },
-    // 上传文件之前的钩子
     handleBeforeUpload(file) {
       let extension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
       let size = file.size / 1024 / 1024;
@@ -234,12 +268,44 @@ export default {
     uploadFile(file) {
       this.fileData.append('files', file.file);
     },
+    async previewSelectedFile() {
+      if (!this.isDemoInstrument || this.previewLoading || this.submitLoading) return;
+      if (this.fileList.length !== 1) {
+        this.clearPreview();
+        return;
+      }
+      this.previewLoading = true;
+      this.importError = '';
+      this.previewRows = [];
+      this.previewOk = false;
+      try {
+        const file = this.fileList[0].raw;
+        const {validateImportFile} = await import('@/mock/instrumentWorkbook');
+        const message = validateImportFile(file);
+        if (message) throw new Error(message);
+        const data = new FormData();
+        data.append('files', file);
+        const res = await request({url: '/instrument/import/preview', method: 'post', data});
+        if (res.code !== 1) throw new Error(res.message || '预览失败');
+        this.previewRows = Array.isArray(res.items.rows) ? res.items.rows : [];
+        this.previewOk = !!res.items.ok;
+        this.importError = this.previewOk ? '' : (res.items.message || '预览未通过');
+      } catch (error) {
+        this.clearPreview();
+        this.importError = error.message || '预览失败，请重试。';
+      } finally {
+        this.previewLoading = false;
+      }
+    },
     async submitInstrumentImport() {
       if (this.submitLoading) return;
+      if (!this.previewOk || this.fileList.length !== 1) {
+        this.importError = '请先选择通过校验的文件再确认导入。';
+        return;
+      }
       this.submitLoading = true;
       this.importError = '';
       try {
-        if (this.fileList.length !== 1) throw new Error('请选择一个 .xlsx 文件。');
         const file = this.fileList[0].raw;
         const {validateImportFile} = await import('@/mock/instrumentWorkbook');
         const message = validateImportFile(file);
@@ -252,6 +318,9 @@ export default {
         this.$emit('handleUpdateInit', res.items);
       } catch (error) {
         this.importError = error.message || '导入失败，请重试。';
+        this.submitLoading = false;
+        // Re-preview against current catalog/capacity after a failed confirm.
+        await this.previewSelectedFile();
       } finally {
         this.submitLoading = false;
       }
@@ -317,6 +386,24 @@ export default {
 
       .el-button {
         width: 48%;
+      }
+    }
+
+    .import-preview {
+      margin-top: 16px;
+
+      .import-preview-summary {
+        margin-bottom: 8px;
+        color: #606266;
+        font-size: 13px;
+      }
+
+      .import-preview-error {
+        color: #f56c6c;
+      }
+
+      .import-preview-ok {
+        color: #67c23a;
       }
     }
   }

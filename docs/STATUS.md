@@ -1411,3 +1411,43 @@
 - 修改文件：src/components/ImportFile/index.vue；src/mock/instrumentWorkbook.js；src/mock/fixtures/{instrument,equipment}.js；src/mock/handlers/instrument.js；tests/unit/demo/{instrument-import,instrument-import-ui,import-template-unavailable}.spec.js；scripts/check-demo-device-2d.cjs；package.json/package-lock.json；本批docs与2D截图。
 - 设计决定：单文件.xlsx、多行原子导入，最多50行/10MB、名称/部门/分类/房间可读模板；导入设备已登记未布置，不扩展布局。旧CSV撤下；预览确认留给下一切片。
 - 下一最小任务：按next-task-prompt.md做导入预览确认，预览不落库，确认前重新校验；不自动开始2E。建议commit：feat: 完成设备XLSX批量导入闭环并修复绑定一致性。
+
+## 追加：设备导入预览确认（2026-10-01）
+
+依据 `docs/next-task-prompt.md`（导入预览确认）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| Mock | 抽取 `buildInstrumentImportPlan`；新增 `previewDemoInstruments`（不写存储） |
+| Handler | `POST /instrument/import/preview`；确认仍走 `/instrument/import`（再次校验） |
+| UI | 选文件自动预览表（行号/名称/部门/分类/房间/错误）；整批通过才可「确认导入」；换文件清空预览；提交锁与失败后重预览 |
+| 测试 | 预览不落库单测；UI 预览/确认/重试；浏览器脚本验预览门闩 |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 2E |
+
+### 验证
+
+- `npm run test:demo -- --watch=false --silent`：19 套 / **114** 项通过。
+- `DEMO_PORT=8088 npm run test:demo:device:2d`：通过，`externalAttempts:0`；错误行预览未写入 → 换正确文件预览通过 → 确认后 total=14。
+- 证据：`docs/evidence/device-management-2d`。
+
+### 能用 / 不能用
+
+- **能用**：选择 XLSX → 预览校验（不落库）→ 确认导入写入；错误行可视化。
+- **不能用**：预览阶段落库；导出/批量删除/新增表单。
+
+### 设计决定
+
+- 预览与确认共用 `buildInstrumentImportPlan`，页面不复制业务规则。
+- 确认失败后释放锁并重新 preview，避免容量/重名状态过期仍可点确认。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归 / 硬件 1B 脚本。
+- 未验跨标签页并发写入。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（2E 导出或批量删除）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备导入预览确认流程`。

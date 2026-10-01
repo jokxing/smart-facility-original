@@ -14,6 +14,7 @@ import {
   clearInstrumentMeta,
   getInstrumentDashboardNew,
   importDemoInstruments,
+  previewDemoInstruments,
   listInstruments,
   listRoonInstrumentInfo
 } from '../../../src/mock/fixtures/instrument';
@@ -113,6 +114,26 @@ test('downloaded template is genuine XLSX and accepted by the same parser', asyn
   const buffer = await createInstrumentWorkbook(instrumentImportOptions());
   expect(buffer[0]).toBe(0x50); expect(buffer[1]).toBe(0x4b);
   expect((await importDemoInstruments({files: new File([buffer], '模板.xlsx')})).count).toBe(1);
+});
+
+test('preview validates without writing; confirm rechecks and then persists', async () => {
+  await establishSession();
+  const bad = row('预览设备乙'); bad[1] = '不存在';
+  const previewBad = (await client.post('/instrument/import/preview', await formFor([row('预览设备甲'), bad]))).data;
+  expect(previewBad.code).toBe(1);
+  expect(previewBad.items.ok).toBe(false);
+  expect(previewBad.items.rows[1].error).toContain('部门');
+  expect(getInstrumentDashboardNew().totalCount).toBe(12);
+
+  const previewOk = await previewDemoInstruments({files: await fileFor([row('预览设备甲'), row('预览设备乙')])});
+  expect(previewOk.ok).toBe(true);
+  expect(previewOk.rows).toHaveLength(2);
+  expect(getInstrumentDashboardNew().totalCount).toBe(12);
+
+  const saved = (await client.post('/instrument/import', await formFor([row('预览设备甲'), row('预览设备乙')]))).data;
+  expect(saved.code).toBe(1);
+  expect(saved.items.count).toBe(2);
+  expect(getInstrumentDashboardNew().totalCount).toBe(14);
 });
 
 test('imported devices bind, bound deletion is blocked, deleted devices cannot bind', async () => {

@@ -188,14 +188,17 @@ const findLab = `(() => {
     await workbook.xlsx.writeFile(invalidPath);
     await send('DOM.setFileInputFiles', {nodeId, files: [invalidPath]});
     await waitPage("document.querySelector('.el-upload-list__item')", 'invalid workbook selected');
-    await evaluate("document.querySelector('.import-dialog .footer .el-button--primary').click()");
-    await waitPage("document.querySelector('.import-dialog .el-alert') && document.querySelector('.import-dialog .el-alert').textContent.includes('第 3 行')", 'row error');
+    await waitPage("document.querySelector('.import-preview') && document.querySelector('.import-preview').textContent.includes('预览未通过')", 'invalid preview');
+    assert.equal(await evaluate("!!document.querySelector('.import-dialog .footer .el-button--primary').disabled"), true);
     assert.equal(await evaluate("JSON.parse(localStorage.getItem('smart-facility-demo:v1:instrumentCreated') || '[]').length"), 0);
     await screenshot('02b-invalid-row');
     await evaluate("document.querySelector('.import-dialog .el-upload-list__item .el-icon-close').click()");
     await waitPage("!document.querySelector('.el-upload-list__item')", 'old file removed');
+    await waitPage("!document.querySelector('.import-preview')", 'preview cleared');
     await send('DOM.setFileInputFiles', {nodeId, files: [uploadPath]});
     await waitPage("document.querySelector('.el-upload-list__item')", 'selected workbook');
+    await waitPage("document.querySelector('.import-preview') && document.querySelector('.import-preview').textContent.includes('预览通过')", 'valid preview');
+    assert.equal(await evaluate("JSON.parse(localStorage.getItem('smart-facility-demo:v1:instrumentCreated') || '[]').length"), 0);
     await evaluate("document.querySelector('.import-dialog .footer .el-button--primary').click()");
 
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 14`, 'imported total');

@@ -156,39 +156,121 @@ export function instrumentImportOptions() {
   };
 }
 
-/** Parse first; validate against current state and commit synchronously after the last await. */
-export async function importDemoInstruments(body = {}) {
-  const files = Array.isArray(body.files) ? body.files : (body.files ? [body.files] : []);
-  if (files.length !== 1) return {ok: false, message: '每次请选择一个 .xlsx 文件。'};
-  let rows;
-  try { rows = await readInstrumentWorkbook(files[0]); }
-  catch (error) { return {ok: false, message: error.message || '读取失败，请重新选择文件。'}; }
-  const options = instrumentImportOptions();
-  const known = new Set(activeInstrumentSeeds().map(resolveInstrumentEntity).map(item => item.roomId + ':' + item.name.trim()));
-  const planned = [];
-  for (const {rowNumber, cells} of rows) {
-    const [name, department, type, room] = cells;
-    const fail = message => ({ok: false, message: '第 ' + rowNumber + ' 行：' + message});
-    if (name.length < 2 || name.length > 26) return fail('名称必须为 2–26 字。');
-    const dept = options.departments.find(item => item.name === department);
-    const category = options.types.find(item => item.name === type);
-    const space = options.rooms.find(item => item.name === room);
-    if (!dept) return fail('部门不在模板可选范围内。');
-    if (!category) return fail('分类不在模板可选范围内。');
-    if (!space) return fail('房间不在模板可选范围内。');
-    const key = space.id + ':' + name;
-    if (known.has(key)) return fail('同房间设备名称重复（含已有设备或本批次）。');
-    known.add(key);
-    planned.push({name, departmentId: dept.id, types: category.id, roomId: space.id,
-      assetKey: 'demo-device-incubator', daysAgo: 0, imported: true});
-  }
+function freeImportIds() {
   const created = readCreatedInstruments();
   const used = new Set(created.map(item => Number(item.id)).concat(readDeletedIds()));
   const free = [];
   for (let id = IMPORT_ID_MIN; id <= IMPORT_ID_MAX; id++) if (!used.has(id)) free.push(id);
-  if (planned.length > free.length) return {ok: false, message: '剩余导入容量为 ' + free.length + ' 台，本批次未写入。'};
-  const entities = planned.map((item, index) => ({...item, id: free[index]}));
-  try { writeCreatedInstruments(created.concat(entities)); }
+  return {created, free};
+}
+
+/**
+ * Shared business plan for preview + confirm. Does not write storage.
+ * Collects per-row errors so the UI can show a full preview table.
+ */
+export function buildInstrumentImportPlan(rows) {
+  const options = instrumentImportOptions();
+  const known = new Set(activeInstrumentSeeds().map(resolveInstrumentEntity).filter(Boolean).map(item => item.roomId + ':' + item.name.trim()));
+  const previewRows = [];
+  const planned = [];
+  for (const {rowNumber, cells} of rows) {
+    const [name, department, type, room] = cells;
+    let error = '';
+    let departmentId = null;
+    let types = null;
+    let roomId = null;
+    if (name.length < 2 || name.length > 26) error = '名称必须为 2–26 字。';
+    const dept = options.departments.find(item => item.name === department);
+    const category = options.types.find(item => item.name === type);
+    const space = options.rooms.find(item => item.name === room);
+    if (!error && !dept) error = '部门不在模板可选范围内。';
+    if (!error && !category) error = '分类不在模板可选范围内。';
+    if (!error && !space) error = '房间不在模板可选范围内。';
+    if (!error) {
+      const key = space.id + ':' + name;
+      if (known.has(key)) error = '同房间设备名称重复（含已有设备或本批次）。';
+      else {
+        known.add(key);
+        departmentId = dept.id;
+        types = category.id;
+        roomId = space.id;
+        planned.push({
+          name, departmentId, types, roomId,
+          assetKey: 'demo-device-incubator', daysAgo: 0, imported: true
+        });
+      }
+    }
+    previewRows.push({
+      rowNumber,
+      name,
+      department,
+      type,
+      room,
+      departmentId,
+      types,
+      roomId,
+      error
+    });
+  }
+  const {created, free} = freeImportIds();
+  let message = '';
+  if (previewRows.some(item => item.error)) {
+    message = '存在校验错误，请修正后重新选择文件。';
+  } else if (planned.length > free.length) {
+    message = '剩余导入容量为 ' + free.length + ' 台，本批次未写入。';
+    previewRows.forEach(item => { item.error = message; });
+  }
+  const ok = !message && planned.length > 0;
+  return {
+    ok,
+    message: ok ? '' : (message || '请至少填写一行设备。'),
+    rows: previewRows,
+    planned: ok ? planned : [],
+    created,
+    free,
+    validCount: planned.length,
+    freeCount: free.length
+  };
+}
+
+async function readImportRowsFromBody(body = {}) {
+  const files = Array.isArray(body.files) ? body.files : (body.files ? [body.files] : []);
+  if (files.length !== 1) return {ok: false, message: '每次请选择一个 .xlsx 文件。'};
+  try {
+    return {ok: true, rows: await readInstrumentWorkbook(files[0])};
+  } catch (error) {
+    return {ok: false, message: error.message || '读取失败，请重新选择文件。'};
+  }
+}
+
+/** POST /instrument/import/preview — validate only; never writes. */
+export async function previewDemoInstruments(body = {}) {
+  const read = await readImportRowsFromBody(body);
+  if (!read.ok) return {ok: false, message: read.message, rows: []};
+  const plan = buildInstrumentImportPlan(read.rows);
+  return {
+    ok: plan.ok,
+    message: plan.message,
+    rows: plan.rows,
+    validCount: plan.validCount,
+    freeCount: plan.freeCount
+  };
+}
+
+/** Parse first; validate against current state and commit synchronously after the last await. */
+export async function importDemoInstruments(body = {}) {
+  const read = await readImportRowsFromBody(body);
+  if (!read.ok) return {ok: false, message: read.message};
+  const plan = buildInstrumentImportPlan(read.rows);
+  if (!plan.ok) {
+    const firstError = plan.rows.find(item => item.error);
+    return {
+      ok: false,
+      message: firstError ? ('第 ' + firstError.rowNumber + ' 行：' + firstError.error) : plan.message
+    };
+  }
+  const entities = plan.planned.map((item, index) => ({...item, id: plan.free[index]}));
+  try { writeCreatedInstruments(plan.created.concat(entities)); }
   catch (_) { return {ok: false, message: '本地保存失败，请检查浏览器存储空间后重试。'}; }
   return {...entities[0], ok: true, count: entities.length, ids: entities.map(item => item.id)};
 }
