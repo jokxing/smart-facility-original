@@ -13,7 +13,7 @@
         <el-form
           ref="labDeviceForm"
           :model="ruleForm"
-          :rules="rules"
+          :rules="effectiveRules"
           label-position="left" label-width="auto"
         >
           <el-col :span="12">
@@ -30,9 +30,10 @@
               <el-form-item :label="$t('labDevice.labDeviceNo')" prop="no">
               <el-input
                 v-model="ruleForm.no"
+                :disabled="isDemo"
                 class="select-change-p"
                 maxlength="30"
-                :placeholder="$t('labDevice.inputLabDeviceNo')"
+                :placeholder="isDemo ? '保存后自动生成' : $t('labDevice.inputLabDeviceNo')"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -54,7 +55,7 @@
                         class="select-change-p"/>
                 </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col v-if="!isDemo" :span="12">
                 <el-form-item :label="$t('labDevice.labDeviceRatedWorkingTime')" prop="status">
                     <el-input-number
                         v-model="ruleForm.workingHours"
@@ -68,7 +69,7 @@
                     <span class="unit">{{ $t('labDevice.host') }}/{{ $t('common.day3') }}</span>
                 </el-form-item>
             </el-col>
-          <el-col :span="12">
+          <el-col v-if="!isDemo" :span="12">
               <el-form-item :label="$t('common.principal')">
               <el-select class="select-change-p" filterable v-model="ruleForm.managerId">
                 <el-option
@@ -81,7 +82,8 @@
           </el-col>
           <el-col :span="12">
               <el-form-item :label="$t('common.owningRoom')" prop="roomId">
-              <SelectRoomTree
+              <span v-if="isDemo && isEdit">{{ ruleForm.roomName }}</span>
+              <SelectRoomTree v-else
                 @getValue="selectRoom"
                 class="select-change-p"
                 :updateRoomName="ruleForm.roomName"
@@ -91,7 +93,7 @@
             </el-form-item>
 
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="!isDemo" :span="12">
                         <el-form-item :label="$t('labDevice.labDeviceBrand')" prop="brand">
                             <el-input
                                 v-model="ruleForm.brand"
@@ -101,7 +103,7 @@
                             ></el-input>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="!isDemo" :span="12">
                         <el-form-item :label="$t('labDevice.labDeviceModel')" prop="model">
                             <el-input
                                 maxlength="20"
@@ -111,7 +113,7 @@
                             ></el-input>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="!isDemo" :span="12">
                         <el-form-item :label="$t('labDevice.labDeviceBuyDate')" prop="buyDate">
                             <el-date-picker
                                 v-model="ruleForm.buyDate"
@@ -122,7 +124,7 @@
                             ></el-date-picker>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="!isDemo" :span="12">
                         <el-form-item :label="$t('labDevice.labDevicePrice')" prop="price">
                             <el-input-number
                                 v-model="ruleForm.price"
@@ -132,7 +134,7 @@
                             />
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="!isDemo" :span="12">
                         <el-form-item :label="$t('labDevice.labDeviceGrade')">
 
                             <el-select v-model="ruleForm.gradeId" class="select-change-p">
@@ -141,7 +143,7 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="!isDemo" :span="12">
                         <el-form-item :label="$t('common.remark')" prop="remark">
                             <el-input
                                 v-model="ruleForm.remark"
@@ -153,7 +155,7 @@
                             />
                         </el-form-item>
                     </el-col>
-                    <el-col :span="24">
+                    <el-col v-if="!isDemo" :span="24">
                         <el-form-item v-if="!loading" :label="$t('labDevice.sysImg')" prop="iconActive">
                             <div class="upload-box">
                                 <!-- 可以搜索系统图片 -->
@@ -403,10 +405,10 @@ export default {
     };
   },
   created() {
-    this.getEquipmentGrade();
+    if (!this.isDemo) this.getEquipmentGrade();
     this.getRoomData();
-    this.getPolicy();
-    this.handleGetUserList();
+    if (!this.isDemo) this.getPolicy();
+    if (!this.isDemo) this.handleGetUserList();
     this.ruleForm.roomId = this.roomId;
     this.disabled = !!this.roomId;
 
@@ -441,9 +443,13 @@ export default {
           })
       }
       typesFn(this.classify)
-    this.getFileUrlByTitle();
+    if (!this.isDemo) this.getFileUrlByTitle();
   },
   computed: {
+    effectiveRules() {
+      return this.isDemo ? {...this.rules, no: [], roomId: [{required: true, message: '请选择房间', trigger: 'change'}]} : this.rules;
+    },
+    isDemo() { return process.env.VUE_APP_DEMO === 'true'; },
     ...mapState("lab", {
       isEdit: "isEdit",
       editData: "editData",

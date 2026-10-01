@@ -446,6 +446,9 @@ export function updateInstrumentBasic(body = {}) {
   if (!ALLOWED_TYPES.has(types)) {
     return {ok: false, message: '请选择有效设备分类。'};
   }
+  const duplicate = activeInstrumentSeeds().map(resolveInstrumentEntity).some(item =>
+    item && Number(item.id) !== id && Number(item.roomId) === Number(seed.roomId) && item.name.trim() === name);
+  if (duplicate) return {ok: false, message: '同房间设备名称重复。'};
   const next = {...readInstrumentMeta()};
   next[String(id)] = {name, departmentId, types};
   writeInstrumentMeta(next);

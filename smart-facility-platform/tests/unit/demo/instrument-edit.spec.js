@@ -119,3 +119,12 @@ test('edit modal dependency stubs succeed', async () => {
   expect(tree.code).toBe(1);
   expect(tree.items[0].children[0].children[0].children.some(r => r.id === 950001)).toBe(true);
 });
+
+
+test('rename enforces same-room uniqueness while allowing unchanged and other-room names', () => {
+  const update = name => updateInstrumentBasic({id: 970001, name, departmentId: 900101, types: 1});
+  expect(update('演示冷藏柜').ok).toBe(false);
+  expect(listInstruments({keyword: '演示培养箱', pageSize: 20}).list.find(row => row.id === 970001).name).toBe('演示培养箱');
+  expect(update('演示培养箱').ok).toBe(true);
+  expect(update('演示培养箱 B').ok).toBe(true);
+});

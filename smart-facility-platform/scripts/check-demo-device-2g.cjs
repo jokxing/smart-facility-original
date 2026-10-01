@@ -178,6 +178,8 @@ const findAddModal = `(() => {
     await waitPage(`${findLab}.modalVisible === true`, 'modalVisible');
     await waitPage("!!document.querySelector('.labDevice-modal')", 'add modal DOM');
     await waitPage(`!!(${findAddModal} && ${findAddModal}.addAsny)`, 'add modal vm');
+    assert.equal(await evaluate("document.querySelectorAll('.labDevice-modal .el-form-item').length"), 5);
+    assert.equal(await evaluate("!!document.querySelector('.labDevice-modal input[placeholder=\"保存后自动生成\"]:disabled')"), true);
     await screenshot('02-add-modal');
 
     await evaluate(`(async () => {
@@ -185,13 +187,15 @@ const findAddModal = `(() => {
       modal.ruleForm = {
         ...modal.ruleForm,
         name: '手填新增设备',
-        no: 'DEMO-MANUAL-001',
+        no: '',
         departmentId: '900102',
         types: 1,
         roomId: 950003,
         roomName: '演示房间 B'
       };
-      await modal.addAsny();
+      modal.types = 900201;
+      await modal.$nextTick();
+      modal.handleFormSubmit('labDeviceForm');
       return true;
     })()`);
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 13`, 'added total');
@@ -205,6 +209,9 @@ const findAddModal = `(() => {
     })()`);
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 1`, 'search added');
     assert.equal(await evaluate(`${findLab}.dataSource[0].name`), '手填新增设备');
+    assert.equal(await evaluate(`${findLab}.dataSource[0].departmentId`), 900102);
+    assert.equal(await evaluate(`${findLab}.dataSource[0].roomId`), 950003);
+    assert.match(await evaluate(`${findLab}.dataSource[0].no`), /^DEMO-EQ-/);
     await screenshot('04-search-added');
 
     publishEvidence();

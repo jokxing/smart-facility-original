@@ -192,3 +192,7 @@ POST /instrument/import 接收 FormData 单个files（真实.xlsx）；设备导
 | 确认 | 仅当 `ok=true` 可点「确认导入」；再次走 `POST /instrument/import`（重新校验名称重复与容量） |
 | 换文件 | 清空预览后重新请求 preview |
 | 共享 | `buildInstrumentImportPlan` 供 preview/import 共用，页面不复制规则 |
+
+
+### 表单收尾（2026-10-01）
+演示新增只可编辑名称/部门/分类/房间，编号自动生成；编辑只开放名称/部门/分类，房间只读。编辑与新增/导入统一同房间名称唯一语义，编辑排除自身；不同房间允许同名。未持久化字段不再提供输入。
