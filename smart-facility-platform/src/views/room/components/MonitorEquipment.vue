@@ -38,12 +38,12 @@
                         class="input-with-select"
                         clearable
                         :placeholder="$t('room.inputNameOrNo')"
-                        @keyup.enter.native="handleInstrumentListQuery()">
+                        @keyup.enter.native="handleInstrumentSearch">
                         <el-button
                             slot="append"
                             class="el-button-host"
                             icon="icon-search1"
-                            @click="handleInstrumentListQuery()"/>
+                            @click="handleInstrumentSearch"/>
                     </el-input>
                     <el-button v-if="$store.state.level && !isDemo" type="primary" class="icon-add-to" @click="handleAddInstrument(1)">
                         {{ $t('room.addLabDevice') }}</el-button>
@@ -84,6 +84,7 @@
     import AdministrationModal from "@/views/labDevice/modal";
     import { getRoomMonitorInstrument, removeRoomGoods } from "@/api/room";
     import { postInstrumentList } from "@/api/labDevice";
+    import {resolveDeviceAssetUrl} from '@/utils/demoDeviceUrl';
     import { BASE_URL } from "@/utils/constant";
     import { mapMutations, mapState } from "vuex";
     import i18n from "@/i18n";
@@ -148,6 +149,7 @@
         methods: {
             // 监测设备tab
             handleCutMonitor() {
+                this.monitorItems.pageNum = 1;
                 this.tabPosition = "0";
                 if(this.monitorStatus === '1'){
                     this.handleGetRoomMonitorInstrument()
@@ -157,6 +159,7 @@
             },
             // 设备tab
             handleTabPosition() {
+                this.monitorItems.pageNum = 1;
                 if(this.monitorStatus === '1'){
                     this.handleGetRoomMonitorInstrument()
                 }else{
@@ -175,7 +178,7 @@
                                 let obj = {
                                     id: item.id,
                                     name: item.name,
-                                    url: BASE_URL + item.logoUrl,
+                                    url: resolveDeviceAssetUrl(item.logoUrl, BASE_URL),
                                     sensors: []
                                 };
                                 item.simpleEquipments.map(i => {
@@ -192,6 +195,10 @@
                         this.$message.error(res.message);
                     }
                 });
+            },
+            handleInstrumentSearch() {
+                this.monitorItems.pageNum = 1;
+                return this.handleInstrumentListQuery();
             },
             // 未监设备
             handleInstrumentListQuery() {

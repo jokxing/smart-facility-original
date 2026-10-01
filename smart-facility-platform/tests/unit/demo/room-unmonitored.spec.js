@@ -1,3 +1,4 @@
+import {updateInstrumentBasic} from '../../../src/mock/fixtures/instrument';
 import axios from 'axios';
 import qs from 'qs';
 import {DEMO_BASE_URL} from '../../../src/mock/adapter';
@@ -128,4 +129,10 @@ test('unmonitored list respects type category from room detail tabs', async () =
   })).data;
   expect(it.code).toBe(1);
   expect(it.items.total).toBe(0);
+});
+
+ test('room category reflects current edited metadata', () => {
+  expect(updateInstrumentBasic({id:970001,name:'演示培养箱',departmentId:900101,types:2}).ok).toBe(true);
+  expect(listRoomMonitorInstrument({roomId:950001,types:2}).some(item=>item.id===970001)).toBe(true);
+  expect(listRoomMonitorInstrument({roomId:950001,types:1}).some(item=>item.id===970001)).toBe(false);
 });

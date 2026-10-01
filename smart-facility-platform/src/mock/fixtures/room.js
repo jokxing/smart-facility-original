@@ -190,6 +190,8 @@ export function listRoomMonitorInstrument(params = {}) {
     (listRoonInstrumentInfo(roomId).list || []).map(item => Number(item.elementId || item.id))
   );
   return owned
+    .map(resolveInstrumentEntity)
+    .filter(Boolean)
     .filter(entity => onMapIds.has(Number(entity.id)))
     .filter(entity => typesFilter == null || Number(entity.types) === typesFilter)
     .map(entity => {

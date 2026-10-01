@@ -1,5 +1,7 @@
 # 房间管理 3A —— 列表与只读详情
 
+三项收尾更新（2026-10-01）：已监测设备分类按当前编辑实体过滤；未监测分类/搜索/Tab切换回第一页，分页仍保留目标页；素材键通过现有resolveDeviceAssetUrl映射本地SVG，无素材显示回退。验证见STATUS最新记录。
+
 核对与交付日期：2026-10-01。依据 `views/room/Room.vue`、`RoomDrawerNew`、`MonitorEquipment`、`api/room/index.js` 与既有空间/仪器实体；**不**开放房间增删改。
 
 ## 本轮开放范围

@@ -259,6 +259,7 @@ const findMonitor = `(() => {
     })()`);
     await waitPage(`${findDrawer} && !${findDrawer}.loading && ${findDrawer}.detail && ${findDrawer}.detail.id === 950001`, 'detail A');
     await waitPage(`${findMonitor} && ${findMonitor}.monitor && ${findMonitor}.monitor.length === 6`, 'on-map six');
+    await waitPage("Array.from(document.querySelectorAll('.room-drawer .equipment-icon img')).length === 6 && Array.from(document.querySelectorAll('.room-drawer .equipment-icon img')).every(img => img.naturalWidth > 0 && new URL(img.src).pathname.startsWith('/demo/devices/'))", 'local SVG artwork loaded');
     await screenshot('02-monitored');
 
     await evaluate(`(() => {
@@ -271,6 +272,12 @@ const findMonitor = `(() => {
     assert.match(await evaluate(`${findMonitor}.noMonitor[0].name`), /未上图培养箱/);
     assert.equal(await evaluate(`!document.querySelector('.icon-add-to')`), true);
     await screenshot('03-unmonitored');
+    await evaluate(`${findMonitor}.monitorItems.pageNum = 2`);
+    await evaluate("document.querySelector('.room-drawer .el-radio-group .el-radio-button:nth-child(2)').click()");
+    await waitPage(`${findMonitor}.monitorItems.pageNum === 1 && !${findMonitor}.loading && ${findMonitor}.noMonitor.length === 1`, 'category resets page');
+    await evaluate(`${findMonitor}.monitorItems.pageNum = 2`);
+    await evaluate("document.querySelector('.room-drawer .input-with-select button').click()");
+    await waitPage(`${findMonitor}.monitorItems.pageNum === 1 && !${findMonitor}.loading && ${findMonitor}.noMonitor.length === 1`, 'search resets page');
 
     await evaluate(`(() => {
       const m = ${findMonitor};

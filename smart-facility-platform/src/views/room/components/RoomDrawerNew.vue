@@ -74,7 +74,7 @@
             <div class="detail-padding-nocolor" ><!-- 这个div要始终显示 -->
                 <el-descriptions :title="$t('hardware.newStatus')">
                     <template slot="extra">
-                        <el-button @click="getProbeIndex" icon="icon-reset">{{ $t('hardware.reset') }}</el-button>
+                        <el-button @click="getProbeIndex" icon="icon-reset"><span style="margin-left: 4px">{{ $t('hardware.reset') }}</span></el-button>
                     </template>
                 </el-descriptions>
                 <div class="new-state" v-if="sensors.length > 0">

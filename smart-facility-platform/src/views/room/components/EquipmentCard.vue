@@ -7,7 +7,8 @@
     </div>
     <div class="equipment-message">
       <div class="equipment-icon">
-        <img :src="data.url" alt="">
+        <img v-if="data.url" :src="data.url" :alt="data.name">
+        <span v-else>暂无图片</span>
       </div>
       <div v-if="data.type !== 8" class="equipment">
         <div
