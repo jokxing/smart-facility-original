@@ -23,12 +23,13 @@
         <div class="bg">
             <histogram-chart :height="'400px'" :data-charts="eqiupmentAlarmData" :legend-show="true"/>
         </div>
-        <!-- 4A：以下区块暂不开放，避免请求未接入接口 -->
-        <template v-if="showDeferredStats">
+        <!-- 4B：设备状态饼图已开放 -->
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceStatusStat')"></el-descriptions>
         <div class="">
             <EquipmentStatePieCharts/>
         </div>
+        <!-- 4A/4B：使用统计与使用率仍不开放 -->
+        <template v-if="showDeferredStats">
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceUserStat')"></el-descriptions>
         <div class="bg">
             <chart-dimension
@@ -166,7 +167,7 @@ export default {
     data() {
         const _this = this;
         return {
-            // 4A slice: keep overview + alarm charts only
+            // 4B: pie open; use/ranking still behind showDeferredStats
             showDeferredStats: false,
             colors: ['#BFBFBF', '#FEC000', '#262626', '#0070c0', '#808080'],
             overview: [

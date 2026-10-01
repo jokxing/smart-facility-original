@@ -804,6 +804,20 @@ export function getInstrumentDashboardNew() {
 }
 
 /**
+ * GET /instrument/instrumentStatistics — Statistics 4B run/standby/close rings.
+ * LABSTATUS: 1 run, 2 standby, 0 close. Other status codes count only in totalCount.
+ */
+export function getInstrumentStatistics() {
+  const rows = activeInstrumentSeeds().map(buildInstrumentRow).filter(Boolean);
+  return {
+    totalCount: rows.length,
+    runCount: rows.filter(r => Number(r.status) === 1).length,
+    standbyCount: rows.filter(r => Number(r.status) === 2).length,
+    closeCount: rows.filter(r => Number(r.status) === 0).length
+  };
+}
+
+/**
  * Shared hover/list sensor reading for one instrument under the current scenario.
  * Offline keeps val null — never forge a live normal reading.
  */

@@ -9,6 +9,7 @@ import {
   getDemoMonitorInfo,
   getDemoOpenMonitorFlag,
   getInstrumentDashboardNew,
+  getInstrumentStatistics,
   importDemoInstruments,
   previewDemoInstruments,
   exportDemoInstruments,
@@ -64,6 +65,7 @@ export default [
   }),
   protectedRoute('POST', '/instrument/list', ({body}) => success(listInstruments(body || {}))),
   protectedRoute('GET', '/instrument/dashboard/new', () => success(getInstrumentDashboardNew())),
+  protectedRoute('GET', '/instrument/instrumentStatistics', () => success(getInstrumentStatistics())),
   protectedRoute('GET', '/instrument/detail', ({params}) => {
     const detail = getDemoInstrumentDetail(params.id);
     return detail ? success(detail) : failure('演示设备不存在。');

@@ -10,7 +10,8 @@
 | `GET /statistic/overview` 三张总览卡 | **已开放**（当前状态聚合） |
 | `GET /statistic/alarm/overview` 三环图 | **已开放**（历史告警分布） |
 | `GET /statistic/equipment/alarm` 柱图 | **已开放**（智能硬件历史告警） |
-| 设备状态饼图 / 使用统计 / 使用率排行 | **UI 隐藏**；不发请求 |
+| 设备状态饼图 | **4B 已开放**（见 `statistics-4b-contract.md`） |
+| 使用统计 / 使用率排行 | **UI 隐藏**；不发请求 |
 | `/ds/device/chart` 等兄弟路由 | **未放行** |
 | 利用率 / 电量 / 分级统计 / 导出 | **未接入**；不得写成真实结果 |
 
@@ -112,7 +113,7 @@
 | `GET /statistic/instrument/useRanking` | 未接；页面不请求 |
 | `GET /statistic/electricity*` | 未接 |
 | `GET /statistic/status` | 未接 |
-| `GET /instrument/instrumentStatistics` | 未接；饼图已卸 |
+| `GET /instrument/instrumentStatistics` | **4B 已接**（见 `statistics-4b-contract.md`） |
 
 ## 验收要点
 
@@ -122,6 +123,6 @@
 4. 处理一条仪器报警记录或硬件阈值告警后，对应环/柱未处理计数下降；空则空态。
 5. 未登录 `code === 2`；`externalAttempts === 0`。
 
-## 4B 建议（不本轮实现）
+## 后续
 
-设备状态饼图：接通 `GET /instrument/instrumentStatistics`（或等价），与仪器运行/待机口径对齐；仍隐藏利用率与电量。
+4B 设备状态饼图见 `docs/statistics-4b-contract.md` / `docs/next-task-prompt.md`。

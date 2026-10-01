@@ -1918,3 +1918,28 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`feat: 接通数据统计总览与告警只读演示`。
 - 下一提示词：`docs/next-task-prompt.md`（4B 设备状态饼图）。
+
+## 2026-10-01 — 数据统计 4B（设备状态饼图）
+
+### 做了什么
+
+- 契约 `docs/statistics-4b-contract.md`；Mock `GET /instrument/instrumentStatistics`（活跃仪器 LABSTATUS 0/1/2 分桶）。
+- `Statistics.vue` 单独开放状态饼图；使用统计/使用率仍 `showDeferredStats=false`。
+- 单测 `statistics-4b.spec.js`；浏览器 `test:demo:statistics:4b`，证据 `docs/evidence/statistics-4b`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：28 套 / 152 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:4b` → `externalAttempts=0`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 可用 / 不能用
+
+- **可用**：4A + 设备状态三环（默认全工作中；删机同步；告警/离线场景三环为 0 不造正常）。
+- **不能用**：使用统计、使用率排行、电量、`/ds/device/chart`。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`feat: 接通数据统计设备状态饼图演示`。
+- 下一提示词：`docs/next-task-prompt.md`（4C 设备使用统计）。
