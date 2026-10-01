@@ -140,15 +140,23 @@ export default [
   protectedRoute('GET', '/file/instrument/pic/search', () => success({list: [], total: 0, pageNum: 1, pageSize: 18})),
   protectedRoute('POST', '/room/tree', ({body}) => success(listRoomTree(body || {}))),
   protectedRoute('GET', '/monitorIndicator/getOpenMonitorFlag', ({params}) => {
-    if (Number(params.objType) !== 2) {
-      return failure('本切片仅支持设备监测标签。');
+    const objType = Number(params.objType);
+    if (objType === 3) {
+      return success({list: []});
+    }
+    if (objType !== 2) {
+      return failure('本切片仅支持设备或房间监测标签。');
     }
     const items = getDemoOpenMonitorFlag(params.objId);
     return items ? success(items) : failure('演示设备不存在。');
   }),
   protectedRoute('GET', '/monitorIndicator/getMonitorFlag', ({params}) => {
-    if (Number(params.objType) !== 2) {
-      return failure('本切片仅支持设备监测标签。');
+    const objType = Number(params.objType);
+    if (objType === 3) {
+      return success([]);
+    }
+    if (objType !== 2) {
+      return failure('本切片仅支持设备或房间监测标签。');
     }
     const items = getDemoMonitorFlag(params.objId);
     return items ? success(items) : failure('演示设备不存在。');

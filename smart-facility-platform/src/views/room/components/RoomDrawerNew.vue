@@ -8,7 +8,7 @@
         <div v-if="isDrawer" class="room-drawer detail-container" v-loading="loading">
             <div class="detail-padding">
                 <DrawerNav :is-width="false" :name="detail.name" @handle="handleClose"/>
-                <el-row justify="end" type="flex">
+                <el-row v-if="!isDemo" justify="end" type="flex">
 <!--                    <el-button -->
 <!--                        v-if="isLimit"-->
 <!--                        class="margin-small-right" -->
@@ -54,7 +54,7 @@
                     </div>
                 </div>
 
-                <el-row v-if="detail">
+                <el-row v-if="detail && !isDemo">
                     <el-popover
                         placement="right"
                         width="550"
@@ -91,7 +91,7 @@
             <TagPane 
                 ref="tagPane" 
                 class="detail-padding" 
-                v-if="detail" 
+                v-if="detail && !isDemo" 
                 :id="detail.id" 
                 :type="3"
                 :no="detail.no"
@@ -164,6 +164,7 @@
         },
         data() {
             return {
+                isDemo: process.env.VUE_APP_DEMO === 'true',
                 MONITORSTATUS,
                 statusText,
                 statusColor,

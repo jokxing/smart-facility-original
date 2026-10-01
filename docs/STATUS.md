@@ -1654,3 +1654,54 @@
 - 未验证：生产构建、全站回归、非演示后端、完整人工树选择路径（浏览器脚本赋表单值后走正常校验提交）；编辑重名分支由单测验证，本轮浏览器回归普通编辑成功路径。
 - 同步契约、指南、review-device-management-module及2B/2G截图；两项收尾关闭。下一任务已改为房间管理3A列表+只读详情，交另AI执行，未提前改动房间模块。
 - 未安装依赖、未提交推送。建议commit：fix: 收口设备登记表单并统一编辑重名校验。
+
+
+## 2026-10-01 — 房间管理 3A：列表与只读详情
+
+### 做了什么
+
+- 开放首页「房间管理」→ `/rm/room`（`permission.js`）。
+- 增强 `POST /room/list`：完整行字段、关键词/部门/位置/状态/分页；保留设计器仅 `floorId` 空侧栏语义。
+- 接通 `GET /room/dashboardV1`（位置口径）；详情 `openTwoSystem: 1` → `RoomDrawerNew`；`GET /room/monitor/instrument` 读已上图 `970xxx`。
+- 演示隐藏写入口与未支持的硬件类型筛选；房间写 API 明确拒绝。
+- 走廊种子 `senorStatus: 3`（未监测）；契约 / demo-guide / next-task-prompt(3B 建议)。
+- 单测 `room-list.spec.js`；浏览器 `test:demo:room:3a`，证据 `docs/evidence/room-management-3a`。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `src/mock/fixtures/room.js` | list/dashboard/detail/monitor |
+| `src/mock/fixtures/floor.js` | 走廊未监测；list 委托 room fixture |
+| `src/mock/fixtures/instrument.js` | `roomId` + `monitor` 筛 |
+| `src/mock/handlers/room.js` / `floor.js` / `instrument.js` | 读路径 + 写拒绝；objType 3 空探头 |
+| `src/permission.js` | 放行 `/rm/room` |
+| `src/views/room/Room.vue` 等 | 演示只读 UI |
+| `tests/unit/demo/room-list.spec.js` 等 | 覆盖 |
+| `scripts/check-demo-room-3a.cjs`、`package.json` | 浏览器验收 |
+| `docs/*` | 契约/指南/STATUS/下一刀 |
+
+### 验证
+
+- `npm run test:demo`：23 套 / 133 项通过。
+- `$env:DEMO_PORT='8089'; npm run test:demo:room:3a`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：首页进入列表 → 筛选/分页/统计 → 只读详情与已上图仪器。
+- **不能用**：房间增删改、导入导出、绑定/解绑、关联硬件类型筛选、巡查报告写。
+
+### 设计决定
+
+- 设计器空侧栏靠「无 gardenId 等管理键」识别，避免房间页按楼层筛选被误伤。
+- 已上图 vs 空间归属：monitor/instrument 仅 placement；`instrument/list`+`monitor:2` 为未上图。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归。
+- 未人工点选部门树/楼层抽屉全部交互（脚本赋筛选值后请求）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（3B 建议）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通房间管理列表与只读详情演示`。

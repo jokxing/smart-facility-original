@@ -19,6 +19,7 @@
     "test:demo:device:2f": "node scripts/check-demo-device-2f.cjs",
     "test:demo:device:2g": "node scripts/check-demo-device-2g.cjs",
     "test:demo:device:2h": "node scripts/check-demo-device-2h.cjs",
+    "test:demo:room:3a": "node scripts/check-demo-room-3a.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",

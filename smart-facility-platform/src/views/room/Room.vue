@@ -21,6 +21,7 @@
                         :select-tree-value.sync="items.departmentId"
                         @change="getValue"/>
                     <el-select
+                        v-if="!isDemo"
                         class="w160 margin-small-right"
                         v-model="items.objType"
                         filterable
@@ -49,21 +50,21 @@
                     <el-button class="icon-reset" @click="handleInit"></el-button>
                 </div>
                 <div>
-                    <el-button v-if="$store.state.level" class="icon-addto" type="primary" @click="handleAdd">
+                    <el-button v-if="$store.state.level && !isDemo" class="icon-addto" type="primary" @click="handleAdd">
                         {{ $t('room.addRoom') }}
                     </el-button>
-                    <el-button v-if="$store.state.level" class="icon-setup" @click="multiSelect = !multiSelect">
+                    <el-button v-if="$store.state.level && !isDemo" class="icon-setup" @click="multiSelect = !multiSelect">
                         {{ multiSelect ? $t('common.cancelMultiSelect') : $t('common.multiSelect') }}
                     </el-button>
-                    <el-button v-if="$store.state.level" class="icon-upload"
+                    <el-button v-if="$store.state.level && !isDemo" class="icon-upload"
                                @click="importFileVisible = !importFileVisible"> {{ $t('common.importHandle') }}
                     </el-button>
-                    <el-button v-if="$store.state.level" class="icon-download1" @click="handleExport">
+                    <el-button v-if="$store.state.level && !isDemo" class="icon-download1" @click="handleExport">
                         {{ $t('common.export') }}
                     </el-button>
                 </div>
             </div>
-            <div v-if="multipleSelection.length || multiSelect" class="choose-bar">
+            <div v-if="!isDemo && (multipleSelection.length || multiSelect)" class="choose-bar">
                 <template>
                     <div class="checked">
                         {{ $t('common.multipleSelection') }}<span>{{
@@ -94,7 +95,7 @@
                     stripe
                     border
                     @selection-change="handleSelectionChange">
-                    <el-table-column v-if="$store.state.level" fixed reserve-selection type="selection"
+                    <el-table-column v-if="$store.state.level && !isDemo" fixed reserve-selection type="selection"
                                      width="50"></el-table-column>
                     <el-table-column fixed label="#" width="70px" type="index">
                         <template slot-scope="scope">
@@ -146,7 +147,7 @@
                     </el-table-column>
                     <el-table-column :label="$t('common.remark')" prop="remark">
                     </el-table-column>
-                    <el-table-column v-if="$store.state.level" fixed="right" :label="$t('common.handle')"
+                    <el-table-column v-if="$store.state.level && !isDemo" fixed="right" :label="$t('common.handle')"
                                      min-width="100">
                         <template slot-scope="scope">
                             <el-button type="text" @click="handleEdit(scope.row)">{{ $t('common.edit') }}</el-button>
@@ -253,6 +254,7 @@ export default {
     inject: ["reload"],
     data() {
         return {
+            isDemo: process.env.VUE_APP_DEMO === 'true',
             active: 3,
             totalObject: {
                 overview: [

@@ -1,0 +1,139 @@
+# 房间管理 3A —— 列表与只读详情
+
+核对与交付日期：2026-10-01。依据 `views/room/Room.vue`、`RoomDrawerNew`、`MonitorEquipment`、`api/room/index.js` 与既有空间/仪器实体；**不**开放房间增删改。
+
+## 本轮开放范围
+
+| 能力 | 演示 |
+| --- | --- |
+| 首页「房间管理」→ `/rm/room` | **已开放**（`permission.js` + `DEMO_MENUS`） |
+| `POST /room/list` 筛选/分页 | **已开放** |
+| `GET /room/dashboardV1` 统计卡 | **已开放**（仅跟位置筛选） |
+| 点击名称 → `RoomDrawerNew` 只读详情 | **已开放**（`openTwoSystem` 真值） |
+| 详情内关联仪器（空间归属 / 已上图） | **已开放**（读活跃 `970xxx`） |
+| 关联硬件类型筛选 `objType` | **隐藏**（无可靠房间级绑定口径，不假生效） |
+| 新增 / 编辑 / 删除 / 批量 / 导入 / 导出 | **UI 隐藏** + Mock **明确拒绝** |
+| 详情内探头编辑 / 报警体系 / 巡查模板 / 绑定弹层写 | **UI 隐藏**；解绑等写 **拒绝** |
+
+## 入口（源码核实）
+
+| 项 | 路径 |
+| --- | --- |
+| 首页卡片 | `utils/menuManager.js` id=`rm`，path=`/rm/room` |
+| 侧栏菜单 | `fixtures/auth.js` `DEMO_MENUS` |
+| 路由 | `router/index.js` `/rm/room` → `views/room/Room.vue` |
+| 守卫 | `permission.js` `demoAllowed` 含 `/rm/room` |
+
+## 实体与 ID（复用，禁止第二套）
+
+| 实体 | ID | 源 |
+| --- | --- | --- |
+| 园区 | `910001` | `DEMO_SPACE` |
+| 楼宇 | `920001` | 演示一号楼 |
+| 楼层 | `930001` | 1F（有平面） |
+| 房间 | `950001` 演示房间 A（运维） | `DEMO_FLOOR_ROOMS` |
+| | `950002` 演示走廊（运维，无仪器→未监测） | 同上 |
+| | `950003` 演示房间 B（研发） | 同上 |
+| 仪器 | `970001`–`970012` | `fixtures/instrument.js`；A 六台 / B 六台 / 走廊无 |
+| 部门 | `900101` 运维 / `900102` 研发 | `auth.js` |
+
+列表行、详情、楼层平面、仪器列表共用同一房间/仪器源。
+
+## 列表契约
+
+### `POST /room/list`
+
+请求体（`Room.vue` 实际拼装 `items` + `dashboardItem`）：
+
+| 字段 | 用途 |
+| --- | --- |
+| `keyword` | 匹配 `name` / `no`（大小写不敏感） |
+| `departmentId` | 部门 id；空不筛 |
+| `status` | `1` 正常 / `2` 异常 / `-100` 离线 / `3` 未监测 |
+| `gardenId` / `buildingId` / `floorId` | 位置；空字符串不筛 |
+| `pageNum` / `pageSize` | 分页（默认 10） |
+| `objType` | **本切片忽略**（UI 已隐藏） |
+
+**设计器兼容（必须保留）：**
+
+- `Layout.vue` 调用 `{floorId, pageNum, pageSize}`（**无** `gardenId` / `buildingId` / `departmentId` / `status` / `objType` 键）且无 keyword → **固定空列表**（侧栏「待上图房间」）。
+- 房间管理页始终带 `gardenId` 等键（可为 `""`），按 `floorId` 等正常过滤，**不**走上述空列表分支。
+- 空筛选结果 `total: 0`，**不**回退全量。
+
+成功：`items: { list, total, pageNum, pageSize }`。
+
+行字段（表列 + 详情分叉）：
+
+`id, name, no, departmentId, departmentName, gradenName, buildingName, floorName, gardenId, buildingId, floorId, senorStatus, createDate, remark, openTwoSystem`
+
+- `openTwoSystem: 1` → 打开 `RoomDrawerNew`
+- `senorStatus`：有活跃仪器则跟共享场景；无仪器跟房间种子（走廊为 `3` 未监测）
+- `gradenName`：与页面模板拼写一致（非 gardenName）
+
+下拉/树依赖（已有）：`GET /map/garden`、`GET /equipment/bindEquipmentType`（本切片不展示硬件筛）。
+
+### `GET /room/dashboardV1`
+
+查询参数：`gardenId` / `buildingId` / `floorId`（与列表位置一致；**不受** keyword/部门/status 影响）。
+
+成功：`items: { totalNum, normalNum, policeNum, leaveNum, notMonitoringNum }`
+
+| 字段 | 口径 |
+| --- | --- |
+| `totalNum` | 位置范围内房间数 |
+| `normalNum` | `senorStatus === 1` |
+| `policeNum` | `senorStatus === 2` |
+| `leaveNum` | `senorStatus === -100` |
+| `notMonitoringNum` | `senorStatus === 3` |
+
+## 详情契约
+
+### `GET /room/detail?id=`
+
+已有；未知 ID → failure。字段含 `openTwoSystem: 1` 及列表同口径部门/状态/空间名。
+
+### `GET /room/monitor/instrument?roomId=&types=`
+
+返回该房间**已上图**仪器（布局 placement 存在且未删除），元素：
+
+`{ id, name, logoUrl, simpleEquipments: [{ type, powerFailure, sensors }] }`
+
+- `types`：`0`/空=全部；否则按仪器 `types` 过滤
+- **空间归属但未上图**的仪器不出现在此列表（见下）
+
+### `POST /instrument/list`（详情「未监测设备」Tab）
+
+本切片补齐：`roomId` 单房间 + `monitor: "2"` → 仅该房间**有空间归属且未上图**的活跃仪器。空结果不回退全库。
+
+### 探头标签
+
+`GET /monitorIndicator/getOpenMonitorFlag|getMonitorFlag`：`objType===3` 时返回空列表/空数组（房间级探头本切片不做）；`objType===2` 仍为设备切片。
+
+### 只读配套
+
+| API | 行为 |
+| --- | --- |
+| `GET /thingsUser/list` | 空分页（已有） |
+| `POST /roomReport/list` | 空分页（已有） |
+| `GET /room/things/list` | 空 list（已有；绑定写入口已藏） |
+
+## 写操作（拒绝）
+
+| API | 文案要点 |
+| --- | --- |
+| `POST /room/add` | 本阶段演示未开放房间新增 |
+| `POST /room/update/basic` | 未开放房间编辑 |
+| `POST /room/remove/:id` | 未开放房间删除 |
+| `POST /room/batch/delete` | 未开放批量删除 |
+| `POST /room/batch/update` | 未开放批量更新 |
+| `POST /room/export` | 未开放导出 |
+| `POST /room/goods/remove` | 未开放解绑房间设备 |
+
+## 验收要点
+
+1. 首页点「房间管理」进入列表，统计与 3 间房口径一致。
+2. 关键词/部门/位置/状态筛选；清空后恢复；空结果不回退。
+3. 点名称打开 `RoomDrawerNew`，可见基本信息与已上图仪器。
+4. 写按钮不可见；直接打写 API 得明确失败。
+5. 设计器 `{floorId}` 无 keyword 仍为空列表。
+6. 单测 + 浏览器脚本；`externalAttempts=0`。

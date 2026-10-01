@@ -45,7 +45,7 @@
                             icon="icon-search1"
                             @click="handleInstrumentListQuery()"/>
                     </el-input>
-                    <el-button v-if="$store.state.level" type="primary" class="icon-add-to" @click="handleAddInstrument(1)">
+                    <el-button v-if="$store.state.level && !isDemo" type="primary" class="icon-add-to" @click="handleAddInstrument(1)">
                         {{ $t('room.addLabDevice') }}</el-button>
                 </el-row>
                 <things-table
@@ -103,6 +103,7 @@
         },
         data() {
             return {
+                isDemo: process.env.VUE_APP_DEMO === 'true',
                 isDrawer: false,
                 instrumentId: null,
                 loading: false,

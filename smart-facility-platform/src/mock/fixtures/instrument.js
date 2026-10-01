@@ -681,6 +681,10 @@ function matchSpace(entity, body) {
   if (!space) return false;
   const roomIds = asIdList(body.roomIdList);
   if (roomIds.length) return roomIds.includes(entity.roomId);
+  // Room detail「未监测」Tab uses single roomId (not roomIdList).
+  if (body.roomId != null && String(body.roomId).trim() !== '') {
+    return Number(body.roomId) === entity.roomId;
+  }
   const floorIds = asIdList(body.floorIds);
   if (floorIds.length) return floorIds.includes(space.floorId);
   if (body.buildingId != null && String(body.buildingId).trim() !== '') {
@@ -689,6 +693,21 @@ function matchSpace(entity, body) {
   if (body.gardenId != null && String(body.gardenId).trim() !== '') {
     return Number(body.gardenId) === space.gardenId;
   }
+  return true;
+}
+
+function isInstrumentOnMap(instrumentId, roomId) {
+  const onMap = placementsForRoom(Number(roomId)).some(place => Number(place.elementId) === Number(instrumentId));
+  return onMap;
+}
+
+function matchMonitorFlag(entity, monitor) {
+  if (monitor == null || monitor === '') return true;
+  const key = String(monitor);
+  const onMap = isInstrumentOnMap(entity.id, entity.roomId);
+  // monitor=1 已上图；monitor=2 空间归属但未上图
+  if (key === '1') return onMap;
+  if (key === '2') return !onMap;
   return true;
 }
 
@@ -725,6 +744,7 @@ export function listInstruments(body = {}) {
     .map(resolveInstrumentEntity)
     .filter(Boolean)
     .filter(entity => matchSpace(entity, body))
+    .filter(entity => matchMonitorFlag(entity, body.monitor))
     .filter(entity => !deptIds.length || deptIds.includes(Number(entity.departmentId)))
     .filter(entity => !typesList.length || typesList.includes(Number(entity.types)))
     .filter(entity => matchObjType(entity.id, body.objType))

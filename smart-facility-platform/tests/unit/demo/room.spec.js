@@ -39,7 +39,7 @@ test('room detail requires auth', async () => {
   expect((await client.get('/room/detail', {params: {id: 950001}})).data.code).toBe(2);
 });
 
-test('room detail and companion lists match RoomModule open contract', async () => {
+test('room detail and companion lists match RoomDrawerNew open contract', async () => {
   await establishSession();
   const detail = (await client.get('/room/detail', {params: {id: 950001}})).data;
   expect(detail.code).toBe(1);
@@ -51,16 +51,21 @@ test('room detail and companion lists match RoomModule open contract', async () 
     floorName: '1F',
     departmentName: expect.any(String),
     senorStatus: expect.any(Number),
-    status: expect.any(Number)
+    status: expect.any(Number),
+    openTwoSystem: 1
   });
 
   const overview = (await client.get('/map/floor/overview', {params: {floorId: 930001}})).data;
   expect(overview.items.labList.every(room => room.isEdit === true)).toBe(true);
 
   expect((await client.get('/room/things/list', {params: {roomId: 950001}})).data.items.list).toEqual([]);
-  expect((await client.get('/room/monitor/instrument', {params: {roomId: 950001}})).data.items).toEqual([]);
+  const monitor = (await client.get('/room/monitor/instrument', {params: {roomId: 950001}})).data;
+  expect(monitor.code).toBe(1);
+  expect(monitor.items.length).toBeGreaterThan(0);
+  expect(monitor.items[0]).toMatchObject({id: expect.any(Number), name: expect.any(String), simpleEquipments: expect.any(Array)});
   expect((await client.post('/roomReport/list', {roomId: 950001, pageNum: 1, pageSize: 10})).data.items.list).toEqual([]);
   expect((await client.get('/thingsUser/list', {params: {thingId: 950001, pageNum: 1, pageSize: 10}})).data.items.list).toEqual([]);
+  expect((await client.get('/monitorIndicator/getOpenMonitorFlag', {params: {objId: 950001, objType: 3}})).data.items.list).toEqual([]);
 });
 
 test('unknown room fails; room things/add rejects invalid hardware bind', async () => {

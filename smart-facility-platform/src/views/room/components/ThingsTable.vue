@@ -26,7 +26,7 @@
           </template>
       </el-table-column>
       <el-table-column :label="$t('common.remark')" prop="remark"/>
-      <el-table-column v-if="$store.state.level" :label="$t('common.handle')" min-width="150">
+      <el-table-column v-if="$store.state.level && !isDemo" :label="$t('common.handle')" min-width="150">
         <template v-slot="scope">
           <el-button type="text" @click="handleEditThing(scope.row)">{{ $t('common.edit') }}</el-button>
           <el-button type="text" @click="handleRemoveThing(scope.row)">{{ $t('common.delete') }}</el-button>
@@ -57,6 +57,11 @@ export default {
       default: () => {}
     }
 
+  },
+  data() {
+    return {
+      isDemo: process.env.VUE_APP_DEMO === 'true'
+    };
   },
   methods: {
     handleEditThing(row) {

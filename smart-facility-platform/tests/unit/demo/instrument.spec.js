@@ -170,12 +170,13 @@ test('scenario switch changes layout status and RoomDataV counts together; layou
 test('floor room markers for wired labs follow the shared scenario', () => {
   setDemoScenario('normal');
   expect(listFloorOverview(930001).labList.find(r => r.id === 950001).senorStatus).toBe(1);
-  expect(listFloorOverview(930001).labList.find(r => r.id === 950002).senorStatus).toBe(1);
+  // Corridor has no instruments → seed 未监测 (3), does not follow scenario.
+  expect(listFloorOverview(930001).labList.find(r => r.id === 950002).senorStatus).toBe(3);
 
   setDemoScenario('alarm');
   expect(listFloorOverview(930001).labList.find(r => r.id === 950001).senorStatus).toBe(2);
   expect(listFloorOverview(930001).labList.find(r => r.id === 950003).senorStatus).toBe(2);
-  expect(listFloorOverview(930001).labList.find(r => r.id === 950002).senorStatus).toBe(1);
+  expect(listFloorOverview(930001).labList.find(r => r.id === 950002).senorStatus).toBe(3);
   expect(listFloorScreen({floorId: 930001}).roomCount.alarmCount).toBe(2);
 
   setDemoScenario('offline');
@@ -291,9 +292,12 @@ test('instrument detail and open-monitor flags reuse shared ids/sensors; offline
   })).data.items).toEqual([]);
 
   expect((await client.get('/instrument/detail', {params: {id: 999999}})).data.code).toBe(0);
-  expect((await client.get('/monitorIndicator/getOpenMonitorFlag', {
+  // objType 3 = room probe slice (empty list); device probes stay on objType 2.
+  const roomFlags = (await client.get('/monitorIndicator/getOpenMonitorFlag', {
     params: {objId: 970001, objType: 3}
-  })).data.code).toBe(0);
+  })).data;
+  expect(roomFlags.code).toBe(1);
+  expect(roomFlags.items.list).toEqual([]);
 });
 
 test('monitorInfo series follows interval and sensor; segmented range merges; offline stays empty', async () => {

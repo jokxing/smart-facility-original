@@ -37,7 +37,7 @@ export const DEMO_FLOOR_ROOMS = Object.freeze({
       color: '#cfe9f8',
       scaleX: 1,
       scaleY: 1,
-      senorStatus: 1,
+      senorStatus: 3,
       isEdit: true,
       equipments: []
     },
