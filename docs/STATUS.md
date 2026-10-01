@@ -1968,3 +1968,28 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`feat: 接通数据统计设备使用统计演示`。
 - 下一提示词：`docs/next-task-prompt.md`（4D 使用率排行）。
+
+## 2026-10-01 — 数据统计 4D（设备使用率排行）
+
+### 做了什么
+
+- 契约 `docs/statistics-4d-contract.md`；Mock `GET /statistic/instrument/useRanking`（`items` 为数组；工作日/自然日/时段派生）。
+- `Statistics.vue` 开放使用率排行表与高级查询；去掉 `showDeferredStats` 门闸。
+- 单测 `statistics-4d.spec.js`；浏览器 `test:demo:statistics:4d`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：30 套 / 158 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:4d` → `externalAttempts=0`；证据 `docs/evidence/statistics-4d`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 可用 / 不能用
+
+- **可用**：`/ds/statistics` 主路径 4A–4D。
+- **不能用**：真实电量、`/ds/device/chart`、导出。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`feat: 接通数据统计设备使用率排行演示`。
+- 下一提示词：`docs/next-task-prompt.md`（电量或高级统计页可选）。

@@ -13,7 +13,7 @@
 | 维度：电量（原 `queryType=2`） | **UI 去掉**；若仍请求则 `instrumentUseList: []` |
 | 设备类型筛：全部 / 实验室 / 行政 / IT | **已开放**（IT 无种子 → 空态） |
 | 时间：日/周/月预设 + 自定义区间 | **已开放**（演示时钟） |
-| 使用率排行 | **仍隐藏**；不发 `useRanking` |
+| 使用率排行 | **4D 已开放**（见 `statistics-4d-contract.md`） |
 
 ## 请求（页面实际拼装 `equipmentUse`）
 

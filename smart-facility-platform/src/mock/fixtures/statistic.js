@@ -190,3 +190,51 @@ export function getStatisticInstrumentUse(params = {}) {
   rows.sort((a, b) => b[metric] - a[metric] || a.instrumentName.localeCompare(b.instrumentName, 'zh'));
   return {instrumentUseList: rows};
 }
+
+function parseHour(value) {
+  if (value == null || value === '') return NaN;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0 || n > 23) return NaN;
+  return Math.floor(n);
+}
+
+/**
+ * GET /statistic/instrument/useRanking — Statistics 4D table.
+ * Returns a plain array (page assigns res.items directly to useRanKings).
+ */
+export function getStatisticInstrumentUseRanking(params = {}) {
+  const days = windowDays(params);
+  const periodType = Number(params.periodType) === 2 ? 2 : 1;
+  const queryType = Number(params.queryType) || 1;
+  const beginH = parseHour(params.periodBeginTime);
+  const endH = parseHour(params.periodEndTime);
+  const hasHourWindow = Number.isFinite(beginH) && Number.isFinite(endH) && beginH <= endH;
+  const hourSpan = hasHourWindow ? Math.max(1, endH - beginH + 1) : null;
+
+  const rows = listActiveInstrumentSeeds()
+    .map(buildInstrumentRow)
+    .filter(Boolean)
+    .map(row => {
+      const hours = Number(row.workingHours);
+      const workHours = Number.isFinite(hours) && hours > 0 ? hours : 7.5;
+      const factor = 0.5 + ((Number(row.id) % 7) / 10);
+      const base = periodType === 1 ? workHours : 24;
+      const hourScale = hourSpan == null ? 1 : Math.min(1, hourSpan / base);
+      let useRate = Math.min(100, Math.round(factor * (workHours / base) * hourScale * 100));
+      if (queryType === 2) {
+        useRate = Math.min(100, Math.round(useRate * (days === 1 ? 1 : 0.98)));
+      } else if (queryType === 3) {
+        useRate = Math.min(100, Math.round(useRate * 0.95));
+      }
+      const variationRate = (Number(row.id) % 11) - 5;
+      return {
+        instrumentName: row.name,
+        useRate,
+        variationRate,
+        changed: variationRate >= 0
+      };
+    });
+
+  rows.sort((a, b) => b.useRate - a.useRate || a.instrumentName.localeCompare(b.instrumentName, 'zh'));
+  return rows;
+}

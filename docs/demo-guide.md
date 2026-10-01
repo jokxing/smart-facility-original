@@ -1,14 +1,14 @@
-# 本地演示：含数据统计 4A–4C
+# 本地演示：含数据统计 4A–4D
 
 房间详情更新：设备分类随设备编辑生效；切分类、搜索或Tab会回第一页；设备卡片展示与平面图同源的本地SVG设备外观。
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 设备状态饼图（4B）+ 设备使用统计（4C）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/rm/room`、`/ds/statistics`。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/rm/room`、`/ds/statistics`。
 
 首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开详情；可编辑名称/部门/分类；可单条/批量删除（**已绑定智能硬件须先解绑**）；可手填新增；可 XLSX 导入（先预览再确认）；可导出。批量改部门等仍拒绝。
 
 首页「房间管理」进入房间列表：关键词/部门/位置/状态筛选、分页、统计卡；可**导出**当前筛选全部匹配行。点房间名称打开只读详情（基本信息 + 已上图关联仪器 + **未监测设备** Tab + 已绑定智能硬件只读表）。**不开放**房间新增/编辑/删除/导入/绑定解绑；列表上的关联硬件类型筛选取消（不假生效）。
 
-首页「数据统计」进入总览三卡 + 报警总览三环 + 智能硬件报警柱图 + 设备状态统计 + **设备使用统计**（时长/次数，日周月）。使用率排行/电量本阶段隐藏。
+首页「数据统计」进入总览 + 报警 + 状态饼图 + 使用统计 + **使用率排行表**（工作日/自然日、高级时段）。真实电量与 `/ds/device/chart` 本阶段隐藏。
 
 ## 启动
 
@@ -26,7 +26,7 @@ npm run demo
 楼层「进入配置」仍只读；不支持从侧栏新增/删除设备。  
 首页或顶栏 **设备管理**：筛选分页 → 详情/编辑/删除 → **解绑（若已绑定）** → **新增** → **多选批量删除** → **导入**（预览确认）→ **导出**当前筛选结果。  
 首页 **房间管理**：筛选分页 → 点名称打开只读详情与关联仪器；可导出；未监测 Tab 依赖设备管理新增未上图仪器。
-首页 **数据统计**：总览数量 → 报警环图 → 硬件告警柱图 → 设备状态饼图 → 设备使用统计条图；点卡片「详情」可跳已开放列表页。
+首页 **数据统计**：总览 → 报警 → 状态饼图 → 使用统计条图 → 使用率排行表。
 
 ## Mock 要点
 
@@ -55,6 +55,7 @@ npm run demo
 | 数据统计告警 | `GET /statistic/alarm/overview`；`GET /statistic/equipment/alarm`（历史未处理） |
 | 数据统计状态饼图 | `GET /instrument/instrumentStatistics`（活跃仪器 run/standby/close） |
 | 数据统计使用 | `GET /statistic/instrument/use`（活跃仪器 + 演示时钟窗口派生时长/次数） |
+| 数据统计使用率排行 | `GET /statistic/instrument/useRanking`（数组 items；工作日/自然日/时段派生） |
 | 设备只读详情 | `GET /instrument/detail`；监测标签 `getOpenMonitorFlag` / `getMonitorFlag` |
 | 设备历史曲线 | `GET /monitorIndicator/monitorInfo`（离线为空）；`historyPage` 空表桩 |
 | 仪器其它写 | `batch/update` **明确拒绝** |
@@ -79,8 +80,8 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:statistics:4c
-# 可选：npm run test:demo:statistics:4b / 4a
+npm run test:demo:statistics:4d
+# 可选：npm run test:demo:statistics:4c / 4b / 4a
 ```
 
 顶栏「系统 → 报警记录」支持多选批量处理（须有处理时间与类型）。曲线非法自定义日期应失败/空态，不再变成默认窗口。
@@ -97,7 +98,11 @@ npm run test:demo:statistics:4c
 
 ### 设备使用统计（4C）
 
-同页「设备使用统计」：时长/次数条图，日/周/月或自定义区间（演示时钟）；类型筛全部/实验室/行政/IT。指标由活跃仪器 `workingHours` + 窗口天数派生，**不是**真实电表。行政/IT 默认可空。仍隐藏使用率排行与电量维度。
+同页「设备使用统计」：时长/次数条图，日/周/月或自定义区间（演示时钟）；类型筛全部/实验室/行政/IT。指标由活跃仪器 `workingHours` + 窗口天数派生，**不是**真实电表。行政/IT 默认可空。
+
+### 设备使用率排行（4D）
+
+同页「设备使用率统计」表：`useRate`/`variationRate`/`changed`；工作日/自然日与高级时段查询。与 4C 同源派生。仍不开放真实电量与 `/ds/device/chart`。
 
 ## 房间布局缓存升级（P1 修复）
 

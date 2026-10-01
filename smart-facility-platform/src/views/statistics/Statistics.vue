@@ -56,8 +56,7 @@
                 <data-empty v-loading="eqiupmentCharts.loading" v-else/>
 
         </div>
-        <!-- 使用率排行仍不开放 -->
-        <template v-if="showDeferredStats">
+                <!-- 4D：设备使用率排行已开放 -->
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceUserRateStat')"></el-descriptions>
         <div class="bg">
             <chart-dimension
@@ -125,7 +124,6 @@
             </div>
         </div>
         <use-ran-high-search ref="UseRanHighSearch" @handle="handleHigthSearch"/>
-        </template>
     </div>
 </template>
 
@@ -168,8 +166,7 @@ export default {
     data() {
         const _this = this;
         return {
-            // 4C: use chart open; ranking still behind showDeferredStats
-            showDeferredStats: false,
+            // 4A–4D stats sections open
             colors: ['#BFBFBF', '#FEC000', '#262626', '#0070c0', '#808080'],
             overview: [
                 {
@@ -381,6 +378,7 @@ export default {
                 this.equipmentOverview.rows = equipmentOverview && equipmentOverview.length ? equipmentOverview : [];
             });
             this.handleEquipmentUsers();
+            this.handleGetInstrumentUserRanKing();
         },
         timeTransform(sec) {
             if (this.equipmentUse.queryType !== 0) {

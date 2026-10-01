@@ -1,19 +1,13 @@
-# 下一任务：数据统计 4D——设备使用率排行只读演示
+# 下一任务：数据统计收尾建议——电量或高级统计页（可选）
 
-请直接执行这个小任务。工作区 E:\project\smart-facility-original；仅改 smart-facility-platform 和 docs。先读 PROJECT_CONTEXT.md、STATUS.md 文末、demo-guide.md、statistics-4a/4b/4c-contract.md，检查适用 AGENTS 和 Git，保留未提交修改。4A–4C 已通过，不重复重做。用户身份按前端主力及 Vue 2 重构组成员表述。
+4A–4D 已覆盖 `/ds/statistics` 主路径：总览、告警、状态饼图、使用统计、使用率排行。工作区 E:\project\smart-facility-original；仅改 smart-facility-platform 和 docs。先读 STATUS 文末与 statistics-4*-contract。用户身份按前端主力及 Vue 2 重构组成员表述。
 
-## 本轮范围
-在 `/ds/statistics` 有限开放「设备使用率统计」表格（`getStatisticInstrumentUseRanKing` / `GET /statistic/instrument/useRanking`），保留 ChartDimension / 高级查询能接多少接多少。保留 Vue 2。暂不做电量、导出、`/ds/device/chart`。
+## 可选下一小任务（择一，勿并行）
 
-## 实际源码线索
-- Statistics.vue：`showDeferredStats` 仍为 false；4D 解开使用率排行区块。
-- `handleGetInstrumentUserRanKing` 消费 `res.items` 为表格行（`instrumentName`/`useRate`/`variationRate`/`changed`）；先核实页面字段与参数，不能猜。
-- 须与 4C 活跃仪器同源；增删后排行变化；空态明确；禁止不可变假排行。
+**方案 A（推荐若继续统计模块）**：接通电量相关只读图（原页面 `queryType=2` / `getStatisticElectricity*`），须先写契约说明计量源；禁止用全 0 冒充真实功耗。
 
-## 执行顺序
-1. 写 `docs/statistics-4d-contract.md`。
-2. Mock 读接口会话保护。
-3. 单测 + 浏览器验证；externalAttempts 为零。
-4. 更新 STATUS、demo-guide、契约；给准确 commit 信息，完成后停止。后续只写建议。
+**方案 B**：有限开放 `/ds/device/chart` 记录仪图表统计（另页），单独放行路由与 Mock，不回改 4A–4D。
 
-不安装依赖，不访问旧服务，不输出 env 真实值，不跑生产脚本，不暂存/commit/push，不升级或重写 Vue 2。未执行的验证必须标明。
+**方案 C**：切到其他未演示模块（系统用户/工单等），另写 next-task-prompt。
+
+若选 A/B：先契约 → Mock 会话保护 → 单测 + 浏览器 → 更新 STATUS/demo-guide；不安装依赖、不 commit/push、不重写 Vue 2。未执行验证须标明。
