@@ -1,8 +1,8 @@
-# 本地演示：含设备管理列表与编辑（2A/2B）
+# 本地演示：含设备管理列表、编辑与删除（2A/2B/2C）
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）与基本信息编辑（2B）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）、基本信息编辑（2B）、单条删除（2C）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`。
 
-首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开只读详情；列表/详情可编辑名称、部门、分类（持久化 `instrumentMeta`）。新增/删除/批量/导入导出在演示下仍拒绝。
+首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开只读详情；列表/详情可编辑名称、部门、分类（`instrumentMeta`）；操作列可单条删除（`instrumentDeleted` tombstone）。新增/批量/导入导出在演示下仍拒绝。
 
 ## 启动
 
@@ -18,7 +18,7 @@ npm run demo
 顶栏 **系统 → 报警记录**：查看设备告警列表，单条「添加处理」后刷新为已处理。  
 楼层/房间可用 **场景·正常/异常/离线**；切换不改坐标。  
 楼层「进入配置」仍只读；不支持从侧栏新增/删除设备。  
-首页或顶栏 **设备管理**：仪器列表筛选分页 → 点名称打开只读详情 → **编辑**改名称/部门/分类。
+首页或顶栏 **设备管理**：仪器列表筛选分页 → 点名称打开只读详情 → **编辑**改名称/部门/分类 → 操作列 **删除**一台后列表与统计减少。
 
 ## Mock 要点
 
@@ -31,9 +31,10 @@ npm run demo
 | 演示场景 | `GET/POST /demo/scenario` |
 | 仪器列表 / 统计 | `POST /instrument/list`；`GET /instrument/dashboard/new`（970xxx 共享实体） |
 | 仪器编辑 | `POST /instrument/update/basic`（name/departmentId/types → `instrumentMeta`） |
+| 仪器单删 | `POST /instrument/remove/:id`（→ `instrumentDeleted`；同步剪布局点） |
 | 设备只读详情 | `GET /instrument/detail`；监测标签 `getOpenMonitorFlag` / `getMonitorFlag` |
 | 设备历史曲线 | `GET /monitorIndicator/monitorInfo`（离线为空）；`historyPage` 空表桩 |
-| 仪器其它写 | `add` / `remove` / `batch/*` / `export` / `unbind` **明确拒绝** |
+| 仪器其它写 | `add` / `batch/*` / `export` / `unbind` **明确拒绝** |
 | 报警记录处理 | `POST …/historyAlarmRecord/summary`；`POST …/exceptionHandle/batch`；`GET /alarm/errorList` |
 | 硬件告警处理 | `POST /monitorIndicator/historyAlarmRecord`；`POST /monitorIndicator/exceptionHandle`（objSensorId+time） |
 | 硬件间隔/阈值 | `POST /device/update/interval/report|alarm`；`POST /device/update/sensors` |
@@ -46,7 +47,7 @@ npm run demo
 | 枪架枪位列表 | `POST /gun/pipette/binding/list`；历史告警空桩 |
 | 网关标签绑定 | `POST /label/binding/list`（980025 预置 TAG-001…）；历史告警空桩 |
 | 声光/平台开关 | `POST /device/update/closeAlarm/*` 明确拒绝 |
-| 持久化 | `…equipmentMeta`；`equipmentUsers`；`equipmentBindings`；`instrumentMeta` |
+| 持久化 | `…equipmentMeta`；`equipmentUsers`；`equipmentBindings`；`instrumentMeta`；`instrumentDeleted` |
 | 楼层房间标记写 / 侧栏仪器列表 | 仍拒绝或跳过 |
 
 ## 复测
@@ -55,7 +56,8 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:device:2b
+npm run test:demo:device:2c
+# 可选：npm run test:demo:device:2b
 # 可选：npm run test:demo:device:2a
 # 可选：npm run test:demo:hardware:1b
 ```

@@ -11,7 +11,8 @@
 | `GET /instrument/dashboard/new` 统计卡 | **已开放** |
 | 点击名称 → `LabDeviceDrawer` 只读详情 | **已开放**（复用 `GET /instrument/detail` + 监测标签） |
 | 编辑基本信息（名称/部门/分类） | **2B 已开放**（`POST /instrument/update/basic` + `instrumentMeta`） |
-| 新增/删除/批量/导入/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
+| 单条删除 | **2C 已开放**（`POST /instrument/remove/:id` + `instrumentDeleted` tombstone） |
+| 新增/批量删除/导入/导出/解绑 | **明确拒绝**（UI 隐藏 + Mock `failure`） |
 
 ## 实体与 ID
 
@@ -97,11 +98,23 @@
 | `departmentId` | `900101` / `900102` |
 | `types` | `1` 演示设备 / `2` 演示辅助设备 |
 
-成功后列表、详情、房间布局名称、bindable 目录立即反映 overlay。其它 body 字段接受但忽略。
+成功后列表、详情、房间布局名称、bindable 目录立即反映 overlay。其它 body 字段接受但忽略。已 tombstone 的 id 不可再编辑。
+
+### 2C 已开放：`POST /instrument/remove/:id`
+
+持久化键：`smart-facility-demo:v1:instrumentDeleted`（id 数组 tombstone；`DEMO_INSTRUMENTS` seed 不变）。
+
+| 规则 | 说明 |
+| --- | --- |
+| id | 必须存在于 seed；已删再删 → failure「已删除」；未知 id 无路由（fixture 层拒绝） |
+| 副作用 | 清除该 id 的 `instrumentMeta`；从 `roomLayoutOverrides` 剪掉对应点 |
+| 读路径 | 列表 total/dashboard、详情、房间布局、`bindable?kind=instrument` 均排除已删 id |
+
+列表操作列「删除」已开放（无 `labelId` 时确认后直删；有标签时仍走解绑，解绑接口仍拒绝）。批量删除入口仍隐藏且 Mock 拒绝。
 
 ### 仍拒绝
 
-`POST /instrument/add|remove/:id|batch/delete|batch/update|export`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
+`POST /instrument/add|batch/delete|batch/update|export`，`GET /instrument/unbind` → `failure('本阶段演示未开放仪器写操作。')`。
 
 ## 导航
 
@@ -111,5 +124,5 @@
 
 ## 验证
 
-- 单测：列表分页/筛选/统计；编辑成功/校验失败/会话；列表详情布局 bindable 一致
-- 浏览器：证据 `docs/evidence/device-management-2a`、`docs/evidence/device-management-2b`
+- 单测：列表分页/筛选/统计；编辑成功/校验失败/会话；删除 tombstone 后列表/统计/详情/布局/bindable 一致；批量删除仍拒绝
+- 浏览器：证据 `docs/evidence/device-management-2a`、`docs/evidence/device-management-2b`、`docs/evidence/device-management-2c`

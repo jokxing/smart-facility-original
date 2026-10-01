@@ -292,7 +292,6 @@
                                                         </el-button
                                                         >
                                                         <el-button
-                                                            v-if="!isDemo"
                                                             class="abnormal"
                                                             type="text"
                                                             @click="handleDelete(scope.row)"
@@ -1089,9 +1088,14 @@ export default {
                         message: this.$t('common.deleteSuccess'),
                     })
                     this.loading = false
+                    this.handleGetGatherData()
                     this.handleReflesh()
+                } else {
+                    this.loading = false
+                    this.$message.error(result.message || this.$t('common.deleteError'))
                 }
             } catch (err) {
+                this.loading = false
                 this.$message({
                     type: 'error',
                     message: err
@@ -1215,6 +1219,7 @@ export default {
 
         isReflesh: {
             handler() {
+                this.handleGetGatherData();
                 this.handleInstrumentList();
             }
         },

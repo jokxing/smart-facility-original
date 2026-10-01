@@ -13,6 +13,7 @@
     "test:demo:hardware:1b": "node scripts/check-demo-hardware-1b.cjs",
     "test:demo:device:2a": "node scripts/check-demo-device-2a.cjs",
     "test:demo:device:2b": "node scripts/check-demo-device-2b.cjs",
+    "test:demo:device:2c": "node scripts/check-demo-device-2c.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",

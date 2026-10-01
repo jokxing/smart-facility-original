@@ -138,13 +138,12 @@ test('detail id matches list row; bindable catalog stays same 970xxx set', async
   expect(listBindableCatalog('instrument').map(item => item.id)).toEqual(DEMO_INSTRUMENTS.map(item => item.id));
 });
 
-test('writes except update/basic stay rejected; categories/menus support labdevice entry', async () => {
+test('writes except update/basic and remove stay rejected; categories/menus support labdevice entry', async () => {
   await establishSession();
   for (const [method, url] of [
     ['post', '/instrument/add'],
     ['post', '/instrument/batch/delete'],
     ['post', '/instrument/export'],
-    ['post', '/instrument/remove/970001'],
     ['get', '/instrument/unbind']
   ]) {
     const res = method === 'get'

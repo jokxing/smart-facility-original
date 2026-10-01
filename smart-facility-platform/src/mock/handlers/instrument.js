@@ -9,6 +9,7 @@ import {
   getInstrumentDashboardNew,
   listInstruments,
   listRoonInstrumentInfo,
+  removeInstrument,
   resetRoomInstrumentLayout,
   saveRoomInstrumentLayout,
   updateInstrumentBasic
@@ -20,7 +21,11 @@ import {failure, protectedRoute, success} from '../response';
 
 const WRITE_BLOCKED = '本阶段演示未开放仪器写操作。';
 const removeRoutes = DEMO_INSTRUMENTS.map(item =>
-  protectedRoute('POST', `/instrument/remove/${item.id}`, () => failure(WRITE_BLOCKED))
+  protectedRoute('POST', `/instrument/remove/${item.id}`, () => {
+    const result = removeInstrument(item.id);
+    if (!result.ok) return failure(result.message || '删除失败');
+    return success({id: result.id, roomId: result.roomId});
+  })
 );
 
 // Room instrument layout + device list/dashboard + read-only detail + MonitorInfo series.

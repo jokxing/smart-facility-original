@@ -28,6 +28,7 @@ function floorPctToRoomLocal(roomId, pctLeft, pctTop) {
 const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
 const INSTRUMENT_META_KEY = 'instrumentMeta';
+const INSTRUMENT_DELETED_KEY = 'instrumentDeleted';
 const ALLOWED_TYPES = new Set([1, 2]);
 
 function typeNameFor(types) {
@@ -80,6 +81,71 @@ function instrumentById(id) {
   return DEMO_INSTRUMENTS.find(item => item.id === Number(id)) || null;
 }
 
+function readDeletedIds() {
+  try {
+    const raw = storage.getItem(INSTRUMENT_DELETED_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(Number).filter(n => !Number.isNaN(n)) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function writeDeletedIds(ids) {
+  storage.setItem(INSTRUMENT_DELETED_KEY, JSON.stringify([...new Set(ids.map(Number))]));
+}
+
+export function isInstrumentDeleted(id) {
+  return readDeletedIds().includes(Number(id));
+}
+
+export function clearInstrumentDeleted() {
+  storage.removeItem(INSTRUMENT_DELETED_KEY);
+}
+
+function activeInstrumentSeeds() {
+  return DEMO_INSTRUMENTS.filter(item => !isInstrumentDeleted(item.id));
+}
+
+function pruneDeletedFromLayouts(deletedId) {
+  const key = Number(deletedId);
+  const map = readOverrides();
+  let changed = false;
+  for (const roomId of Object.keys(map)) {
+    const items = map[roomId];
+    if (!Array.isArray(items)) continue;
+    const next = items.filter(item => {
+      const elementId = Number(item.elementId != null ? item.elementId : item.id);
+      return elementId !== key;
+    });
+    if (next.length !== items.length) {
+      if (next.length) map[roomId] = next;
+      else delete map[roomId];
+      changed = true;
+    }
+  }
+  if (changed) writeOverrides(map);
+}
+
+/**
+ * POST /instrument/remove/:id — tombstone overlay; keeps DEMO_INSTRUMENTS seed immutable.
+ */
+export function removeInstrument(id) {
+  const key = Number(id);
+  const seed = instrumentById(key);
+  if (!seed) return {ok: false, message: '演示设备不存在。'};
+  if (isInstrumentDeleted(key)) return {ok: false, message: '演示设备已删除。'};
+  writeDeletedIds(readDeletedIds().concat(key));
+  const meta = readInstrumentMeta();
+  if (meta[String(key)]) {
+    delete meta[String(key)];
+    writeInstrumentMeta(meta);
+  }
+  pruneDeletedFromLayouts(key);
+  return {ok: true, id: key, roomId: seed.roomId};
+}
+
 function readInstrumentMeta() {
   try {
     const raw = storage.getItem(INSTRUMENT_META_KEY);
@@ -97,7 +163,7 @@ function writeInstrumentMeta(map) {
 
 /** Seed + overlay (name / departmentId / types). Used by list, detail, layout, bindable. */
 export function resolveInstrumentEntity(entity) {
-  if (!entity) return null;
+  if (!entity || isInstrumentDeleted(entity.id)) return null;
   const patch = readInstrumentMeta()[String(entity.id)] || {};
   return {
     ...entity,
@@ -118,7 +184,7 @@ export function clearInstrumentMeta() {
 export function updateInstrumentBasic(body = {}) {
   const id = Number(body && body.id);
   const seed = instrumentById(id);
-  if (!seed) return {ok: false, message: '演示设备不存在。'};
+  if (!seed || isInstrumentDeleted(id)) return {ok: false, message: '演示设备不存在。'};
   const name = String(body.name == null ? '' : body.name).trim();
   if (name.length < 2 || name.length > 26) {
     return {ok: false, message: '请填写 2–26 字的设备名称。'};
@@ -178,22 +244,28 @@ function seedPlacement(seed) {
 }
 
 function placementsForRoom(roomId) {
-  const seeds = LAYOUT_SEEDS.filter(seed => seed.roomId === roomId).map(seedPlacement);
+  const seeds = LAYOUT_SEEDS
+    .filter(seed => seed.roomId === roomId && !isInstrumentDeleted(seed.elementId))
+    .map(seedPlacement);
   const overrides = readOverrides()[String(roomId)];
   if (!Array.isArray(overrides) || !overrides.length) return seeds;
-  const result = validateLayout(overrides.map(item => ({...item, type: 4})), roomId);
+  const filtered = overrides
+    .filter(item => !isInstrumentDeleted(item.elementId != null ? item.elementId : item.id))
+    .map(item => ({...item, type: 4}));
+  if (!filtered.length) return seeds;
+  const result = validateLayout(filtered, roomId);
   return result.ok ? result.items : seeds;
 }
 
 export function listInstrumentsByRoomId(roomId) {
   const key = roomId == null || roomId === '' ? null : Number(roomId);
   if (key == null || Number.isNaN(key)) return [];
-  return DEMO_INSTRUMENTS.filter(item => item.roomId === key);
+  return activeInstrumentSeeds().filter(item => item.roomId === key);
 }
 
 export function listInstrumentsForFloorRooms(roomIds) {
   const idSet = new Set((roomIds || []).map(Number).filter(n => !Number.isNaN(n)));
-  return DEMO_INSTRUMENTS.filter(item => idSet.has(item.roomId));
+  return activeInstrumentSeeds().filter(item => idSet.has(item.roomId));
 }
 
 /**
@@ -212,7 +284,7 @@ function validateLayout(items, requiredRoomId) {
     }
     const elementId = Number(raw.elementId != null ? raw.elementId : raw.id);
     const entity = instrumentById(elementId);
-    if (!entity || seen.has(elementId)) {
+    if (!entity || isInstrumentDeleted(elementId) || seen.has(elementId)) {
       return {ok: false, message: '存在未知设备，已拒绝保存。'};
     }
     seen.add(elementId);
@@ -285,6 +357,7 @@ function createDateFor(entity) {
 /** Shared list/detail row fields from one instrument entity + current scenario. */
 export function buildInstrumentRow(entity) {
   const resolved = resolveInstrumentEntity(entity);
+  if (!resolved) return null;
   const {status, senorStatus} = statusForScenario(getDemoScenario());
   return {
     id: resolved.id,
@@ -393,8 +466,9 @@ export function listInstruments(body = {}) {
   const statusFilter = body.status;
   const sensorFilter = body.sensorStatus;
 
-  const rows = DEMO_INSTRUMENTS
+  const rows = activeInstrumentSeeds()
     .map(resolveInstrumentEntity)
+    .filter(Boolean)
     .filter(entity => matchSpace(entity, body))
     .filter(entity => !deptIds.length || deptIds.includes(Number(entity.departmentId)))
     .filter(entity => !typesList.length || typesList.includes(Number(entity.types)))
@@ -420,7 +494,7 @@ export function listInstruments(body = {}) {
  * GET /instrument/dashboard/new — gather cards; universe counts (not list filters).
  */
 export function getInstrumentDashboardNew() {
-  const rows = DEMO_INSTRUMENTS.map(buildInstrumentRow);
+  const rows = activeInstrumentSeeds().map(buildInstrumentRow);
   const runNormal = rows.filter(r => Number(r.status) === 1).length;
   const runAbnormal = rows.filter(r => [0, -1, 2, -100].includes(Number(r.status))).length;
   const runRest = rows.filter(r => [3, 4].includes(Number(r.status))).length;
@@ -456,6 +530,7 @@ export function sensorReadingForInstrument(elementId) {
  * logoUrl left empty so the drawer uses the local default image (no external file URL).
  */
 export function getDemoInstrumentDetail(id) {
+  if (isInstrumentDeleted(id)) return null;
   const entity = instrumentById(id);
   return entity ? buildInstrumentRow(entity) : null;
 }
@@ -465,6 +540,7 @@ export function getDemoInstrumentDetail(id) {
  * Temperature reuses hover reading; humidity is chart-switch companion only.
  */
 export function getDemoOpenMonitorFlag(objId) {
+  if (isInstrumentDeleted(objId)) return null;
   const entity = instrumentById(objId);
   if (!entity) return null;
   const reading = sensorReadingForInstrument(entity.id);

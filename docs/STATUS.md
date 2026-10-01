@@ -1299,3 +1299,44 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（2C 仪器删除）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通设备管理仪器名称部门分类编辑演示`。
+
+## 追加：设备管理 2C 仪器单条删除（2026-10-01）
+
+依据 `docs/next-task-prompt.md`（设备管理 2C）。本文仅追加。
+
+### 修改
+
+| 项 | 内容 |
+| --- | --- |
+| Mock | `removeInstrument` + `instrumentDeleted` tombstone；剪 `instrumentMeta` 与布局点 |
+| 读路径 | 列表/dashboard/详情/布局/bindable 排除已删 id |
+| Handler | `POST /instrument/remove/:id`（按 seed id 注册）；batch/delete 等仍拒绝 |
+| UI | 列表操作列开放「删除」；新增/批量/导入导出仍 `!isDemo` 隐藏 |
+| 测试 | `instrument-delete.spec.js`；浏览器 `check-demo-device-2c.cjs` |
+| 文档 | contract / demo-guide；`next-task-prompt.md` → 2D 导入或新增 |
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：17 套 / **100** 项通过。
+- `DEMO_PORT=8088 npm run test:demo:device:2c`：通过，`externalAttempts:0`；证据 `docs/evidence/device-management-2c`（01–04）。
+- 删除 970012 后 total=11、统计卡同步、关键词搜编号为空。
+
+### 能用 / 不能用
+
+- **能用**：列表单条删除；刷新后列表、统计、详情、布局、bindable 不再含该 id。
+- **不能用**：批量删除/新增/导入导出/解绑；有标签设备解绑仍拒绝（本切片种子无 labelId）。
+
+### 设计决定
+
+- Tombstone overlay，不改 seed；删除时同步剪布局避免孤儿点。
+- 未知 id 不注册 HTTP 路由（adapter 精确匹配）；单测在 fixture 层断言拒绝。
+
+### 未验证
+
+- 未跑生产构建 / 全站回归 / 硬件 1B 全量脚本。
+- 未验带 `labelId` 的解绑→删除链路（种子无标签）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（2D 导入或新增）。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通设备管理仪器单条删除演示`。
