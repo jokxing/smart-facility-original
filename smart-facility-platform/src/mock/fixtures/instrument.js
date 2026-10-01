@@ -1,3 +1,4 @@
+import {readInstrumentWorkbook} from '../instrumentWorkbook';
 /**
  * Shared lab instruments + room-local layouts for getRoonInstrumentInfoList.
  *
@@ -33,8 +34,7 @@ const INSTRUMENT_CREATED_KEY = 'instrumentCreated';
 const IMPORT_ID_MIN = 970101;
 const IMPORT_ID_MAX = 970150;
 const ALLOWED_TYPES = new Set([1, 2]);
-/** Imported demo devices sit in corridor so room A/B layout save rules stay intact. */
-const IMPORT_DEFAULT_ROOM_ID = 950002;
+
 
 function typeNameFor(types) {
   return Number(types) === 2 ? '演示辅助设备' : '演示设备';
@@ -148,172 +148,49 @@ function activeInstrumentSeeds() {
   return DEMO_INSTRUMENTS.filter(item => !isInstrumentDeleted(item.id)).concat(created);
 }
 
-function nextImportId() {
-  const used = new Set([
-    ...DEMO_INSTRUMENTS.map(item => item.id),
-    ...readCreatedInstruments().map(item => Number(item.id)),
-    ...readDeletedIds().filter(id => id >= IMPORT_ID_MIN)
-  ]);
-  for (let id = IMPORT_ID_MIN; id <= IMPORT_ID_MAX; id++) {
-    if (!used.has(id)) return id;
-  }
-  return null;
-}
-
-function firstUploadFile(files) {
-  if (files == null) return null;
-  return Array.isArray(files) ? (files[0] || null) : files;
-}
-
-async function readUploadSource(file) {
-  if (file == null) return null;
-  if (typeof file === 'string') return {kind: 'text', text: file};
-  // Prefer bytes + TextDecoder: jsdom Blob#text() may Latin-1-decode UTF-8.
-  if (typeof file.arrayBuffer === 'function') {
-    return {kind: 'bytes', bytes: new Uint8Array(await file.arrayBuffer())};
-  }
-  if (typeof Blob !== 'undefined' && file instanceof Blob && typeof FileReader !== 'undefined') {
-    const buffer = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(reader.error || new Error('read failed'));
-      reader.readAsArrayBuffer(file);
-    });
-    return {kind: 'bytes', bytes: new Uint8Array(buffer)};
-  }
-  if (typeof file.text === 'function') {
-    return {kind: 'text', text: await file.text()};
-  }
-  return null;
-}
-
-function decodeDemoImportText(source) {
-  if (!source) return {ok: false, message: '无法读取导入文件。'};
-  if (source.kind === 'text') {
-    const text = String(source.text || '');
-    if (!text.trim()) return {ok: false, message: '导入文件为空。'};
-    if (text.indexOf('\0') >= 0) {
-      return {
-        ok: false,
-        message: '演示仅解析文本 CSV 模板。请使用「下载模板」后编辑，或另存为 CSV 再上传（不要存成 Excel 二进制）。'
-      };
-    }
-    return {ok: true, text: text.replace(/^\uFEFF/, '')};
-  }
-  const bytes = source.bytes;
-  if (!bytes || !bytes.length) return {ok: false, message: '导入文件为空。'};
-  // OLE Compound (.xls) or ZIP (.xlsx) — no spreadsheet parser in demo deps.
-  if ((bytes[0] === 0xD0 && bytes[1] === 0xCF) || (bytes[0] === 0x50 && bytes[1] === 0x4B)) {
-    return {
-      ok: false,
-      message: '演示仅解析文本 CSV 模板。请使用「下载模板」后编辑，或另存为 CSV 再上传（不要存成 Excel 二进制）。'
-    };
-  }
-  for (let i = 0; i < Math.min(bytes.length, 512); i++) {
-    if (bytes[i] === 0) {
-      return {
-        ok: false,
-        message: '演示仅解析文本 CSV 模板。请使用「下载模板」后编辑，或另存为 CSV 再上传（不要存成 Excel 二进制）。'
-      };
-    }
-  }
-  let start = 0;
-  if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) start = 3;
-  const slice = bytes.subarray(start);
-  let text;
-  if (typeof TextDecoder !== 'undefined') {
-    text = new TextDecoder('utf-8').decode(slice);
-  } else if (typeof Buffer !== 'undefined') {
-    text = Buffer.from(slice).toString('utf8');
-  } else {
-    text = decodeURIComponent(Array.from(slice, b => '%' + b.toString(16).padStart(2, '0')).join(''));
-  }
-  return {ok: true, text};
-}
-
-function splitCsvLine(line) {
-  const cells = [];
-  let cur = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"';
-        i += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-    if (ch === ',' && !inQuotes) {
-      cells.push(cur.trim());
-      cur = '';
-      continue;
-    }
-    cur += ch;
-  }
-  cells.push(cur.trim());
-  return cells;
-}
-
-function parseDemoImportRow(text) {
-  const lines = String(text || '')
-    .replace(/^\uFEFF/, '')
-    .split(/\r?\n/)
-    .map(line => line.trim())
-    .filter(Boolean);
-  if (!lines.length) return {ok: false, message: '导入文件为空。'};
-  const headerCells = splitCsvLine(lines[0]);
-  const headerJoined = headerCells.join('|').toLowerCase();
-  const hasHeader = /名称|name|部门|department|房间|room|types|分类/.test(headerJoined);
-  if (hasHeader && lines.length < 2) return {ok: false, message: '模板至少需要一行数据。'};
-  const cells = splitCsvLine(hasHeader ? lines[1] : lines[0]);
-  const name = String(cells[0] == null ? '' : cells[0]).trim();
-  if (name.length < 2 || name.length > 26) {
-    return {ok: false, message: '请填写 2–26 字的设备名称。'};
-  }
-  const departmentId = Number(cells[1]);
-  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
-    return {ok: false, message: '部门ID仅支持 900101 / 900102。'};
-  }
-  const types = cells[2] == null || cells[2] === '' ? 1 : Number(cells[2]);
-  if (!ALLOWED_TYPES.has(types)) {
-    return {ok: false, message: '分类 types 仅支持 1 / 2。'};
-  }
-  const roomId = cells[3] == null || cells[3] === '' ? IMPORT_DEFAULT_ROOM_ID : Number(cells[3]);
-  if (!INSTRUMENT_ROOM_SPACE[roomId]) {
-    return {ok: false, message: '房间ID仅支持 950001 / 950002 / 950003。'};
-  }
-  return {ok: true, name, departmentId, types, roomId};
-}
-
-/**
- * POST /instrument/import — parse first data row of demo CSV template
- * (名称,部门ID,分类types,房间ID). Binary .xls/.xlsx is rejected (no sheet lib).
- */
-export async function importDemoInstruments(body = {}) {
-  const file = firstUploadFile(body && body.files);
-  if (!file) return {ok: false, message: '请先选择要导入的文件。'};
-  const id = nextImportId();
-  if (id == null) return {ok: false, message: '演示导入数量已达上限。'};
-  const source = await readUploadSource(file);
-  const decoded = decodeDemoImportText(source);
-  if (!decoded.ok) return decoded;
-  const parsed = parseDemoImportRow(decoded.text);
-  if (!parsed.ok) return parsed;
-  const entity = {
-    id,
-    name: parsed.name,
-    roomId: parsed.roomId,
-    assetKey: 'demo-device-incubator',
-    types: parsed.types,
-    departmentId: parsed.departmentId,
-    daysAgo: 0,
-    imported: true
+export function instrumentImportOptions() {
+  return {
+    departments: [DEPT_OPS, DEPT_RD].map(id => ({id, name: departmentNameForId(id)})),
+    types: [...ALLOWED_TYPES].map(id => ({id, name: typeNameFor(id)})),
+    rooms: Object.entries(INSTRUMENT_ROOM_SPACE).map(([id, room]) => ({id: Number(id), name: room.roomName}))
   };
-  writeCreatedInstruments(readCreatedInstruments().concat(entity));
-  return {ok: true, id, name: entity.name, count: 1, departmentId: entity.departmentId, roomId: entity.roomId, types: entity.types};
+}
+
+/** Parse first; validate against current state and commit synchronously after the last await. */
+export async function importDemoInstruments(body = {}) {
+  const files = Array.isArray(body.files) ? body.files : (body.files ? [body.files] : []);
+  if (files.length !== 1) return {ok: false, message: '每次请选择一个 .xlsx 文件。'};
+  let rows;
+  try { rows = await readInstrumentWorkbook(files[0]); }
+  catch (error) { return {ok: false, message: error.message || '读取失败，请重新选择文件。'}; }
+  const options = instrumentImportOptions();
+  const known = new Set(activeInstrumentSeeds().map(resolveInstrumentEntity).map(item => item.roomId + ':' + item.name.trim()));
+  const planned = [];
+  for (const {rowNumber, cells} of rows) {
+    const [name, department, type, room] = cells;
+    const fail = message => ({ok: false, message: '第 ' + rowNumber + ' 行：' + message});
+    if (name.length < 2 || name.length > 26) return fail('名称必须为 2–26 字。');
+    const dept = options.departments.find(item => item.name === department);
+    const category = options.types.find(item => item.name === type);
+    const space = options.rooms.find(item => item.name === room);
+    if (!dept) return fail('部门不在模板可选范围内。');
+    if (!category) return fail('分类不在模板可选范围内。');
+    if (!space) return fail('房间不在模板可选范围内。');
+    const key = space.id + ':' + name;
+    if (known.has(key)) return fail('同房间设备名称重复（含已有设备或本批次）。');
+    known.add(key);
+    planned.push({name, departmentId: dept.id, types: category.id, roomId: space.id,
+      assetKey: 'demo-device-incubator', daysAgo: 0, imported: true});
+  }
+  const created = readCreatedInstruments();
+  const used = new Set(created.map(item => Number(item.id)).concat(readDeletedIds()));
+  const free = [];
+  for (let id = IMPORT_ID_MIN; id <= IMPORT_ID_MAX; id++) if (!used.has(id)) free.push(id);
+  if (planned.length > free.length) return {ok: false, message: '剩余导入容量为 ' + free.length + ' 台，本批次未写入。'};
+  const entities = planned.map((item, index) => ({...item, id: free[index]}));
+  try { writeCreatedInstruments(created.concat(entities)); }
+  catch (_) { return {ok: false, message: '本地保存失败，请检查浏览器存储空间后重试。'}; }
+  return {...entities[0], ok: true, count: entities.length, ids: entities.map(item => item.id)};
 }
 
 function pruneDeletedFromLayouts(deletedId) {
@@ -344,6 +221,7 @@ export function removeInstrument(id) {
   const seed = instrumentById(key);
   if (!seed) return {ok: false, message: '演示设备不存在。'};
   if (isInstrumentDeleted(key)) return {ok: false, message: '演示设备已删除。'};
+  if (boundEquipmentTypesForInstrument(key).length) return {ok: false, message: '该设备已绑定智能硬件，请先解绑后删除。'};
   writeDeletedIds(readDeletedIds().concat(key));
   const meta = readInstrumentMeta();
   if (meta[String(key)]) {

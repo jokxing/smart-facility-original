@@ -33,20 +33,22 @@
             :before-upload="handleBeforeUpload"
             :file-list="fileList"
             :http-request="uploadFile"
-            :limit="3"
+            :limit="isDemoInstrument ? 1 : 3"
+            :disabled="submitLoading"
             :on-change="handleFileList"
             :on-error="handleError"
             :on-exceed="handleExceedFile"
             :on-remove="handleRemove"
             :on-success="handleSuccess"
-            accept=".xlsx,.xls,.csv">
-          <div class="el-upload__tip">{{ $t('hardware.importTemplate3') }}</div>
+            :accept="isDemoInstrument ? '.xlsx' : '.xlsx,.xls'">
+          <div class="el-upload__tip">{{ isDemoInstrument ? '仅支持一个 .xlsx 文件，最多 50 行、10MB；整批校验通过后保存。' : $t('hardware.importTemplate3') }}</div>
           <div class="footer">
             <el-button slot="trigger">{{ $t('hardware.importTemplate4') }}</el-button>
-            <el-button type="primary" @click.stop="handleSubmitUpload">{{ $t('hardware.importTemplate5') }}</el-button>
+            <el-button type="primary" :loading="submitLoading" @click.stop="handleSubmitUpload">{{ isDemoInstrument ? '导入设备' : $t('hardware.importTemplate5') }}</el-button>
           </div>
         </el-upload>
       </el-row>
+      <el-alert v-if="importError" :title="importError" type="error" :closable="false" show-icon />
     </div>
   </el-dialog>
 </template>
@@ -66,6 +68,7 @@ export default {
       const _this = this;
     return {
       submitLoading: false,
+      importError: '',
       fileData: "",
       fileList: [],
       importType: {
@@ -156,38 +159,53 @@ export default {
       }
     }
   },
+  computed: {
+    isDemoInstrument() { return process.env.VUE_APP_DEMO === 'true' && this.title === 'instrument'; }
+  },
   methods: {
     handleModalClose() {
-      this.$emit('hiddenModalVisible')
+      if (!this.submitLoading) this.$emit('hiddenModalVisible')
     },
     handleDownImport() {
       if (process.env.VUE_APP_DEMO === 'true' && this.title === 'instrument') {
-        // UTF-8 CSV (not binary xls). Excel「另存为 xlsx/xls」后演示无法解析。
-        const content = '\uFEFF名称,部门ID,分类types,房间ID\n演示导入设备,900101,1,950002\n';
-        const blob = new Blob([content], {type: 'text/csv;charset=utf-8'});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = localStorage.getItem('lang') === 'en' ? 'instrument.csv' : '设备导入.csv';
-        link.click();
-        URL.revokeObjectURL(url);
-        return true;
+        return this.downloadInstrumentTemplate();
       }
       this.$message.warning(localStorage.getItem('lang') === 'en'
         ? 'Import templates are not available in this demo.'
         : '本演示未接入导入模板，暂不可下载。');
       return false;
     },
+    async downloadInstrumentTemplate() {
+      try {
+        const res = await request({url: '/__demo/instrument/import-options', method: 'get'});
+        if (res.code !== 1) throw new Error(res.message || '模板加载失败');
+        const {createInstrumentWorkbook} = await import('@/mock/instrumentWorkbook');
+        const buffer = await createInstrumentWorkbook(res.items);
+        const url = URL.createObjectURL(new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = '设备导入.xlsx';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return true;
+      } catch (error) {
+        this.$message.error(error.message || '模板下载失败，请重试。');
+        return false;
+      }
+    },
     handleExceedFile(files, fileList) {
+      if (this.isDemoInstrument) { this.$message.warning('每次只能选择一个文件，请先移除当前文件。'); return; }
       this.$message.warning(this.$t('hardware.importTemplate6') +` ${files.length + fileList.length} ` + this.$t('common.individual'));
     },
     // 文件状态改变时的钩子
     handleFileList(file, fileList) {
-      this.fileList.push(file);
+      this.fileList = fileList;
+      this.importError = "";
     },
     // 文件列表移除文件时的钩子
     handleRemove(file, fileList) {
-      this.fileList.splice(this.fileList.findIndex(item => item.uid === file.uid), 1)
+      this.fileList = fileList;
+      this.importError = "";
     },
     // 文件上传成功时的钩子
     handleSuccess(res, file, fileList) {
@@ -202,19 +220,44 @@ export default {
       let extension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
       let size = file.size / 1024 / 1024;
       const allowed = process.env.VUE_APP_DEMO === 'true'
-        ? ['xlsx', 'xls', 'csv']
+        ? ['xlsx']
         : ['xlsx', 'xls'];
       if (!allowed.includes(extension)) {
         this.$message.warning(this.$t('hardware.importTemplate3'));
+        return false;
       }
       if (size > 10) {
         this.$message.warning(this.$t('hardware.importTemplate7'));
+        return false;
       }
     },
     uploadFile(file) {
       this.fileData.append('files', file.file);
     },
+    async submitInstrumentImport() {
+      if (this.submitLoading) return;
+      this.submitLoading = true;
+      this.importError = '';
+      try {
+        if (this.fileList.length !== 1) throw new Error('请选择一个 .xlsx 文件。');
+        const file = this.fileList[0].raw;
+        const {validateImportFile} = await import('@/mock/instrumentWorkbook');
+        const message = validateImportFile(file);
+        if (message) throw new Error(message);
+        const data = new FormData();
+        data.append('files', file);
+        const res = await request({url: '/instrument/import', method: 'post', data});
+        if (res.code !== 1) throw new Error(res.message || '导入失败');
+        this.$message.success('已导入 ' + res.items.count + ' 台设备（已登记，未布置）。');
+        this.$emit('handleUpdateInit', res.items);
+      } catch (error) {
+        this.importError = error.message || '导入失败，请重试。';
+      } finally {
+        this.submitLoading = false;
+      }
+    },
     handleSubmitUpload() {
+      if (this.isDemoInstrument) return this.submitInstrumentImport();
       if (this.fileList.length === 0) {
         this.$message.warning(this.$t('hardware.importTemplate8'));
       } else {

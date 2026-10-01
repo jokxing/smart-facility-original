@@ -1385,3 +1385,29 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（2E 导出或批量删除）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通设备管理仪器导入演示`。
+
+## 设备管理四个本地提交复盘（2026-10-01）
+
+- 检查起点工作区干净，本地相对缓存 origin/master 领先四提交（列表、编辑、单删、导入），未 fetch/push。
+- 独立重跑 18 套 104 项单测通过；临时补测多行导入、并发 ID、导入后绑定三项失败，临时测试已移除。未重跑浏览器；2D 现有脚本改写上传方法，不足以证明真实上传流程。
+- 详细问题与建议见 review-device-management-2a-2d.md。建议先补导入质量和关系一致性，再做预览确认；暂不自动执行 2E 或修改业务代码。
+- 本轮仅维护复盘文档与 STATUS，未提交推送。
+
+
+## XLSX 导入闭环（2026-10-01，实施中）
+
+- 用户指定 XLSX 优先，替代此前 CSV 方案，暂缓2E。修改 ImportFile、instrumentWorkbook、instrument/equipment fixture、instrument handler；整批校验保存，提交锁，解析后同步分配ID，动态绑定校验，绑定中设备禁止删除。导入设备已登记但不自动上图。
+- 模板四列：名称/部门/分类/房间；目录来自受保护 Mock 接口；单文件10MB、最多50行，错误整批不保存并提示行号。仅支持真正.xlsx。
+- 更新导入单测并新增UI提交锁/失败重试测试；浏览器脚本改真实选择文件，移除上传方法覆盖。
+- 依赖由用户安装ExcelJS4.4.0；原有peer冲突与deasync旧安装脚本导致前两次失败，等待使用--legacy-peer-deps --ignore-scripts安装后验收。未提交推送。
+
+
+### XLSX 导入闭环验收完成（2026-10-01）
+
+- 用户已用 npm install exceljs@4.4.0 --save-exact --legacy-peer-deps --ignore-scripts 完成安装，package.json/lock纳入本批；比较锁文件，既有packages版本变化为0。npm报告183项漏洞属于当前整棵依赖树，本轮未做依赖安全修复或audit fix。
+- npm run test:demo -- --watch=false --silent：19套112项通过；包括真实XLSX多行、错误第二行整批不写、并发唯一ID、重复名称、容量、非法格式/公式、模板往返、导入后绑定/绑定中拒绝删除、UI防重入/重试。
+- 本机8090演示编译通过（5条既有Vue模板key警告）。首次沙箱内Edge CDP超时，沙箱外同一本机阻断外网脚本通过。补充版2D浏览器验收：真实点击下载模板且ExcelJS可读；原生文件选择错误第二行→无写入→移除重选正确两行→total14→按名称查询→整页刷新仍保留两条；externalAttempts=0。截图见docs/evidence/device-management-2d，已查看弹窗及错误行截图。
+- git diff --check通过；未跑生产构建/全站回归/其他硬件浏览器脚本，未验证跨标签页并发写入；本轮并发保证范围为同一页面。未执行部署、提交、推送。
+- 修改文件：src/components/ImportFile/index.vue；src/mock/instrumentWorkbook.js；src/mock/fixtures/{instrument,equipment}.js；src/mock/handlers/instrument.js；tests/unit/demo/{instrument-import,instrument-import-ui,import-template-unavailable}.spec.js；scripts/check-demo-device-2d.cjs；package.json/package-lock.json；本批docs与2D截图。
+- 设计决定：单文件.xlsx、多行原子导入，最多50行/10MB、名称/部门/分类/房间可读模板；导入设备已登记未布置，不扩展布局。旧CSV撤下；预览确认留给下一切片。
+- 下一最小任务：按next-task-prompt.md做导入预览确认，预览不落库，确认前重新校验；不自动开始2E。建议commit：feat: 完成设备XLSX批量导入闭环并修复绑定一致性。

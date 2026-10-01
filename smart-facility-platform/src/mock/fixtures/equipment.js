@@ -7,7 +7,7 @@ import {formatDemoDateTime, DEMO_NOW_MS, parseDemoDateTime} from '../clock';
 import storage from '../storage';
 import {DEMO_STAFF} from './auth';
 import {DEMO_FLOOR_ROOMS} from './floor';
-import {DEMO_INSTRUMENTS, listActiveInstrumentSeeds, resolveInstrumentEntity} from './instrument';
+import {listActiveInstrumentSeeds, resolveInstrumentEntity} from './instrument';
 
 const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
@@ -976,8 +976,6 @@ const EQUIPMENT_BINDINGS_KEY = 'equipmentBindings';
 
 const BINDABLE_ROOMS = Object.freeze(Object.values(DEMO_FLOOR_ROOMS).flat()
   .map(({id, name}) => ({id, name, type: 11, openTwoSystem: true})));
-const BINDABLE_INSTRUMENTS = Object.freeze(DEMO_INSTRUMENTS
-  .map(({id, name}) => ({id, name, type: 4, openTwoSystem: true})));
 
 function readEquipmentBindingsStore() {
   return readJsonMap(EQUIPMENT_BINDINGS_KEY);
@@ -993,7 +991,7 @@ function bindingsFor(equipmentId) {
 }
 
 function catalogThing(type, thingsId) {
-  const list = Number(type) === 11 ? BINDABLE_ROOMS : BINDABLE_INSTRUMENTS;
+  const list = Number(type) === 11 ? BINDABLE_ROOMS : listBindableCatalog('instrument');
   return list.find(item => Number(item.id) === Number(thingsId)) || null;
 }
 
@@ -1020,7 +1018,7 @@ export function listEquipmentBindings(params = {}) {
   const raw = params.equipmentIdStr != null ? params.equipmentIdStr : params.equipmentId;
   const equipmentId = Number(raw);
   if (!Number.isFinite(equipmentId)) return [];
-  return bindingsFor(equipmentId);
+  return bindingsFor(equipmentId).map(item => catalogThing(item.type, item.id)).filter(Boolean).map(clone);
 }
 
 /**

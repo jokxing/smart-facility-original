@@ -1,5 +1,5 @@
 /**
- * Device management 2D: import one instrument via list ImportFile dialog.
+ * Device management 2D: import a genuine multi-row XLSX file via list ImportFile dialog.
  * Evidence → docs/evidence/device-management-2d. Requires demo on DEMO_PORT (default 8088).
  */
 const assert = require('node:assert/strict');
@@ -161,34 +161,45 @@ const findLab = `(() => {
     await waitPage("!!document.querySelector('.import-dialog')", 'import dialog');
     await screenshot('02-import-dialog');
 
-    await evaluate(`(() => {
-      const page = ${findLab};
-      const dialog = (function walk(vm) {
-        if (!vm) return null;
-        if (vm.handleSubmitUpload && vm.uploadFile) return vm;
-        for (const child of (vm.$children || [])) {
-          const hit = walk(child);
-          if (hit) return hit;
-        }
-        return null;
-      })(page);
-      if (!dialog) throw new Error('ImportFile not found');
-      const payload = '\\ufeff名称,部门ID,分类types,房间ID\\n演示导入记录,900102,1,950003\\n';
-      const uploadFile = new File([payload], '设备导入.csv', {type: 'text/csv'});
-      dialog.fileList = [{name: uploadFile.name, raw: uploadFile, uid: Date.now(), status: 'ready'}];
-      dialog.$refs.upload = dialog.$refs.upload || {submit() {}};
-      dialog.uploadFile = (opt) => {
-        dialog.fileData = dialog.fileData || new FormData();
-        dialog.fileData.append('files', opt.file || uploadFile);
-      };
-      dialog.$refs.upload.submit = function() {
-        dialog.uploadFile({file: uploadFile});
-      };
-      return dialog.handleSubmitUpload();
-    })()`);
+    const downloadDir = path.join(profile, 'downloads');
+    fs.mkdirSync(downloadDir, {recursive: true});
+    await send('Browser.setDownloadBehavior', {behavior: 'allow', downloadPath: downloadDir}, undefined);
+    await evaluate("document.querySelector('.import-dialog .el-link').click()");
+    const templatePath = path.join(downloadDir, '设备导入.xlsx');
+    await waitFor(() => fs.existsSync(templatePath), 'real XLSX template download');
+    const ExcelJS = require('exceljs');
+    const downloaded = new ExcelJS.Workbook();
+    await downloaded.xlsx.readFile(templatePath);
+    assert.equal(downloaded.getWorksheet('设备导入').getCell('A1').value, '名称');
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('设备导入');
+    sheet.addRows([
+      ['名称', '部门', '分类', '房间'],
+      ['演示导入记录', '演示研发部', '演示设备', '演示房间 B'],
+      ['演示导入第二台', '演示运维部', '演示辅助设备', '演示房间 A']
+    ]);
+    const uploadPath = path.join(cache, 'device-import-browser.xlsx');
+    await workbook.xlsx.writeFile(uploadPath);
+    const {root} = await send('DOM.getDocument');
+    const {nodeId} = await send('DOM.querySelector', {nodeId: root.nodeId, selector: '.import-dialog input[type=file]'});
+    assert.ok(nodeId, 'native file input');
+    const invalidPath = path.join(cache, 'device-import-invalid.xlsx');
+    sheet.getCell('B3').value = '不存在的部门';
+    await workbook.xlsx.writeFile(invalidPath);
+    await send('DOM.setFileInputFiles', {nodeId, files: [invalidPath]});
+    await waitPage("document.querySelector('.el-upload-list__item')", 'invalid workbook selected');
+    await evaluate("document.querySelector('.import-dialog .footer .el-button--primary').click()");
+    await waitPage("document.querySelector('.import-dialog .el-alert') && document.querySelector('.import-dialog .el-alert').textContent.includes('第 3 行')", 'row error');
+    assert.equal(await evaluate("JSON.parse(localStorage.getItem('smart-facility-demo:v1:instrumentCreated') || '[]').length"), 0);
+    await screenshot('02b-invalid-row');
+    await evaluate("document.querySelector('.import-dialog .el-upload-list__item .el-icon-close').click()");
+    await waitPage("!document.querySelector('.el-upload-list__item')", 'old file removed');
+    await send('DOM.setFileInputFiles', {nodeId, files: [uploadPath]});
+    await waitPage("document.querySelector('.el-upload-list__item')", 'selected workbook');
+    await evaluate("document.querySelector('.import-dialog .footer .el-button--primary').click()");
 
-    await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 13`, 'imported total');
-    assert.equal(await evaluate(`${findLab}.gather[0].count`), 13);
+    await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 14`, 'imported total');
+    assert.equal(await evaluate(`${findLab}.gather[0].count`), 14);
     await screenshot('03-list-after-import');
 
     await evaluate(`(() => {
@@ -198,6 +209,9 @@ const findLab = `(() => {
     })()`);
     await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 1 && ${findLab}.dataSource[0] && ${findLab}.dataSource[0].name === '演示导入记录' && ${findLab}.dataSource[0].departmentName === '演示研发部'`, 'imported searchable');
     await screenshot('04-imported-row');
+    await send('Page.reload');
+    await waitPage(`${findLab} && !${findLab}.refreshLoading && ${findLab}.total === 14`, 'persisted after reload');
+    assert.equal(await evaluate("JSON.parse(localStorage.getItem('smart-facility-demo:v1:instrumentCreated')).length"), 2);
 
     publishEvidence();
     assert.equal(externalAttempts, 0, 'external attempts');

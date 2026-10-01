@@ -1,3 +1,4 @@
+import {instrumentImportOptions} from '../fixtures/instrument';
 import {
   DEMO_INSTRUMENTS,
   emptyInstrumentSchedulerPage,
@@ -34,6 +35,7 @@ const removeRoutes = removeIds.map(id =>
 // Room instrument layout + device list/dashboard + read-only detail + MonitorInfo series.
 // 2B: update/basic; 2C: remove tombstone; 2D: import creates corridor instrument.
 export default [
+  protectedRoute('GET', '/__demo/instrument/import-options', () => success(instrumentImportOptions())),
   protectedRoute('POST', '/map/element/getRoonInstrumentInfoList', ({params}) => {
     return success(listRoonInstrumentInfo(params.roomId));
   }),
@@ -81,6 +83,7 @@ export default [
       id: result.id,
       name: result.name,
       count: result.count,
+      ids: result.ids,
       departmentId: result.departmentId,
       roomId: result.roomId,
       types: result.types

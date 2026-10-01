@@ -22,31 +22,11 @@ test.each(['zh', 'en'])('non-instrument template is unavailable with localized n
   }
 });
 
-test('instrument demo template downloads locally', () => {
+test('instrument template delegates to XLSX download', () => {
   const previous = process.env.VUE_APP_DEMO;
   process.env.VUE_APP_DEMO = 'true';
-  const click = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-  const hadCreate = typeof URL.createObjectURL === 'function';
-  const hadRevoke = typeof URL.revokeObjectURL === 'function';
-  if (!hadCreate) URL.createObjectURL = () => 'blob:demo';
-  if (!hadRevoke) URL.revokeObjectURL = () => {};
-  const createObjectURL = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:demo');
-  const revoke = jest.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
-  try {
-    expect(ImportFile.methods.handleDownImport.call({
-      $message: {warning: jest.fn()},
-      title: 'instrument',
-      importType: {instrument: {fileName: '设备导入.xls', enFileName: 'instrument.xls'}}
-    })).toBe(true);
-    expect(createObjectURL).toHaveBeenCalled();
-    expect(click).toHaveBeenCalled();
-    expect(revoke).toHaveBeenCalled();
-  } finally {
-    click.mockRestore();
-    createObjectURL.mockRestore();
-    revoke.mockRestore();
-    if (!hadCreate) delete URL.createObjectURL;
-    if (!hadRevoke) delete URL.revokeObjectURL;
-    process.env.VUE_APP_DEMO = previous;
-  }
+  const downloadInstrumentTemplate = jest.fn(() => true);
+  expect(ImportFile.methods.handleDownImport.call({title: 'instrument', downloadInstrumentTemplate})).toBe(true);
+  expect(downloadInstrumentTemplate).toHaveBeenCalledTimes(1);
+  process.env.VUE_APP_DEMO = previous;
 });

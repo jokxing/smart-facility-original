@@ -1,3 +1,7 @@
+import ExcelJS from 'exceljs';
+import {createInstrumentWorkbook} from '../../../src/mock/instrumentWorkbook';
+import {instrumentImportOptions, removeInstrument} from '../../../src/mock/fixtures/instrument';
+import {addEquipmentInstrumentBinding} from '../../../src/mock/fixtures/equipment';
 import axios from 'axios';
 import qs from 'qs';
 import {DEMO_BASE_URL} from '../../../src/mock/adapter';
@@ -49,65 +53,72 @@ async function establishSession() {
   storage.setItem('USERINFO', JSON.stringify(info.data.items));
 }
 
-function formWithCsv(csv) {
-  const fd = new FormData();
-  fd.append('files', new Blob([csv], {type: 'text/csv'}), '设备导入.csv');
-  return fd;
+
+async function fileFor(rows, name = '设备导入.xlsx') {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('设备导入');
+  sheet.addRows([['名称', '部门', '分类', '房间'], ...rows]);
+  return new File([await workbook.xlsx.writeBuffer()], name);
 }
-
-const DEFAULT_CSV = '\uFEFF名称,部门ID,分类types,房间ID\n演示导入设备,900101,1,950002\n';
-const CUSTOM_CSV = '\uFEFF名称,部门ID,分类types,房间ID\n演示导入记录,900102,1,950003\n';
-
-test('import requires auth', async () => {
-  expect((await client.post('/instrument/import', formWithCsv(DEFAULT_CSV))).data.code).toBe(2);
+const row = (name = '导入设备甲') => [name, '演示研发部', '演示设备', '演示房间 B'];
+async function formFor(rows) {
+  const form = new FormData(); form.append('files', await fileFor(rows)); return form;
+}
+test('import requires authentication', async () => {
+  expect((await client.post('/instrument/import', await formFor([row()]))).data.code).toBe(2);
 });
-
-test('import parses csv row into list dashboard detail bindable', async () => {
+test('real XLSX batch updates list, dashboard, detail and binding', async () => {
   await establishSession();
-  expect((await client.post('/instrument/import', {})).data.code).toBe(0);
-
-  const beforeLayout = listRoonInstrumentInfo(950001).list.length;
-  const res = (await client.post('/instrument/import', formWithCsv(CUSTOM_CSV))).data;
+  const before = listRoonInstrumentInfo(950003).list.length;
+  const res = (await client.post('/instrument/import', await formFor([row(), row('导入设备乙')]))).data;
   expect(res.code).toBe(1);
-  expect(res.items).toMatchObject({
-    id: 970101,
-    name: '演示导入记录',
-    departmentId: 900102,
-    roomId: 950003,
-    types: 1
-  });
-
-  const list = (await client.post('/instrument/list', {pageNum: 1, pageSize: 20, keyword: '演示导入记录'})).data;
-  expect(list.items.total).toBe(1);
-  expect(list.items.list[0]).toMatchObject({
-    id: 970101,
-    name: '演示导入记录',
-    departmentName: '演示研发部',
-    roomName: '演示房间 B'
-  });
-
-  expect((await client.get('/instrument/dashboard/new')).data.items.totalCount).toBe(13);
-  expect(getInstrumentDashboardNew().totalCount).toBe(13);
-  expect((await client.get('/instrument/detail', {params: {id: 970101}})).data.items.name).toBe('演示导入记录');
-  expect(listBindableCatalog('instrument').some(item => item.id === 970101 && item.name === '演示导入记录')).toBe(true);
-  expect(listRoonInstrumentInfo(950001).list).toHaveLength(beforeLayout);
-  expect(listInstruments({pageNum: 1, pageSize: 20}).list.some(row => row.id === 970001)).toBe(true);
+  expect(res.items).toMatchObject({count: 2, ids: [970101, 970102]});
+  expect(getInstrumentDashboardNew().totalCount).toBe(14);
+  expect(listInstruments({keyword: '导入设备', pageSize: 20}).total).toBe(2);
+  expect((await client.get('/instrument/detail', {params: {id: 970101}})).data.items.name).toBe('导入设备甲');
+  expect(listBindableCatalog('instrument').some(item => item.id === 970101)).toBe(true);
+  expect(listRoonInstrumentInfo(950003).list.length).toBe(before);
+});
+test('invalid second row and duplicate rows leave no partial writes', async () => {
+  const bad = row('导入设备乙'); bad[1] = '不存在';
+  const result = await importDemoInstruments({files: await fileFor([row(), bad])});
+  expect(result).toMatchObject({ok: false}); expect(result.message).toContain('第 3 行');
+  expect(getInstrumentDashboardNew().totalCount).toBe(12);
+  expect((await importDemoInstruments({files: await fileFor([row(), row()])})).ok).toBe(false);
+  expect(getInstrumentDashboardNew().totalCount).toBe(12);
+});
+test('concurrent imports allocate distinct IDs and repeat imports are rejected', async () => {
+  const files = await Promise.all([fileFor([row()]), fileFor([row('导入设备乙')])]);
+  const results = await Promise.all(files.map(files => importDemoInstruments({files})));
+  expect(results.every(item => item.ok)).toBe(true);
+  expect(new Set(results.map(item => item.id)).size).toBe(2);
+  expect((await importDemoInstruments({files: files[0]})).ok).toBe(false);
+});
+test('reject unsupported, corrupt, oversized, multiple files and formula cells', async () => {
+  expect((await importDemoInstruments({})).ok).toBe(false);
+  const file = await fileFor([row()]);
+  expect((await importDemoInstruments({files: [file, file]})).ok).toBe(false);
+  for (const bad of [new File(['csv'], 'a.csv'), new File(['bad'], 'a.xlsx'), {name:'a.xlsx', size: 11*1024*1024}]) {
+    expect((await importDemoInstruments({files: bad})).ok).toBe(false);
+  }
+  const cells = row(); cells[0] = {formula: '1+1', result: 2};
+  expect((await importDemoInstruments({files: await fileFor([cells])})).message).toContain('公式');
+});
+test('capacity failure does not partially save', async () => {
+  expect((await importDemoInstruments({files: await fileFor(Array.from({length:49}, (_, i) => row('批次设备' + i)))})).count).toBe(49);
+  expect((await importDemoInstruments({files: await fileFor([row(), row('最后设备')])})).ok).toBe(false);
+  expect(getInstrumentDashboardNew().totalCount).toBe(61);
+});
+test('downloaded template is genuine XLSX and accepted by the same parser', async () => {
+  const buffer = await createInstrumentWorkbook(instrumentImportOptions());
+  expect(buffer[0]).toBe(0x50); expect(buffer[1]).toBe(0x4b);
+  expect((await importDemoInstruments({files: new File([buffer], '模板.xlsx')})).count).toBe(1);
 });
 
-test('import rejects binary xls and missing file; add still blocked', async () => {
-  await establishSession();
-  expect((await importDemoInstruments({})).ok).toBe(false);
-  expect((await client.post('/instrument/add', {name: 'x'})).data.code).toBe(0);
-
-  const ole = new Uint8Array([0xD0, 0xCF, 0x11, 0xE0, 0x00, 0x00]);
-  const binaryFail = await importDemoInstruments({files: new Blob([ole])});
-  expect(binaryFail.ok).toBe(false);
-  expect(binaryFail.message).toContain('CSV');
-
-  const first = await importDemoInstruments({files: new Blob([CUSTOM_CSV], {type: 'text/csv'})});
-  expect(first.ok).toBe(true);
-  expect(first.name).toBe('演示导入记录');
-  const second = await importDemoInstruments({files: new Blob([DEFAULT_CSV], {type: 'text/csv'})});
-  expect(second.id).toBe(970102);
-  expect(second.name).toBe('演示导入设备');
+test('imported devices bind, bound deletion is blocked, deleted devices cannot bind', async () => {
+  const result = await importDemoInstruments({files: await fileFor([row(), row('待删除设备')])});
+  expect(addEquipmentInstrumentBinding({equipmentId: 980001, thingsId: result.id}).ok).toBe(true);
+  expect(removeInstrument(result.id).ok).toBe(false);
+  expect(removeInstrument(result.ids[1]).ok).toBe(true);
+  expect(addEquipmentInstrumentBinding({equipmentId: 980001, thingsId: result.ids[1]}).ok).toBe(false);
 });
