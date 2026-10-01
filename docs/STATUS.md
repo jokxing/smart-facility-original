@@ -1798,3 +1798,62 @@
 
 - 本轮停止。下一提示词：`docs/next-task-prompt.md`（3D 建议）。未执行。未暂存/提交/推送。
 - 建议 commit：`feat: 接通房间管理筛选导出演示`。
+
+
+## 2026-10-01 — 房间管理 3D：未监测设备 Tab
+
+### 做了什么
+
+- 验收路径：设备管理手填新增（`instrumentCreated` / `imported:true`）→ 房间 A 详情「未监测设备」可见；已上图仍为 6。
+- 单测 `room-unmonitored.spec.js`；浏览器 `test:demo:room:3d`（经设备管理真实新增，非直接打 API），证据 `docs/evidence/room-management-3d`。
+- 无新增冷启动未上图种子（避免打乱设备列表 total=12）。
+- 更新契约 / demo-guide / next-task-prompt（停刀或绑定写建议）。
+
+### 修改文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `tests/unit/demo/room-unmonitored.spec.js` | 冷空 + 新增后 monitor=2 |
+| `scripts/check-demo-room-3d.cjs`、`package.json` | 浏览器验收 |
+| `docs/*` | 契约/指南/STATUS/下一刀 |
+
+### 验证
+
+- `npx vue-cli-service test:unit --testPathPattern=room-unmonitored`：2 项通过。
+- `$env:DEMO_PORT='8089'; npm run test:demo:room:3d`：通过；externalAttempts=0。
+
+### 可用 / 不能用
+
+- **可用**：空间归属未上图仪器出现在房间「未监测设备」；与已上图 Tab 互斥。
+- **不能用**：房间侧新增/绑定写；未监测冷启动种子。
+
+### 设计决定
+
+- 复用 2G `instrumentCreated`，不另造房间侧创建入口。
+- 浏览器脚本从 `.room-drawer .el-tabs` 上溯找 MonitorEquipment（全树 walk 在经设备管理后过大且 CDP 不能 `returnByValue` 组件实例）。
+
+### 未验证
+
+- 未跑生产构建 / 全站 `test:demo` 全量（本轮仅 3D 相关单测 + 浏览器）。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`。未执行。未暂存/提交/推送。
+- 建议 commit：`feat: 接通房间未监测设备 Tab 演示`。
+
+
+## 2026-10-01 — 房间管理 3D 补丁：未监测分类 type 过滤
+
+### 做了什么
+
+- `listInstruments` 补齐 `body.type`（房间详情分类按钮：4=全部，1/2/3=分类），此前忽略导致 Tab 切换列表不变。
+- 单测覆盖；契约补一句。
+
+### 验证
+
+- `room-unmonitored.spec.js`：3 项通过。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议随 3D 一并 commit，或单独：`fix: 房间未监测设备按分类 type 过滤`。

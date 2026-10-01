@@ -711,6 +711,14 @@ function matchMonitorFlag(entity, monitor) {
   return true;
 }
 
+/** Room detail 未监测 Tab：type 4/0/空=全部；1/2/3 对齐仪器 types。 */
+function matchListType(entity, type) {
+  if (type == null || type === '') return true;
+  const code = Number(type);
+  if (Number.isNaN(code) || code === 0 || code === 4) return true;
+  return Number(entity.types) === code;
+}
+
 /**
  * Optional hook: bound hardware type codes for an instrument (objType filter).
  * Injected from equipment fixture to avoid circular imports at module load.
@@ -745,6 +753,7 @@ export function listInstruments(body = {}) {
     .filter(Boolean)
     .filter(entity => matchSpace(entity, body))
     .filter(entity => matchMonitorFlag(entity, body.monitor))
+    .filter(entity => matchListType(entity, body.type))
     .filter(entity => !deptIds.length || deptIds.includes(Number(entity.departmentId)))
     .filter(entity => !typesList.length || typesList.includes(Number(entity.types)))
     .filter(entity => matchObjType(entity.id, body.objType))

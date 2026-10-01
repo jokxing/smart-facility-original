@@ -13,6 +13,7 @@
 | 详情内关联仪器（空间归属 / 已上图） | **已开放**（读活跃 `970xxx`） |
 | 详情内关联硬件只读 | **3B 已开放**（`things/newList` + 共享 bindings） |
 | 筛选导出 | **3C 已开放**（`POST /room/export` → 本地 XLSX） |
+| 未监测设备 Tab | **3D 已开放**（依赖 `instrumentCreated` / 设备管理新增） |
 | 关联硬件类型筛选 `objType` | **隐藏**（列表筛；详情只读列表另见 3B） |
 | 新增 / 编辑 / 删除 / 批量 / 导入 | **UI 隐藏** + Mock **明确拒绝** |
 | 详情内探头编辑 / 报警体系 / 巡查模板 / 绑定解绑写 | **UI 隐藏**；解绑等写 **拒绝** |
@@ -107,6 +108,8 @@
 
 本切片补齐：`roomId` 单房间 + `monitor: "2"` → 仅该房间**有空间归属且未上图**的活跃仪器。空结果不回退全库。
 
+分类按钮传 `type`：`4`/空=全部；`1` 实验室 / `2` 行政 / `3` IT，按仪器 `types` 过滤（演示种子多为 `1`，行政/IT 空属正常）。
+
 ### 探头标签
 
 `GET /monitorIndicator/getOpenMonitorFlag|getMonitorFlag`：`objType===3` 时返回空列表/空数组（房间级探头本切片不做）；`objType===2` 仍为设备切片。
@@ -144,6 +147,15 @@
 
 `POST /room/export`：与列表相同筛选（keyword/departmentId/status/gardenId/buildingId/floorId），**忽略分页**，返回本地 XLSX（工作表「房间列表」）。空筛选结果仅表头，不回退全量。导入仍未开放。
 
+### 3D 未监测设备 Tab
+
+| 项 | 说明 |
+| --- | --- |
+| 路径 | 设备管理手填新增（`POST /instrument/add` → `instrumentCreated`，`imported: true`）→ 房间详情「未监测设备」 |
+| 口径 | `monitor:"2"` + `roomId`：有空间归属且未上图；不上 `GET /room/monitor/instrument` |
+| 冷启动 | 房间 A/B 未监测为空（种子均已上图）；走廊始终为空 |
+| UI | Tab 可切换；演示区不展示房间内「添加设备」入口 |
+
 ## 验收要点
 
 1. 首页点「房间管理」进入列表，统计与 3 间房口径一致。
@@ -152,3 +164,4 @@
 4. 写按钮不可见；直接打写 API 得明确失败。
 5. 设计器 `{floorId}` 无 keyword 仍为空列表。
 6. 单测 + 浏览器脚本；`externalAttempts=0`。
+7. **3D**：设备管理新增未上图仪器后，对应房间「未监测设备」可见且已上图数不变。
