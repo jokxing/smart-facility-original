@@ -34,6 +34,8 @@
 </template>
 
 <script>
+import {validateStatisticHourParams} from '@/utils/statisticRangeValidate';
+
 export default {
   name: "index",
   data() {
@@ -77,6 +79,14 @@ export default {
 
     },
     onsubmit() {
+      const check = validateStatisticHourParams({
+        periodBeginTime: this.form.periodBeginTime,
+        periodEndTime: this.form.periodEndTime
+      });
+      if (!check.ok) {
+        this.$message.error(check.message);
+        return;
+      }
       this.handleClose();
       this.$emit("handle", this.form);
     }

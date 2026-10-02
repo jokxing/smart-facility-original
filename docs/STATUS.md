@@ -2052,3 +2052,29 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`fix: 数据统计自定义日期清空恢复日维度`。
 - 下一提示词：`docs/next-task-prompt.md`（S2 无效区间校验）。
+
+## 2026-10-02 — 数据统计 S2（无效日期/小时区间校验）
+
+### 做了什么
+
+- 共用校验 `src/utils/statisticRangeValidate.js`：区分未指定与缺一端/非法/逆序；日期与时段分别拒绝。
+- Mock：`statistic.js` 非法区间抛错（禁止静默回退默认天/全天）；handlers 返回 `failure`。
+- 前端：`Statistics.vue` 自定义日期与高级查询前校验并 `$message.error`；`UseRanHighSearch` 提交前校验逆序时段（不改零点回显，留给 S3）。
+- 单测 `statistics-s2.spec.js`；浏览器 `test:demo:statistics:s2`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：33 套 / 172 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:s2` → `externalAttempts=0`；证据 `docs/evidence/statistics-s2`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 设计决定
+
+- 两端皆空 = 未指定（走 dateType / 全天）；一端有值必须成对且 begin≤end。
+- 零点 `obj.end || 23` 仍属 S3，本轮未改。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`fix: 数据统计拒绝无效日期与时段区间`。
+- 下一提示词：`docs/next-task-prompt.md`（S3 零点回显）。

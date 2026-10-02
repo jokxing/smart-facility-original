@@ -11,6 +11,12 @@ import {
   listInstrumentAlarmEventsForStatistics,
   listRoomAlarmEventsForStatistics
 } from './alarm';
+import {
+  hasStatisticRangeText,
+  parseStatisticHour,
+  validateStatisticDateParams,
+  validateStatisticHourParams
+} from '@/utils/statisticRangeValidate';
 
 const DEFAULT_RANGE_DAYS = 30;
 
@@ -134,10 +140,21 @@ export function getStatisticEquipmentAlarm() {
     .filter(item => item.data.length > 0);
 }
 
+/**
+ * Resolve window length in days.
+ * Unspecified begin/end → dateType presets.
+ * Partial / invalid / reversed custom range → throw (S2: no silent fallback).
+ */
 function windowDays(params = {}) {
-  const begin = parseAt(params.beginTime);
-  const end = parseAt(params.endTime);
-  if (Number.isFinite(begin) && Number.isFinite(end) && begin <= end) {
+  const check = validateStatisticDateParams(params);
+  if (!check.ok) {
+    throw new Error(check.message);
+  }
+  const hasBegin = hasStatisticRangeText(params.beginTime);
+  const hasEnd = hasStatisticRangeText(params.endTime);
+  if (hasBegin && hasEnd) {
+    const begin = parseAt(params.beginTime);
+    const end = parseAt(params.endTime);
     const beginDay = Math.floor((begin + 8 * 3600000) / 86400000);
     const endDay = Math.floor((end + 8 * 3600000) / 86400000);
     return Math.max(1, endDay - beginDay + 1);
@@ -205,10 +222,25 @@ export function getStatisticInstrumentUse(params = {}) {
 }
 
 function parseHour(value) {
-  if (value == null || value === '') return NaN;
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < 0 || n > 23) return NaN;
-  return Math.floor(n);
+  return parseStatisticHour(value);
+}
+
+/**
+ * Resolve hour span for ranking.
+ * Both empty → full day (null span).
+ * Partial / invalid / reversed → throw (S2: no silent full-day fallback).
+ */
+function resolveHourSpan(params = {}) {
+  const check = validateStatisticHourParams(params);
+  if (!check.ok) {
+    throw new Error(check.message);
+  }
+  const hasBegin = hasStatisticRangeText(params.periodBeginTime);
+  const hasEnd = hasStatisticRangeText(params.periodEndTime);
+  if (!hasBegin && !hasEnd) return null;
+  const beginH = parseHour(params.periodBeginTime);
+  const endH = parseHour(params.periodEndTime);
+  return Math.max(1, endH - beginH + 1);
 }
 
 /**
@@ -219,10 +251,7 @@ export function getStatisticInstrumentUseRanking(params = {}) {
   const days = windowDays(params);
   const periodType = Number(params.periodType) === 2 ? 2 : 1;
   const queryType = Number(params.queryType) || 1;
-  const beginH = parseHour(params.periodBeginTime);
-  const endH = parseHour(params.periodEndTime);
-  const hasHourWindow = Number.isFinite(beginH) && Number.isFinite(endH) && beginH <= endH;
-  const hourSpan = hasHourWindow ? Math.max(1, endH - beginH + 1) : null;
+  const hourSpan = resolveHourSpan(params);
 
   const rows = listActiveInstrumentSeeds()
     .map(buildInstrumentRow)

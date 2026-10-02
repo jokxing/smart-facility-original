@@ -149,6 +149,10 @@ import moment from "moment";
 import VeBar from "v-charts/lib/bar.common";
 import DataEmpty from "@c/DataEmpty"
 import {isStatisticCustomDateRange} from "@/utils/statisticCustomRange";
+import {
+    validateStatisticDateParams,
+    validateStatisticHourParams
+} from "@/utils/statisticRangeValidate";
 export default {
     name: "Statistics",
     components: {
@@ -452,8 +456,15 @@ export default {
                 this.handleEquipmentUsers();
                 return;
             }
-            this.equipmentUse.endTime = moment(val[1]).format(TIME_FORMAT);
-            this.equipmentUse.beginTime = moment(val[0]).format(TIME_FORMAT);
+            const beginTime = moment(val[0]).format(TIME_FORMAT);
+            const endTime = moment(val[1]).format(TIME_FORMAT);
+            const check = validateStatisticDateParams({beginTime, endTime});
+            if (!check.ok) {
+                this.$message.error(check.message);
+                return;
+            }
+            this.equipmentUse.endTime = endTime;
+            this.equipmentUse.beginTime = beginTime;
             this.equipmentUse.dateType = null;
             this.handleEquipmentUsers();
         },
@@ -485,6 +496,8 @@ export default {
             getStatisticInstrumentUseRanKing(this.useRanKing).then(res => {
                 if (res.code) {
                     this.useRanKings = res.items;
+                } else {
+                    this.$message.error(res.message);
                 }
             })
         },
@@ -497,8 +510,15 @@ export default {
                 this.handleGetInstrumentUserRanKing();
                 return;
             }
-            this.useRanKing.endTime = moment(val[1]).format(TIME_FORMAT);
-            this.useRanKing.beginTime = moment(val[0]).format(TIME_FORMAT);
+            const beginTime = moment(val[0]).format(TIME_FORMAT);
+            const endTime = moment(val[1]).format(TIME_FORMAT);
+            const check = validateStatisticDateParams({beginTime, endTime});
+            if (!check.ok) {
+                this.$message.error(check.message);
+                return;
+            }
+            this.useRanKing.endTime = endTime;
+            this.useRanKing.beginTime = beginTime;
             this.useRanKing.dateType = null;
             this.handleGetInstrumentUserRanKing();
         },
@@ -533,6 +553,14 @@ export default {
         },
         // 高级查询
         handleHigthSearch(obj) {
+            const check = validateStatisticHourParams({
+                periodBeginTime: obj.periodBeginTime,
+                periodEndTime: obj.periodEndTime
+            });
+            if (!check.ok) {
+                this.$message.error(check.message);
+                return;
+            }
             this.useRanKing.periodBeginTime = obj.periodBeginTime;
             this.useRanKing.periodEndTime = obj.periodEndTime;
             this.useRanKing.periodType = obj.periodType;
