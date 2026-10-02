@@ -81,6 +81,11 @@
                 default: null
             }
         },
+        computed: {
+            isDemo() {
+                return process.env.VUE_APP_DEMO === 'true';
+            }
+        },
         data() {
             const _this = this;
             return {
@@ -443,6 +448,7 @@
             handleMessage(res,msg){
                 if(res.code){
                     if(res.code === 1){
+                        if (this.isDemo && this.activeName === '2') this.$store.commit('lab/REFLESH');
                         this.loading = true;
                         this.$message.success(msg);
                         this.getList()

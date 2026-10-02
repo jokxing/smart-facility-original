@@ -2137,3 +2137,89 @@
 - 设计决定：保留现有日期契约 yyyy-MM-dd 或带秒的日期时间及合法时区，不扩展隐式格式；保留 00 零点与整数小时；统计先收尾，切换设备维保。
 - 下一最小任务：设备维保 5A 列表只读 Mock，真实依据 views/maintenance/index.vue、api/labDevice/index.js 和 /apply/maintenance、/ld/maintenance 路由。提示词要求先核实真实可达入口，再接入分页/筛选；不连做申请及完成确认。
 - 建议 commit：`fix: 收紧数据统计日期与小时校验并规划维保演示`。
+
+## 2026-10-02 — 设备维保 5A（列表只读演示）
+
+### 做了什么
+
+- 核实入口：菜单与 `shebei1` 为 `/ld/maintenance`；`/apply/maintenance` 同页但静态双路径；`subRoute.js` 未被引用。演示只开放 `/ld/maintenance`（`router/index.js` + 守卫 + 首页卡片 + `DEMO_MENUS` 设备管理子项）。
+- 接入 `POST /maintenance/list`：会话、分页、关键字、部门、申请日期、`instrumentId`；14 条合成记录快照共享 `970xxx`。
+- `completeFlag` 仅源码 0 维护中 / 1 维护完成。删除设备后历史行仍在，不改设备 tombstone。
+- 演示隐藏列表/抽屉维保写操作；add / updateMaintenance / complete 明确拒绝。存活设备点名称走 `LabDeviceDrawer(instrumentId)`。
+- 契约 `docs/maintenance-5a-contract.md`；单测 `maintenance-5a.spec.js`；浏览器 `test:demo:maintenance:5a`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：36 套 / 184 项通过。
+- `$env:DEMO_PORT='8093'; npm run test:demo:maintenance:5a` → `externalAttempts=0`；证据 `docs/evidence/maintenance-5a`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 日期筛 `createDate`；公司根 `departmentId=0` 不筛；缺一端日期不假装生效。
+- 不开放 `/apply/maintenance`、`/asset/maintenance`。不连做 5B–5D。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 设备维保列表只读演示`。
+- 下一提示词：`docs/next-task-prompt.md`（5B 申请维保）。
+
+## 2026-10-02 — 设备维保 5B（详情申请维保）
+
+### 做了什么
+
+- `POST /maintenance/add`：校验活跃共享设备、备注≤50、部门；持久化 `maintenanceCreated`（id 960101–960150）；列表与 `instrumentId` 筛选可读到。
+- 设备抽屉演示态开放「申请维保」；详情补 `companyId` / `createUserId` 以匹配 `MaintenanceModal` 字段。
+- 已删除设备不可申请；updateMaintenance / complete 仍拒绝。
+- 契约 `docs/maintenance-5b-contract.md`；单测 `maintenance-5b.spec.js`；浏览器 `test:demo:maintenance:5b`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：37 套 / 189 项通过。
+- `$env:DEMO_PORT='8094'; npm run test:demo:maintenance:5b` → `externalAttempts=0`；证据 `docs/evidence/maintenance-5b`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 记录名称/编号/部门以共享设备当前行为准快照；申请人优先 body.userId（须属 DEMO_STAFF）否则演示用户。
+- 不连做 5C–5D。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 设备维保详情申请并持久化`。
+- 下一提示词：`docs/next-task-prompt.md`（5C 下次日期与完成确认）。
+
+## 2026-10-02 — 设备维保 5C（下次日期与完成确认）
+
+### 做了什么
+
+- `POST /maintenance/updateMaintenance`：校验记录存在、日期合法且不早于申请时间；写入 `maintenanceMeta`。
+- `GET /maintenance/complete`：维护中→完成；已完成再确认拒绝（幂等拒绝）。
+- 列表操作列与 Modal、详情维保 Tab 操作重新开放；修正 `NextMintenanceTime` 提交字段 bug。
+- 契约 `docs/maintenance-5c-contract.md`；单测 `maintenance-5c.spec.js`；浏览器 `test:demo:maintenance:5c`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：38 套 / 194 项通过。
+- `$env:DEMO_PORT='8095'; npm run test:demo:maintenance:5c` → `externalAttempts=0`；证据 `docs/evidence/maintenance-5c`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 种子与新建记录统一走 meta overlay；不扩大为工单。不连做 5D。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 设备维保下次日期与完成确认`。
+- 下一提示词：`docs/next-task-prompt.md`（5D 复盘）。
+
+## 2026-10-02 — 设备维保 5D 复核收尾
+
+- 本批 5A–5C 未提交功能成立：菜单/路由、列表筛选、申请、本地持久化、下次日期及完成确认；本轮不提交/推送。
+- 修改文件：fixtures/maintenance.js、handlers/maintenance.js、views/maintenance/index.vue、LabDeviceDrawer.vue、MaintenanceModal.vue、NextMintenanceTime.vue、TagPane.vue、maintenance-5a.spec.js；新增 maintenance-review.spec.js；docs/review-maintenance-module.md、maintenance-5a-contract.md、STATUS.md、next-task-prompt.md、demo-guide.md（追加收尾说明）。代码路径均在 platform。
+- 修复：结束日覆盖整天；无效/缺失/逆序日期拒绝；详情写操作成功刷新外层列表，申请切换维保 Tab 首屏；确认成功文案及弹窗重复提交保护。
+- 验证：独立全量单测 39 套 / 197 项通过；本地 5C 浏览器重试通过，externalAttempts=0，证据 maintenance-5c。首次 CDP 超时非业务断言失败。
+- 未验证：生产构建、真实服务、全站及新增联动的全部浏览器场景。没有安装依赖。
+- 设计决定：沿用 lab/REFLESH 和历史快照；精确时间区间接口不改变，按天边界仅演示列表适配；不将维保扩大为工单，不新增设备基本信息聚合规则。
+- 下一最小任务：部门与员工管理 6A，只读 `/sys/department` 部门树和员工列表，不连做用户及部门写操作。提示词已更新。
+- 整批建议 commit：`feat: 完成设备维保演示闭环与联动收尾`。

@@ -243,6 +243,14 @@ export const routes = [
                         }
                     },
                     {
+                        path: "/ld/maintenance",
+                        name: "LabMaintenance",
+                        component: () => import("../views/maintenance"),
+                        meta: {
+                            title: "maintenance"
+                        }
+                    },
+                    {
                         path: "/ld/use/stat/charts",
                         name: "useStatCharts",
                         component: () => import("../views/labDevice/useStatCharts"),

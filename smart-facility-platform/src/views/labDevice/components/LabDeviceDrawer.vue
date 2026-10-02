@@ -41,7 +41,12 @@
                         </div>
                     </div>
 
-                    <div v-if="!isDemo">
+                    <div v-if="isDemo">
+                        <el-button class="margin-small-right" :disabled="detail.status === 3"
+                                   @click="handleMaintenance">{{ $t('labDevice.addMaintenance') }}
+                        </el-button>
+                    </div>
+                    <div v-else>
 <!--                        <el-button-->
 <!--                            v-if="isLimit"-->
 <!--                            class="margin-small-right"-->
@@ -369,7 +374,7 @@
             @handleSetDate="handleSetDate(1,$event)"/>
         <AdvancedAlarmSet ref="AdvancedAlarmSet" @handle="getDetail"/>
         <ReservationModal ref="reservationModal" v-if="detail" :detail="detail" @handle="handleReservation"/>
-        <MaintenanceModal ref="maintenanceModal" @handle="$refs.tagPane.getList()"/>
+        <MaintenanceModal ref="maintenanceModal" @handle="handleMaintenanceSaved"/>
         <ProbeNameEdit
             ref="probeNameEdit"
             @handle="getDetail"
@@ -778,6 +783,14 @@ export default {
             this.$refs.tagPane.getList();
         },
         // 申请维保
+        handleMaintenanceSaved() {
+            if (!this.$refs.tagPane) return;
+            if (this.isDemo) {
+                this.$refs.tagPane.activeName = '2';
+                this.$refs.tagPane.pageNum = 1;
+            }
+            this.$refs.tagPane.getList();
+        },
         handleMaintenance() {
             this.$refs.maintenanceModal.open(this.detail)
         },

@@ -196,6 +196,20 @@ export const menuList = [
         ]
     },
     {
+        id: "mnt",
+        name: i18n.t('route.maintenance'),
+        icon: require("../assets/bashboard/icon-instrument.png"),
+        path: "/ld/maintenance",
+        children: [
+            {
+                path: "/ld/maintenance",
+                name: "维保管理",
+                icon: "icon-icon-repair",
+                identify: "MaintenanceManager"
+            }
+        ]
+    },
+    {
         id: "ds",
         name: i18n.t('route.statistics'),
         icon: require("../assets/bashboard/icon-statistical.png"),

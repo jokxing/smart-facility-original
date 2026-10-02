@@ -50,8 +50,10 @@
             open(row){
                 this.dialogVisible = true;
                 this.row = row;
+                this.data = {remark: ""};
             },
             handleSubmit() {
+                if (this.btnLoading) return;
                 var data = {
                     companyId: this.row.companyId,
                     departmentId: this.row.departmentId,
@@ -68,6 +70,7 @@
                     if(res.code){
                         if(res.code === 1){
                             this.$message.success(this.$t('labDevice.maintenanceSuccess'));
+                            if (process.env.VUE_APP_DEMO === 'true') this.$store.commit('lab/REFLESH');
                             this.handleClose();
                             this.$emit('handle')
                         }else{
@@ -76,10 +79,13 @@
                     }else{
                         this.$message.error(res.message)
                     }
+                }).catch(() => {
+                    this.btnLoading = false;
                 })
             },
             handleClose() {
-                this.dialogVisible = false
+                this.dialogVisible = false;
+                this.data = {remark: ""};
             }
         },
     }

@@ -1,8 +1,8 @@
-# 本地演示：含数据统计 4A–4D
+# 本地演示：含设备维保 5A–5C
 
 房间详情更新：设备分类随设备编辑生效；切分类、搜索或Tab会回第一页；设备卡片展示与平面图同源的本地SVG设备外观。
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/rm/room`、`/ds/statistics`。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ds/statistics`。不开放 `/apply/maintenance`、`/asset/maintenance`。
 
 首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开详情；可编辑名称/部门/分类；可单条/批量删除（**已绑定智能硬件须先解绑**）；可手填新增；可 XLSX 导入（先预览再确认）；可导出。批量改部门等仍拒绝。
 
@@ -27,6 +27,7 @@ npm run demo
 首页或顶栏 **设备管理**：筛选分页 → 详情/编辑/删除 → **解绑（若已绑定）** → **新增** → **多选批量删除** → **导入**（预览确认）→ **导出**当前筛选结果。  
 首页 **房间管理**：筛选分页 → 点名称打开只读详情与关联仪器；可导出；未监测 Tab 依赖设备管理新增未上图仪器。
 首页 **数据统计**：总览 → 报警 → 状态饼图 → 使用统计条图 → 使用率排行表。
+首页 **维保管理**（或设备管理侧栏「维保管理」）：关键字/部门/日期筛选、分页；点存活设备名称打开已演示设备抽屉。设备抽屉可**申请维保**；列表/详情可设**下次维保日期**与**核查确认**（已完成不可再确认）。已删除设备的历史记录仍列出，点击只提示不打开抽屉，也不能再申请。
 
 ## Mock 要点
 
@@ -56,6 +57,10 @@ npm run demo
 | 数据统计状态饼图 | `GET /instrument/instrumentStatistics`（活跃仪器 run/standby/close） |
 | 数据统计使用 | `GET /statistic/instrument/use`（活跃仪器 + 演示时钟窗口派生时长/次数） |
 | 数据统计使用率排行 | `GET /statistic/instrument/useRanking`（数组 items；工作日/自然日/时段派生） |
+| 维保列表 | `POST /maintenance/list`（共享 970xxx 快照；`completeFlag` 仅 0/1） |
+| 维保申请 | `POST /maintenance/add`（→ `maintenanceCreated`；存活设备） |
+| 维保下次日期 | `POST /maintenance/updateMaintenance`（→ `maintenanceMeta`） |
+| 维保完成确认 | `GET /maintenance/complete`（已完成再确认拒绝） |
 | 设备只读详情 | `GET /instrument/detail`；监测标签 `getOpenMonitorFlag` / `getMonitorFlag` |
 | 设备历史曲线 | `GET /monitorIndicator/monitorInfo`（离线为空）；`historyPage` 空表桩 |
 | 仪器其它写 | `batch/update` **明确拒绝** |
@@ -80,8 +85,8 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:statistics:4d
-# 可选：npm run test:demo:statistics:4c / 4b / 4a
+npm run test:demo:maintenance:5c
+# 可选：npm run test:demo:maintenance:5b / 5a
 ```
 
 顶栏「系统 → 报警记录」支持多选批量处理（须有处理时间与类型）。曲线非法自定义日期应失败/空态，不再变成默认窗口。
@@ -156,3 +161,19 @@ npm run test:demo:statistics:4d
 ### 未监测设备 Tab（3D）
 
 设备管理手填新增一台归属某房间、未上图的仪器后，打开该房间详情 →「未监测设备」可见；「监测设备」仍为已上图列表且数量不变。冷启动无未上图种子。
+
+### 设备维保列表只读（5A）
+
+首页「维保管理」→ `/ld/maintenance`：14 条合成记录，设备 ID/名称与设备管理共用。支持关键字、部门、申请日期筛选与分页；清空日期后恢复全部。点名称打开设备抽屉（`instrumentId`，不是维保记录 id）。`/apply/maintenance` 与资产维保页不放行。
+
+### 设备维保申请（5B）
+
+设备管理或维保列表打开存活设备抽屉 →「申请维保」→ 填写故障描述（≤50 字）→ 确定。新记录写入本地演示存储，维保列表与详情维保 Tab 可查；状态为维护中。已删除设备不可申请。
+
+### 下次日期与完成确认（5C）
+
+维保列表或详情维保 Tab：可修改下次维保日期（不得早于申请时间）；可对维护中记录核查确认，完成后状态变为维护完成且不可再确认。
+
+### 维保收尾（5D）
+
+申请成功自动切到详情维保记录第一页；详情中的申请、修改和完成确认会同步刷新外层维保列表。列表按天筛选包含结束日当天，非法日期区间明确提示。删除设备后历史维保保留，已删除设备不能再申请或打开详情。设备基本信息中的下次维保日期尚未作为记录聚合结果联动。

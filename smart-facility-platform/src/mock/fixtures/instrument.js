@@ -645,7 +645,9 @@ export function buildInstrumentRow(entity) {
     standbyPowerFlag: false,
     bindingDeviceId: null,
     openTwoSystem: true,
-    workingHours: 7.5
+    workingHours: 7.5,
+    companyId: 900001,
+    createUserId: 900001
   };
 }
 

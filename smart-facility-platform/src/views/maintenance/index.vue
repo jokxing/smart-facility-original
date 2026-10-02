@@ -226,6 +226,7 @@ export default {
       keyswordInput: undefined,
       dataSource: [],
       loading: false,
+      isDemo: process.env.VUE_APP_DEMO === "true",
       column: TABLECOLUMN,
       pageSize: items.PAGE_SIZE,
       pageNum: items.PAGE_NUM,
@@ -303,7 +304,7 @@ export default {
         if (result.code === 1) {
           this.$message({
             type: "success",
-            message: this.$t('labDevice.cancelSuccess'),
+            message: this.$t('labDevice.confirmSuccess'),
           });
           this.handleReflesh();
         } else {
@@ -353,6 +354,15 @@ export default {
     },
 
     handleSeedDetail(record) {
+      if (this.isDemo) {
+        if (!record.instrumentId || record.instrumentDeleted || !record.openTwoSystem) {
+          this.$message.info("该设备已删除，维保记录仅作历史展示。");
+          return;
+        }
+        this.instrumentId = record.instrumentId;
+        this.isDrawer = true;
+        return;
+      }
       this.detailId = record.id;
       this.instrumentId = record.instrumentId;
       if(record.openTwoSystem){
@@ -378,7 +388,9 @@ export default {
       let endDate = "";
       if (dateTime) {
         startDate = dateTime[0];
-        endDate = dateTime[1];
+        endDate = this.isDemo && dateTime[1]
+          ? dateTime[1].slice(0, 10) + " 23:59:59"
+          : dateTime[1];
       }
       return {
         startDate,
@@ -391,6 +403,12 @@ export default {
     },
   },
   watch: {
+    departmentId() {
+      this.pageNum = items.PAGE_NUM;
+    },
+    dateTime() {
+      this.pageNum = items.PAGE_NUM;
+    },
     changeTableData: {
       handler(newval) {
         this.getTableData({ ...newval });

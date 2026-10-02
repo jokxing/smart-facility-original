@@ -18,7 +18,6 @@
 <script>
     import SubmitForm from "@c/SubmitForm";
     import {
-        postMaintenanceAdd,
         postMaintenanceUpdateMaintenance,
     } from "@/api/labDevice";
     export default {
@@ -53,13 +52,20 @@
             open(row){
                 this.dialogVisible = true;
                 this.row = row;
+                this.data = {
+                    nextMaintenanceDate: row && row.nextMaintenanceDate ? row.nextMaintenanceDate : ""
+                };
             },
             handleSubmit() {
+                if (this.btnLoading) return;
+                if(!this.data.nextMaintenanceDate){
+                    return this.$message.error(this.$t('labDevice.changeNextMaintenanceDate'))
+                }
                 if(new Date(this.data.nextMaintenanceDate).getTime() < new Date(this.row.createDate).getTime()){
                     return this.$message.error(this.$t('labDevice.nextMaintenanceDateMessage'))
                 }
                 var data = {
-                    nextMaintenanceDate: this.nextMaintenanceDate,
+                    nextMaintenanceDate: this.data.nextMaintenanceDate,
                     maintenanceId: this.row.id,
                 }
                 this.btnLoading = true;
@@ -68,6 +74,7 @@
                     if(res.code){
                         if(res.code === 1){
                             this.$message.success(this.$t('hardware.systemSuccess'));
+                            if (process.env.VUE_APP_DEMO === 'true') this.$store.commit('lab/REFLESH');
                             this.handleClose();
                             this.$emit('handle')
                         }else{
@@ -76,10 +83,13 @@
                     }else{
                         this.$message.error(res.message)
                     }
+                }).catch(() => {
+                    this.btnLoading = false;
                 })
             },
             handleClose() {
-                this.dialogVisible = false
+                this.dialogVisible = false;
+                this.data = { nextMaintenanceDate: "" };
             }
         },
     }

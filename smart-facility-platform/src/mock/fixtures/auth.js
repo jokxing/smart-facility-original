@@ -22,7 +22,8 @@ export const DEMO_CATEGORIES = [
 ];
 export const DEMO_MENUS = [
   {id: 'ld', name: '设备管理', englishName: 'labDevice', path: '/ld/labdevice', subMenu: [
-    {id: 'demo-labdevice', name: '实验室设备', englishName: 'labDevice', path: '/ld/labdevice', icon: 'icon-home1', subMenu: []}
+    {id: 'demo-labdevice', name: '实验室设备', englishName: 'labDevice', path: '/ld/labdevice', icon: 'icon-home1', subMenu: []},
+    {id: 'demo-maintenance', name: '维保管理', englishName: 'maintenance', path: '/ld/maintenance', icon: 'icon-icon-repair', subMenu: []}
   ]},
   {id: 'lhd', name: '智能硬件', englishName: 'hardware', path: '/lhd/hardware/home', subMenu: [
     {id: 'demo-hardware-home', name: '主页', englishName: 'home', path: '/lhd/hardware/home', icon: 'icon-home1', subMenu: []}
