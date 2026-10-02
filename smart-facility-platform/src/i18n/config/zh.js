@@ -1404,6 +1404,8 @@ export default {
       dayUserRate: "日使用率",
       aDayUserRate: "平均日使用率",
       highSearch: "高级查询设置",
+      demoSimNote: "演示说明：本页为模拟统计，指标由演示实体与时钟派生，非生产实测。",
+      demoEnergyNote: "功耗维度为估算能耗（kWh）= 演示铭牌功率 × 派生使用时长，非电表/插座采样。",
       detail: "详情",
       addMDevice: "添加监控记录仪",
       moveDevice: "批量移除记录仪",

@@ -2102,3 +2102,27 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`fix: 数据统计高级查询零点小时回显`。
 - 下一提示词：`docs/next-task-prompt.md`（S4 模拟统计说明）。
+
+## 2026-10-02 — 数据统计 S4（模拟统计说明）
+
+### 做了什么
+
+- `Statistics.vue` 页顶标注「模拟统计」；使用统计区标注「估算能耗（kWh）」口径。
+- i18n `demoSimNote` / `demoEnergyNote`（中英文）；`demo-guide` 同步说明。
+- 单测 `statistics-s4.spec.js`；浏览器 `test:demo:statistics:s4`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：35 套 / 176 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:s4` → `externalAttempts=0`；证据 `docs/evidence/statistics-s4`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 设计决定
+
+- 仅轻量文案，不改 4A–4E 派生口径与接口。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`docs: 数据统计页标注模拟统计与估算能耗`。
+- 数据统计 S1–S4 收尾完成；下一提示词可再选新模块（如 `/ds/device/chart` 或其他）。

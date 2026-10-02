@@ -31,6 +31,7 @@
     "test:demo:statistics:s1": "node scripts/check-demo-statistics-s1.cjs",
     "test:demo:statistics:s2": "node scripts/check-demo-statistics-s2.cjs",
     "test:demo:statistics:s3": "node scripts/check-demo-statistics-s3.cjs",
+    "test:demo:statistics:s4": "node scripts/check-demo-statistics-s4.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",

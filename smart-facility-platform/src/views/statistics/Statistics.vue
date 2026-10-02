@@ -1,6 +1,7 @@
 <template>
     <div class="statistics">
         <el-descriptions :title="'▍ ' + $t('statistics.all')"></el-descriptions>
+        <p class="statistics-note">{{ $t('statistics.demoSimNote') }}</p>
 
         <div class="clearfix bg">
             <template v-for="item in overview">
@@ -30,6 +31,7 @@
         </div>
         <!-- 4C：设备使用统计已开放 -->
         <el-descriptions class="margin-center" :title="'▍ ' + $t('statistics.labDeviceUserStat')"></el-descriptions>
+        <p class="statistics-note statistics-note--section">{{ $t('statistics.demoEnergyNote') }}</p>
         <div class="bg">
             <chart-dimension
                 :type="equipmentUse.dateType"
@@ -597,5 +599,14 @@ export default {
         margin-left: 10px;
         flex: 1;
     }
+}
+.statistics-note {
+    margin: 0 0 12px;
+    color: #606266;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.statistics-note--section {
+    margin: -4px 0 12px;
 }
 </style>

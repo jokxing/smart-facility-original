@@ -1,9 +1,11 @@
-# 下一任务：数据统计 S4——模拟统计/估算能耗说明
+# 下一任务：可选——高级统计页或其他模块
 
-S3 已完成（高级查询零点小时 `"00"` 回显）。先读 STATUS 文末、review-statistics-module.md。工作区 E:\project\smart-facility-original；仅改 smart-facility-platform 和 docs。用户身份按前端主力及 Vue 2 重构组成员表述。
+数据统计主路径 4A–4E 与收尾 S1–S4 已完成。工作区 E:\project\smart-facility-original；仅改 smart-facility-platform 和 docs。先读 STATUS 文末。用户身份按前端主力及 Vue 2 重构组成员表述。
 
-## 本轮范围（仅 S4）
+## 可选下一小任务（择一，勿并行）
 
-页面轻量标注「模拟统计」「估算能耗（kWh）」等，避免用户误认为实测电表/插座数据。勿开新模块；勿回改 4A–4E 口径。
+**方案 A**：有限开放 `/ds/device/chart` 记录仪图表统计（另页），单独放行路由与 Mock，不回改统计已交付内容。
 
-验证：能跑则跑相关单测/浏览器抽查。STATUS **只在文末追加**；不安装依赖、不 commit/push、不重写 Vue 2。完成后停止，再考虑新模块。
+**方案 B**：切到其他未演示模块（系统用户/工单等），另写 next-task-prompt。
+
+若选 A：先契约 → Mock 会话保护 → 单测 + 浏览器 → 更新 STATUS/demo-guide（STATUS **只在文末追加**）；不安装依赖、不 commit/push、不重写 Vue 2。未执行验证须标明。

@@ -1406,6 +1406,8 @@ export default {
         dayUserRate: "daily usage",
         aDayUserRate: "average daily usage",
         highSearch: "Advanced Search",
+        demoSimNote: "Demo note: this page shows simulated statistics derived from demo entities and the demo clock, not live production meters.",
+        demoEnergyNote: "Power use is estimated energy (kWh) = demo nameplate power × derived use hours, not socket/meter samples.",
         detail: "details",
         addMDevice: "Add monitoring recorder",
         moveDevice: "Batch remove loggers",
