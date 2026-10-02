@@ -2078,3 +2078,27 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`fix: 数据统计拒绝无效日期与时段区间`。
 - 下一提示词：`docs/next-task-prompt.md`（S3 零点回显）。
+
+## 2026-10-02 — 数据统计 S3（零点小时回显）
+
+### 做了什么
+
+- `formatStatisticHourOption`：空才回退默认；数字 `0` / `"00"` 保持 `"00"`，不再被 `|| 23` 吞掉。
+- `UseRanHighSearch`：小时选项统一为零填充字符串 `"00"`–`"23"`；提交与重新打开回显一致。
+- 单测 `statistics-s3.spec.js`；浏览器 `test:demo:statistics:s3`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：34 套 / 175 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:s3` → `externalAttempts=0`；证据 `docs/evidence/statistics-s3`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 设计决定
+
+- 仅修空值判断与选项类型；S2 区间校验保持不变。页面「模拟统计」文案留给 S4。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`fix: 数据统计高级查询零点小时回显`。
+- 下一提示词：`docs/next-task-prompt.md`（S4 模拟统计说明）。

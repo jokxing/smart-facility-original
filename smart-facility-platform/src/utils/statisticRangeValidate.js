@@ -36,6 +36,17 @@ export function parseStatisticHour(value) {
 }
 
 /**
+ * UI hour option: always zero-padded string "00"–"23".
+ * Empty/null/undefined → fallback; numeric 0 / "00" stay "00" (not coerced by ||).
+ */
+export function formatStatisticHourOption(value, fallback = '00') {
+  if (value == null || value === '') return fallback;
+  const hour = parseStatisticHour(value);
+  if (!Number.isFinite(hour)) return fallback;
+  return String(hour).padStart(2, '0');
+}
+
+/**
  * Date window: both empty → ok (use dateType).
  * One side only / unparseable / begin>end → reject (no silent fallback).
  */

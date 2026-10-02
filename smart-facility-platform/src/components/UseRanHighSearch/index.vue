@@ -17,11 +17,11 @@
       <el-form-item :label="$t('labDevice.timePeriod')">
         <div class="flex">
           <el-select class="w100" v-model="form.periodBeginTime">
-            <el-option v-for="(item, index) in hours24" :key="item" :value="item" :label="item"></el-option>
+            <el-option v-for="item in hours24" :key="'b-' + item" :value="item" :label="item"></el-option>
           </el-select>
           <span class="mg">{{ $t('common.most') }}</span>
           <el-select class="w100" v-model="form.periodEndTime">
-            <el-option v-for="(item, index) in reverseHours" :key="item" :value="item" :label="item"></el-option>
+            <el-option v-for="item in reverseHours" :key="'e-' + item" :value="item" :label="item"></el-option>
           </el-select>
         </div>
       </el-form-item>
@@ -34,7 +34,18 @@
 </template>
 
 <script>
-import {validateStatisticHourParams} from '@/utils/statisticRangeValidate';
+import {
+  formatStatisticHourOption,
+  validateStatisticHourParams
+} from '@/utils/statisticRangeValidate';
+
+function buildHourOptions() {
+  const hours = [];
+  for (let i = 0; i <= 23; i++) {
+    hours.push(formatStatisticHourOption(i, '00'));
+  }
+  return hours;
+}
 
 export default {
   name: "index",
@@ -42,53 +53,45 @@ export default {
     return {
       dialogFormVisible: false,
       form: {
-        periodType: 0,
+        periodType: 1,
         periodBeginTime: "00",
-        periodEndTime: 23
+        periodEndTime: "23"
       },
       hours24: [],
       reverseHours: []
     }
   },
   methods: {
-    handleQ(val) {
-      let str = ""
-      if (val < 10) {
-        str = val.toString().padStart(2, '0')
-      } else {
-        str = val
-      }
-      return str;
-    },
     handleClose() {
       this.dialogFormVisible = false;
     },
-    open(obj) {
-      this.hours24 = [];
-      this.reverseHours = [];
+    open(obj = {}) {
+      this.hours24 = buildHourOptions();
+      this.reverseHours = this.hours24.slice().reverse();
+      const periodType = Number(obj.type);
       this.form = {
-        periodType: obj.type || 0,
-        periodBeginTime: obj.start || "00",
-        periodEndTime: obj.end || 23
-      }
+        periodType: periodType === 2 ? 2 : 1,
+        periodBeginTime: formatStatisticHourOption(obj.start, '00'),
+        periodEndTime: formatStatisticHourOption(obj.end, '23')
+      };
       this.dialogFormVisible = true;
-      for (let i = 0; i <= 23; i++) {
-        this.hours24.push(this.handleQ(i));
-      }
-      this.reverseHours = JSON.parse(JSON.stringify(this.hours24)).reverse();
-
     },
     onsubmit() {
-      const check = validateStatisticHourParams({
-        periodBeginTime: this.form.periodBeginTime,
-        periodEndTime: this.form.periodEndTime
-      });
+      const periodBeginTime = formatStatisticHourOption(this.form.periodBeginTime, '00');
+      const periodEndTime = formatStatisticHourOption(this.form.periodEndTime, '23');
+      const check = validateStatisticHourParams({periodBeginTime, periodEndTime});
       if (!check.ok) {
         this.$message.error(check.message);
         return;
       }
+      this.form.periodBeginTime = periodBeginTime;
+      this.form.periodEndTime = periodEndTime;
       this.handleClose();
-      this.$emit("handle", this.form);
+      this.$emit("handle", {
+        periodType: this.form.periodType,
+        periodBeginTime,
+        periodEndTime
+      });
     }
   }
 }
