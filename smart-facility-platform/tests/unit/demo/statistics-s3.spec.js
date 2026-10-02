@@ -22,6 +22,18 @@ function mountDialog() {
   });
 }
 
+test('submit rejects malformed hours before option normalization', () => {
+  const wrapper = mountDialog();
+  wrapper.vm.open({type: 1});
+  for (const periodBeginTime of ['bad', '1.5', '24']) {
+    wrapper.vm.form.periodBeginTime = periodBeginTime;
+    wrapper.vm.onsubmit();
+    expect(wrapper.vm.dialogFormVisible).toBe(true);
+    expect(wrapper.emitted().handle).toBeUndefined();
+  }
+  expect(wrapper.vm.$message.error).toHaveBeenCalledTimes(3);
+});
+
 test('formatStatisticHourOption keeps zero and pads strings', () => {
   expect(formatStatisticHourOption(0, '23')).toBe('00');
   expect(formatStatisticHourOption('00', '23')).toBe('00');

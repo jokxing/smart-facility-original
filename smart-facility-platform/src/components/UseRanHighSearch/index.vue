@@ -77,6 +77,11 @@ export default {
       this.dialogFormVisible = true;
     },
     onsubmit() {
+      const rawCheck = validateStatisticHourParams(this.form);
+      if (!rawCheck.ok) {
+        this.$message.error(rawCheck.message);
+        return;
+      }
       const periodBeginTime = formatStatisticHourOption(this.form.periodBeginTime, '00');
       const periodEndTime = formatStatisticHourOption(this.form.periodEndTime, '23');
       const check = validateStatisticHourParams({periodBeginTime, periodEndTime});

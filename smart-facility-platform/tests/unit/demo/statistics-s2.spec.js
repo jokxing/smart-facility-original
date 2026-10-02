@@ -121,6 +121,16 @@ test('API returns failure for invalid use and ranking ranges', async () => {
   expect(rankRes.message).toBe('时段开始不能晚于结束。');
 });
 
+test('noncanonical calendar dates and fractional or coerced hours are rejected', () => {
+  for (const beginTime of ['2026-02-30T00:00', '2026-09-01T24:00', '2026-09-01T00:00']) {
+    expect(validateStatisticDateParams({beginTime, endTime: '2026-10-01 00:00:00'}).ok).toBe(false);
+  }
+  expect(validateStatisticDateParams({beginTime: '2024-02-29', endTime: '2024-03-01'}).ok).toBe(true);
+  for (const periodBeginTime of [1.5, '1.5', true, [], '0x01', '1e1']) {
+    expect(validateStatisticHourParams({periodBeginTime, periodEndTime: '23'}).ok).toBe(false);
+  }
+});
+
 test('valid custom date and hour still succeed', async () => {
   await establishSession();
   const useRes = (await client.get('/statistic/instrument/use', {

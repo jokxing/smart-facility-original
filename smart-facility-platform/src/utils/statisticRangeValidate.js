@@ -23,16 +23,15 @@ function parseAt(value) {
     if (!Number.isFinite(local) || new Date(local).toISOString().slice(0, 19) !== canonical) return NaN;
     return Date.parse(canonical + zone);
   }
-  const normalized = text.includes('T') ? text : text.replace(' ', 'T');
-  const withZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(normalized) ? normalized : normalized + '+08:00';
-  return Date.parse(withZone);
+  return NaN;
 }
 
 export function parseStatisticHour(value) {
-  if (value == null || value === '') return NaN;
+  if (typeof value !== 'number' && typeof value !== 'string') return NaN;
+  if (typeof value === 'string' && !/^\d{1,2}$/.test(value.trim())) return NaN;
   const n = Number(value);
-  if (!Number.isFinite(n) || n < 0 || n > 23) return NaN;
-  return Math.floor(n);
+  if (!Number.isInteger(n) || n < 0 || n > 23) return NaN;
+  return n;
 }
 
 /**

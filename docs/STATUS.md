@@ -2126,3 +2126,14 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`docs: 数据统计页标注模拟统计与估算能耗`。
 - 数据统计 S1–S4 收尾完成；下一提示词可再选新模块（如 `/ds/device/chart` 或其他）。
+
+## 2026-10-02 — 数据统计复核与残留收尾
+
+- S1–S4 历史三项修复成立，模拟统计/估算能耗说明到位。
+- 修改文件：platform/src/utils/statisticRangeValidate.js、src/components/UseRanHighSearch/index.vue、tests/unit/demo/statistics-s2.spec.js、statistics-s3.spec.js；docs/review-statistics-module.md、STATUS.md、next-task-prompt.md。
+- 修复：禁止非标准日期宽松解析；小时拒绝小数和类型强制转换；弹窗原值先校验，避免非法输入被格式化为默认值再提交。
+- 验证：本轮独立全量单测 35 套 / 178 项通过。新增覆盖非法日期、有效闰日、小数/非十进制/非标量小时和弹窗拒绝提交。
+- 未验证：本轮浏览器、生产构建、真实服务、全站。无安装、提交或推送。
+- 设计决定：保留现有日期契约 yyyy-MM-dd 或带秒的日期时间及合法时区，不扩展隐式格式；保留 00 零点与整数小时；统计先收尾，切换设备维保。
+- 下一最小任务：设备维保 5A 列表只读 Mock，真实依据 views/maintenance/index.vue、api/labDevice/index.js 和 /apply/maintenance、/ld/maintenance 路由。提示词要求先核实真实可达入口，再接入分页/筛选；不连做申请及完成确认。
+- 建议 commit：`fix: 收紧数据统计日期与小时校验并规划维保演示`。
