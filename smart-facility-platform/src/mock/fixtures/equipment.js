@@ -5,7 +5,7 @@
 
 import {formatDemoDateTime, DEMO_NOW_MS, parseDemoDateTime} from '../clock';
 import storage from '../storage';
-import {DEMO_STAFF} from './auth';
+import {listAllStaff, isActiveDepartment, findDepartmentById} from './auth';
 import {DEMO_FLOOR_ROOMS} from './floor';
 import {listActiveInstrumentSeeds, resolveInstrumentEntity} from './instrument';
 
@@ -136,20 +136,32 @@ function writeJsonMap(key, map) {
 }
 
 function departmentNameOf(departmentId) {
-  return Number(departmentId) === DEPT_RD ? '演示研发部' : '演示运维部';
+  const row = findDepartmentById(departmentId);
+  return row ? row.name : (Number(departmentId) === DEPT_RD ? '演示研发部' : '演示运维部');
 }
 
 /** Overlay persisted name/department onto a seed row (always clones). */
 function applyEquipmentMeta(item) {
   const base = clone(item);
   const patch = readJsonMap(EQUIPMENT_META_KEY)[String(item.id)];
-  if (!patch || typeof patch !== 'object') return base;
-  if (patch.name != null && String(patch.name).trim() !== '') base.name = String(patch.name).trim().slice(0, 50);
-  if (patch.departmentId != null && Number.isFinite(Number(patch.departmentId))) {
-    base.departmentId = Number(patch.departmentId);
-    base.departmentName = patch.departmentName || departmentNameOf(base.departmentId);
+  if (patch && typeof patch === 'object') {
+    if (patch.name != null && String(patch.name).trim() !== '') {
+      base.name = String(patch.name).trim().slice(0, 50);
+    }
+    if (patch.departmentId != null && Number.isFinite(Number(patch.departmentId))) {
+      base.departmentId = Number(patch.departmentId);
+    }
   }
+  // Always resolve live department name from shared pool (rename sync); ignore stale patch.departmentName.
+  base.departmentName = departmentNameOf(base.departmentId);
   return base;
+}
+
+/** True when any live hardware row still references the department. */
+export function hasActiveEquipmentInDepartment(departmentId) {
+  const key = Number(departmentId);
+  if (!Number.isFinite(key)) return false;
+  return DEMO_EQUIPMENTS.map(applyEquipmentMeta).some(item => Number(item.departmentId) === key);
 }
 
 function hasKeyword(item, keyword) {
@@ -872,7 +884,7 @@ export function updateEquipmentBasic(body = {}) {
   if (!name) return {ok: false, message: '请填写设备名称。'};
   if (name.length > 50) return {ok: false, message: '设备名称过长。'};
   const departmentId = Number(body.departmentId);
-  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
+  if (!isActiveDepartment(departmentId)) {
     return {ok: false, message: '请选择有效部门。'};
   }
   const next = {...readJsonMap(EQUIPMENT_META_KEY)};
@@ -921,7 +933,7 @@ export function addEquipmentUsers(body = {}) {
     if (!gate.ok) return gate;
   }
   const staffMap = {};
-  DEMO_STAFF.forEach(u => { staffMap[u.id] = u; });
+  listAllStaff().forEach(u => { staffMap[u.id] = u; });
   if (userIds.some(id => !staffMap[id])) {
     return {ok: false, message: '存在未知用户，已拒绝添加。'};
   }

@@ -1,8 +1,8 @@
-# 本地演示：含设备维保 5A–5C
+# 本地演示：含部门与成员 6A–6D
 
 房间详情更新：设备分类随设备编辑生效；切分类、搜索或Tab会回第一页；设备卡片展示与平面图同源的本地SVG设备外观。
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ds/statistics`。不开放 `/apply/maintenance`、`/asset/maintenance`。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）** + **部门与成员（6A–6D）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/sys/department`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ds/statistics`。不开放 `/apply/maintenance`、`/asset/maintenance`、`/sys/user`（个人资料）、员工导入导出。
 
 首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开详情；可编辑名称/部门/分类；可单条/批量删除（**已绑定智能硬件须先解绑**）；可手填新增；可 XLSX 导入（先预览再确认）；可导出。批量改部门等仍拒绝。
 
@@ -28,6 +28,7 @@ npm run demo
 首页 **房间管理**：筛选分页 → 点名称打开只读详情与关联仪器；可导出；未监测 Tab 依赖设备管理新增未上图仪器。
 首页 **数据统计**：总览 → 报警 → 状态饼图 → 使用统计条图 → 使用率排行表。
 首页 **维保管理**（或设备管理侧栏「维保管理」）：关键字/部门/日期筛选、分页；点存活设备名称打开已演示设备抽屉。设备抽屉可**申请维保**；列表/详情可设**下次维保日期**与**核查确认**（已完成不可再确认）。已删除设备的历史记录仍列出，点击只提示不打开抽屉，也不能再申请。
+顶栏 **系统 → 部门与成员**：部门树可增/改/删（种子部门不可删）与同级排序；员工可新增/编辑/改角色/离职；关键字/部门筛选与分页。导入/导出仍禁用；不可对演示登录账号离职或改角色。
 
 ## Mock 要点
 
@@ -61,6 +62,15 @@ npm run demo
 | 维保申请 | `POST /maintenance/add`（→ `maintenanceCreated`；存活设备） |
 | 维保下次日期 | `POST /maintenance/updateMaintenance`（→ `maintenanceMeta`） |
 | 维保完成确认 | `GET /maintenance/complete`（已完成再确认拒绝） |
+| 部门与成员列表 | `GET /user/list`（共享 `DEMO_STAFF`∪`staffCreated`+meta；公司根 `departmentId=0` 不筛） |
+| 员工新增 | `POST /user/add`（→ `staffCreated`，id `901101`–`901150`） |
+| 员工编辑 | `POST /user/update/basic`（→ `staffMeta`；loginId 不可改） |
+| 员工改角色 | `POST /user/update/role`（→ `staffMeta`；不可改演示登录账号） |
+| 员工离职 | `POST /user/delete/batch`（→ `staffMeta.left` tombstone） |
+| 角色列表 stub | `GET /role/list`（含「普通成员」） |
+| 部门树 | `GET /department/list`（种子 ∪ `departmentCreated` + meta） |
+| 部门新增/编辑 | `POST /department/add`；`POST /department/update` |
+| 部门删除/排序 | `POST /department/remove/:id`（tombstone）；`PUT /department/move` |
 | 设备只读详情 | `GET /instrument/detail`；监测标签 `getOpenMonitorFlag` / `getMonitorFlag` |
 | 设备历史曲线 | `GET /monitorIndicator/monitorInfo`（离线为空）；`historyPage` 空表桩 |
 | 仪器其它写 | `batch/update` **明确拒绝** |
@@ -85,8 +95,8 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:maintenance:5c
-# 可选：npm run test:demo:maintenance:5b / 5a
+npm run test:demo:system:6d
+# 可选：npm run test:demo:system:6c / 6b / 6a
 ```
 
 顶栏「系统 → 报警记录」支持多选批量处理（须有处理时间与类型）。曲线非法自定义日期应失败/空态，不再变成默认窗口。
@@ -177,3 +187,23 @@ npm run test:demo:maintenance:5c
 ### 维保收尾（5D）
 
 申请成功自动切到详情维保记录第一页；详情中的申请、修改和完成确认会同步刷新外层维保列表。列表按天筛选包含结束日当天，非法日期区间明确提示。删除设备后历史维保保留，已删除设备不能再申请或打开详情。设备基本信息中的下次维保日期尚未作为记录聚合结果联动。
+
+### 部门与成员只读（6A）
+
+首页「系统管理」或顶栏「系统 → 部门与成员」→ `/sys/department`：左侧部门树（含公司根）、右侧共享员工。支持部门切换、关键字、分页；换部门/搜索回第一页。导入/导出/离职与部门树写操作按钮禁用。`/sys/user` 仍是个人资料页，未开放（顶栏个人资料入口仍会被守卫挡回）。
+
+### 员工新增与编辑（6B）
+
+同页可新增员工（登录名唯一、密码不落库）与编辑基本信息；新建 id `901101`–`901150`。列表与设备负责人、维保申请人共用同一员工池。
+
+### 离职与角色调整（6C）
+
+可变更角色（`POST /user/update/role`）；可单条/批量离职（tombstone，列表与负责人选项不再出现，维保历史仍可解析姓名）。不可对演示登录账号 `demo`/`900001` 离职或改角色。
+
+### 部门操作与复盘（6D）
+
+可新增/编辑部门、添加子部门、同级排序；种子部门 900101/900102 不可删；有员工或子部门不可删。员工与设备侧部门校验跟活跃部门池。导入/导出仍未开放。复盘见 `docs/review-system-module.md`。
+
+### 跨模块一致性（6E）
+
+删除新建部门前检查活跃仪器与硬件引用（移出后方可删）；硬件列表/详情部门名随共享部门改名刷新；员工基本编辑未传角色保持原角色，演示登录不可借基本编辑改角色；离职确认文案去掉自动解绑承诺。

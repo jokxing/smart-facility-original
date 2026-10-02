@@ -2223,3 +2223,162 @@
 - 设计决定：沿用 lab/REFLESH 和历史快照；精确时间区间接口不改变，按天边界仅演示列表适配；不将维保扩大为工单，不新增设备基本信息聚合规则。
 - 下一最小任务：部门与员工管理 6A，只读 `/sys/department` 部门树和员工列表，不连做用户及部门写操作。提示词已更新。
 - 整批建议 commit：`feat: 完成设备维保演示闭环与联动收尾`。
+
+## 2026-10-02 — 部门与员工管理 6A（只读演示）
+
+### 做了什么
+
+- 开放 `/sys/department`：`permission.js` + `DEMO_MENUS`「系统 → 部门与成员」；`/sys/user` 仍不开放。
+- 扩展共享 `DEMO_STAFF` 列表字段（tel/email/departmentName/roleName/companyName/createDate 等）；修正 `listDemoStaff` 对数字 `departmentId=0`（公司根）不筛。
+- `Department.vue`：演示态禁用新增/编辑/离职/导入/导出及部门树写操作（`Tree` `isHandle=false`），不注册假成功写接口。
+- 契约 `docs/system-6a-contract.md`；单测 `system-6a.spec.js`；浏览器 `test:demo:system:6a`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：40 套 / 202 项通过。
+- `$env:DEMO_PORT='8096'; npm run test:demo:system:6a` → `externalAttempts=0`；证据 `docs/evidence/system-6a`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 继续复用既有 `GET /user/list`，不另起员工池；公司根与维保/设备约定一致。
+- 不连做 6B–6D。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 部门与成员列表只读演示`。
+- 下一提示词：`docs/next-task-prompt.md`（6B 新增/编辑员工与校验）。
+
+## 2026-10-02 — 部门与员工管理 6B（新增/编辑与校验）
+
+### 做了什么
+
+- `POST /user/add` → `staffCreated`（id `901101`–`901150`）；`POST /user/update/basic` → `staffMeta`；`GET /role/list` 最小 stub（含「普通成员」）。
+- `listAllStaff` 合并种子/新建/overlay；设备负责人与维保申请人同源。
+- `Department.vue` 演示态放开 USER 新增/编辑与 Modal；离职/导入/导出/部门树写仍禁用。
+- 契约 `docs/system-6b-contract.md`；单测 `system-6b.spec.js`；浏览器 `test:demo:system:6b`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：41 套 / 208 项通过。
+- `$env:DEMO_PORT='8096'; npm run test:demo:system:6b` → `externalAttempts=0`；证据 `docs/evidence/system-6b`。顺带重跑 6a 通过。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 密码按源码必填但不落库；loginId 编辑不可改；登录名唯一大小写不敏感。
+- 不连做 6C–6D。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 部门与成员支持新增编辑员工`。
+- 下一提示词：`docs/next-task-prompt.md`（6C 离职及角色调整）。
+
+## 2026-10-02 — 部门与员工管理 6C（离职及角色调整）
+
+### 做了什么
+
+- `POST /user/delete/batch`：tombstone（`staffMeta.left`）；拒绝演示登录账号；列表/活跃池过滤，`findStaffById` 仍解析历史姓名。
+- `POST /user/update/role`：Modal CROLE 接入；拒绝演示登录账号与非法角色；Department 操作列增加「变更角色」。
+- 演示态放开离职与改角色；导入/导出/部门树写仍禁用。
+- 契约 `docs/system-6c-contract.md`；单测 `system-6c.spec.js`；浏览器 `test:demo:system:6c`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：42 套 / 213 项通过。
+- `$env:DEMO_PORT='8096'; npm run test:demo:system:6c` → `externalAttempts=0`；证据 `docs/evidence/system-6c`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。未实现离职文案中的设备自动解绑。
+
+### 设计决定
+
+- 离职用 meta tombstone，不硬删种子/created。不连做 6D。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 部门与成员支持离职与角色调整`。
+- 下一提示词：`docs/next-task-prompt.md`（6D 部门操作与跨模块联动复盘）。
+
+## 2026-10-02 — 部门与员工管理 6D（部门操作与复盘）
+
+### 做了什么
+
+- 部门写：`POST /department/add|update`、`POST /department/remove/:id`、`PUT /department/move`；持久化 `departmentCreated`（900103–900150）+ `departmentMeta`。
+- 种子部门不可删；有员工/子部门不可删；员工与仪器/硬件部门校验改为活跃部门池；改名联动员工 `departmentName`。
+- Department 演示态开放部门树写与 ModalDept；导入/导出仍禁用。
+- 契约 `docs/system-6d-contract.md`；复盘 `docs/review-system-module.md`；单测 `system-6d.spec.js`；浏览器 `test:demo:system:6d`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：43 套 / 218 项通过。
+- `$env:DEMO_PORT='8096'; npm run test:demo:system:6d` → `externalAttempts=0`；证据 `docs/evidence/system-6d`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 部门删除用 tombstone；不硬删被跨模块引用的种子部门。系统管理本批收尾。
+
+### 下一步
+
+- 本轮停止。建议 commit：`feat: 部门树写操作与系统管理演示收尾`。
+- 下一提示词：`docs/next-task-prompt.md`（占位，待指定新主题）。
+
+## 2026-10-02 — 修：首页「系统管理」入口
+
+### 做了什么
+
+- `Dashboard.vue` 演示态将首页「系统」卡片 path 从 `/sys/user` 改写为 `/sys/department`，避免点进个人资料被守卫挡回「尚未接入」。
+- 同步 `system-6a-contract` / `demo-guide` / `review-system-module`；`check-demo-system-6a` 改为从首页卡片进入；单测断言 Dashboard 源码改写。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：43 套 / 219 项通过。
+- `$env:DEMO_PORT='8096'; npm run test:demo:system:6a` → 首页卡片进入 `/sys/department`，`externalAttempts=0`。
+- 未提交、未推送。
+
+### 下一步
+
+- 修完即停；下一主题仍待指定。
+
+## 2026-10-02 — 系统管理独立复核
+
+- 本轮仅更新 review-system-module.md、next-task-prompt.md、STATUS.md，保留其他未提交改动；未改业务源码、未提交或推送。
+- 验证：独立全量 43 套 / 219 项通过；临时 Jest 探针复现部门存在设备引用仍可删、硬件部门名滞后、基本编辑绕过演示登录角色保护，探针已移除。
+- 未验证：本轮浏览器、生产构建、真实服务和全站。
+- 发现：P1 部门删除缺设备/硬件引用保护；P2 硬件改名不同步；P2 基本编辑角色保护不一致；P2 离职文案存在未实现解绑承诺。详细源码依据见复盘顶部。
+- 设计决定：修正历史“收尾”结论；本轮只复盘，不扩展功能，不给切片 commit 信息。
+- 下一最小任务：6E 跨模块一致性和文案修复、补验证；通过复盘后再给整批系统管理 commit 信息。
+
+## 2026-10-02 — 系统管理 6E（跨模块一致性收尾）
+
+### 做了什么
+
+- `removeDemoDepartment`：懒加载检查活跃仪器/硬件引用，转入拒删、移出可删；保留员工/子部门规则。
+- `applyEquipmentMeta`：列表/详情始终从共享部门池解析部门名。
+- `updateDemoStaffBasic`：未传角色保持当前；`DEMO_USER` 改角色与改角色接口一致拒绝。
+- 中英文离职确认文案去掉自动解绑承诺。
+- 契约 `docs/system-6e-contract.md`；单测 `system-6e.spec.js`；浏览器 `test:demo:system:6e`；更新复盘与 demo-guide。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：44 套 / 223 项通过。
+- `$env:DEMO_PORT='8096'; npm run test:demo:system:6e` → `externalAttempts=0`；证据 `docs/evidence/system-6e`。
+- 未跑生产构建、全站浏览器、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 设备引用检查用函数内 `require`，避免 auth↔instrument/equipment 顶层循环依赖。
+- 系统管理本批经 6E 后可收尾；整批 commit 信息待用户确认后再给。
+
+### 下一步
+
+- 本轮停止。下一提示词：`docs/next-task-prompt.md`（占位，待指定新主题）。
+
+## 2026-10-02 — 系统管理二次独立复核与整批收尾
+
+- 6E 四项原发现已修复；本轮补多角色回显、基本编辑 roleId/roleIds 一致性、非法角色集合整次拒绝、提交中防重。
+- 修改文件：platform/src/mock/fixtures/auth.js、src/views/system/Modal.vue、tests/unit/demo/system-6e.spec.js；docs/STATUS.md、review-system-module.md、next-task-prompt.md；新增 remaining-work.md。原 6A–6E 未提交文件均保留。
+- 验证：独立全量 44 套 / 225 项通过；本地 system:6e 浏览器重试通过，externalAttempts=0。首次 CDP 连接超时；diff --check 已检查。
+- 未验证：新增多角色回显单独浏览器断言、全站组合链路、生产构建、真实服务。未安装依赖、未提交或推送。
+- 设计决定：本批只完成部门与成员，不声称完整权限引擎或所有系统管理页；多角色未改则保留，基本编辑显式改变主角色同步为单角色。
+- 整批 commit 建议：feat: 完成部门与员工管理演示闭环及跨模块一致性修复。
+- 下一最小任务：7A 已开放模块跨模块验收。剩余按四批收尾（7A–7D）及可选扩展列于 remaining-work.md，不以旧系统全部目录数量估完成率。

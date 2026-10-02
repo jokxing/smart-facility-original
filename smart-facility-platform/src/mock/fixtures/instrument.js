@@ -9,6 +9,7 @@ import {readInstrumentWorkbook, createInstrumentExportWorkbook} from '../instrum
 
 import storage from '../storage';
 import {DEMO_NOW_MS, formatDemoDateTime, parseDemoDateTime} from '../clock';
+import {isActiveDepartment, findDepartmentById} from './auth';
 import {ROOM_BOUNDS, roomFrame, validPlacement} from '../../utils/demoLayoutGeometry';
 import {getDemoScenario, statusForScenario} from './scenario';
 
@@ -112,6 +113,16 @@ function instrumentById(id) {
 /** Seed + imported overlays still alive (not tombstoned). */
 export function listActiveInstrumentSeeds() {
   return activeInstrumentSeeds();
+}
+
+/** True when any live instrument (seed/import + meta) still references the department. */
+export function hasActiveInstrumentInDepartment(departmentId) {
+  const key = Number(departmentId);
+  if (!Number.isFinite(key)) return false;
+  return listActiveInstrumentSeeds().some(entity => {
+    const resolved = resolveInstrumentEntity(entity);
+    return resolved && Number(resolved.departmentId) === key;
+  });
 }
 
 export function listImportRemoveIds() {
@@ -286,7 +297,7 @@ export function addDemoInstrument(body = {}) {
     return {ok: false, message: '请填写 2–26 字的设备名称。'};
   }
   const departmentId = Number(body.departmentId);
-  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
+  if (!isActiveDepartment(departmentId)) {
     return {ok: false, message: '请选择有效部门。'};
   }
   const types = Number(body.types);
@@ -439,7 +450,7 @@ export function updateInstrumentBasic(body = {}) {
     return {ok: false, message: '请填写 2–26 字的设备名称。'};
   }
   const departmentId = Number(body.departmentId);
-  if (departmentId !== DEPT_OPS && departmentId !== DEPT_RD) {
+  if (!isActiveDepartment(departmentId)) {
     return {ok: false, message: '请选择有效部门。'};
   }
   const types = body.types == null || body.types === '' ? seed.types : Number(body.types);
@@ -595,7 +606,8 @@ function roomNameForId(roomId) {
 }
 
 function departmentNameForId(departmentId) {
-  return Number(departmentId) === DEPT_RD ? '演示研发部' : '演示运维部';
+  const row = findDepartmentById(departmentId);
+  return row ? row.name : (Number(departmentId) === DEPT_RD ? '演示研发部' : '演示运维部');
 }
 
 function instrumentNo(id) {

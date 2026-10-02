@@ -41,14 +41,15 @@
                             @click="handleShowModal($t('system.addUser'), 'USER')"
                         > {{ $t('system.addUser') }}
                         </el-button>
-                        <el-button class="icon-upload" @click="importFileVisible = true"
+                        <el-button :disabled="isDemo" class="icon-upload" @click="importFileVisible = true"
                         > {{ $t('common.importHandle') }}
                         </el-button>
-                        <el-button class="icon-download1" @click="handleExport"
+                        <el-button :disabled="isDemo" class="icon-download1" @click="handleExport"
                         > {{ $t('common.export') }}
                         </el-button>
                         <el-button
                             v-if="selectedRows.length > 0"
+                            :disabled="isDemo"
                             class="btn-default"
                             @click="handleShowModal($t('common.updateDepartment'), 'CDEPT')"
                         >{{ $t('common.updateDepartment') }}
@@ -101,7 +102,7 @@
                         slot="operate"
                         fixed="right"
                         :label="$t('common.handle')"
-                        width="160">
+                        width="220">
                         <template v-slot="scope">
                             <el-button
                                 :disabled="scope.row.editFlag === 0"
@@ -110,7 +111,14 @@
                             >{{ $t('common.edit') }}
                             </el-button>
                             <el-button
+                                :disabled="scope.row.editFlag === 0"
+                                type="text"
+                                @click="handleChangeRole(scope.row)"
+                            >{{ $t('system.fixRole') }}
+                            </el-button>
+                            <el-button
                                 v-if="roleId === 2"
+                                :disabled="isDemo"
                                 type="text"
                                 @click="$refs.permissionAssignment.open(scope.row)">
                                 {{ $t('system.roleAllot') }}
@@ -135,7 +143,7 @@
                     @handle="handleGetUserList(userListParams)"/>
                 <ModalDept v-if="modalDeptVisible"></ModalDept>
                 <ImportFile
-                    v-if="importFileVisible"
+                    v-if="!isDemo && importFileVisible"
                     :title="importTitle"
                     @handleUpdateInit="handleUpdateInit"
                     @hiddenModalVisible="hiddenModalVisible"></ImportFile>
@@ -305,6 +313,9 @@ export default {
                 keyword,
             };
         },
+        isDemo() {
+            return process.env.VUE_APP_DEMO === 'true';
+        },
     },
     watch: {
         deptId: {
@@ -406,6 +417,14 @@ export default {
             this.handleEditDeptModal({
                 title: this.$t('system.editUser'),
                 type: "USER",
+                editData: data,
+            });
+        },
+
+        handleChangeRole(data) {
+            this.handleEditDeptModal({
+                title: this.$t('system.fixRole'),
+                type: "CROLE",
                 editData: data,
             });
         },
@@ -525,6 +544,7 @@ export default {
         },
         // 导出
         handleExport() {
+            if (this.isDemo) return;
             const data = {
                 departmentId: this.deptId,
                 keyword: this.keyword,
@@ -554,6 +574,7 @@ export default {
         },
 
         handleShowModal(title, type) {
+            if (this.isDemo && type !== 'USER' && type !== 'CROLE') return;
             this.handleUserAddMu({
                 type,
                 title,

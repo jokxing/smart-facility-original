@@ -113,6 +113,10 @@ export default {
           this.handleLang(1);
       }
     let menus = menuList.slice(0, -1);
+    // Demo: homepage「系统」card must open the demo department page, not /sys/user (personal profile, blocked).
+    if (process.env.VUE_APP_DEMO === 'true') {
+      menus = menus.map(item => (item.id === 'sys' ? Object.assign({}, item, {path: '/sys/department'}) : item));
+    }
     menus.unshift({
       id: "ccm",
       name: this.$t('route.map'),

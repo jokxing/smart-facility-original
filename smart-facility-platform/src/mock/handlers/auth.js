@@ -1,29 +1,20 @@
-import {DEMO_CREDENTIALS, DEMO_USER, DEMO_STAFF, DEMO_DEPARTMENTS, DEMO_CATEGORIES, DEMO_MENUS} from '../fixtures/auth';
+import {
+  DEMO_CREDENTIALS, DEMO_USER, DEMO_CATEGORIES, DEMO_MENUS, DEMO_ROLES,
+  listDemoStaff, addDemoStaff, updateDemoStaffBasic, updateDemoStaffRole, leaveDemoStaff,
+  listDemoDepartments, addDemoDepartment, updateDemoDepartment, removeDemoDepartment,
+  moveDemoDepartments, listDepartmentRemoveIds
+} from '../fixtures/auth';
 import {readSession, saveSession, newSession, authenticateSession} from '../session';
 import {createCaptchaImage} from '../captcha';
 import {success, failure, protectedRoute} from '../response';
 
-function listDemoStaff(params = {}) {
-  const pageNum = Math.max(1, Number(params.pageNum) || 1);
-  const pageSize = Math.max(1, Number(params.pageSize) || 20);
-  let list = DEMO_STAFF.map(item => ({...item}));
-  if (params.departmentId != null && params.departmentId !== '' && params.departmentId !== '0') {
-    list = list.filter(item => Number(item.departmentId) === Number(params.departmentId));
-  }
-  if (params.keyword != null && String(params.keyword).trim() !== '') {
-    const q = String(params.keyword).trim().toLowerCase();
-    list = list.filter(item =>
-      String(item.name).toLowerCase().includes(q) || String(item.loginId).toLowerCase().includes(q)
-    );
-  }
-  const start = (pageNum - 1) * pageSize;
-  return {
-    list: list.slice(start, start + pageSize),
-    total: list.length,
-    pageNum,
-    pageSize
-  };
-}
+const departmentRemoveRoutes = listDepartmentRemoveIds().map(id =>
+  protectedRoute('POST', `/department/remove/${id}`, () => {
+    const result = removeDemoDepartment(id);
+    if (!result.ok) return failure(result.message);
+    return success({id: result.id});
+  })
+);
 
 export default [
   {method: 'GET', path: '/captchaCode', handle: ({params}) => {
@@ -46,6 +37,44 @@ export default [
   }},
   protectedRoute('GET', '/user/info', () => success(DEMO_USER)),
   protectedRoute('GET', '/user/list', ({params}) => success(listDemoStaff(params || {}))),
+  protectedRoute('POST', '/user/add', ({body}) => {
+    const result = addDemoStaff(body || {});
+    if (!result.ok) return failure(result.message);
+    return success({id: result.id});
+  }),
+  protectedRoute('POST', '/user/update/basic', ({body}) => {
+    const result = updateDemoStaffBasic(body || {});
+    if (!result.ok) return failure(result.message);
+    return success({id: result.id});
+  }),
+  protectedRoute('POST', '/user/update/role', ({body}) => {
+    const result = updateDemoStaffRole(body || {});
+    if (!result.ok) return failure(result.message);
+    return success({id: result.id});
+  }),
+  protectedRoute('POST', '/user/delete/batch', ({body}) => {
+    const result = leaveDemoStaff(body || {});
+    if (!result.ok) return failure(result.message);
+    return success({ids: result.ids});
+  }),
+  protectedRoute('GET', '/role/list', () => success(DEMO_ROLES.map(item => ({...item})))),
+  protectedRoute('GET', '/department/list', () => success({list: listDemoDepartments()})),
+  protectedRoute('POST', '/department/add', ({body}) => {
+    const result = addDemoDepartment(body || {});
+    if (!result.ok) return failure(result.message);
+    return success({id: result.id});
+  }),
+  protectedRoute('POST', '/department/update', ({body}) => {
+    const result = updateDemoDepartment(body || {});
+    if (!result.ok) return failure(result.message);
+    return success({id: result.id});
+  }),
+  protectedRoute('PUT', '/department/move', ({params}) => {
+    const result = moveDemoDepartments(params || {});
+    if (!result.ok) return failure(result.message);
+    return success(null);
+  }),
+  ...departmentRemoveRoutes,
   protectedRoute('POST', '/logout', () => {
     // The existing logout UI still reads USERINFO before clearing localStorage.
     saveSession({...readSession(), authenticated: false, token: ''});
@@ -53,7 +82,6 @@ export default [
   }),
   protectedRoute('GET', '/user/language', () => success(null)),
   protectedRoute('GET', '/role/menu', () => success(DEMO_MENUS)),
-  protectedRoute('GET', '/department/list', () => success({list: DEMO_DEPARTMENTS})),
   protectedRoute('GET', '/instrumentCategoryInfo/superior/cat', () => success(DEMO_CATEGORIES)),
   // /equipment/dashboard lives in handlers/equipment.js (same seed as sort/list).
   // Layout Navbar / MessageNotification shell — empty stubs so SaaS chrome can mount.

@@ -6,19 +6,13 @@
  */
 import storage from '../storage';
 import {DEMO_NOW_MS, formatDemoDateTime, parseDemoDateTime} from '../clock';
-import {DEMO_STAFF, DEMO_USER} from './auth';
+import {findStaffById, isActiveDepartment, DEMO_USER} from './auth';
 import {
   buildInstrumentRow,
   isInstrumentDeleted,
   listActiveInstrumentSeeds,
   resolveInstrumentEntity
 } from './instrument';
-
-const STAFF_TEL = Object.freeze({
-  900001: '13800000001',
-  900002: '13800000002',
-  900003: '13800000003'
-});
 
 const MAINTENANCE_CREATED_KEY = 'maintenanceCreated';
 const MAINTENANCE_META_KEY = 'maintenanceMeta';
@@ -28,8 +22,13 @@ const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
 
 function staffName(id) {
-  const row = DEMO_STAFF.find(item => item.id === id);
+  const row = findStaffById(id);
   return row ? row.name : '演示用户';
+}
+
+function staffTel(id) {
+  const row = findStaffById(id);
+  return row && row.tel ? row.tel : '13800000000';
 }
 
 function atDaysAgo(days, hour = 9) {
@@ -145,7 +144,7 @@ function buildRow(seed) {
     instrumentNo: seed.instrumentNo || instrumentNo(seed.instrumentId),
     departmentId: seed.departmentId,
     userName: staffName(seed.userId),
-    tel: STAFF_TEL[seed.userId] || '13800000000',
+    tel: staffTel(seed.userId),
     createDate,
     maintenanceDate,
     completeDate,
@@ -261,7 +260,7 @@ export function addDemoMaintenance(body = {}) {
   let departmentId = Number(row.departmentId);
   if (body.departmentId != null && body.departmentId !== '') {
     const requested = Number(body.departmentId);
-    if (requested !== DEPT_OPS && requested !== DEPT_RD) {
+    if (!isActiveDepartment(requested)) {
       return {ok: false, message: '请选择有效部门。'};
     }
   }
@@ -269,7 +268,7 @@ export function addDemoMaintenance(body = {}) {
   let userId = DEMO_USER.id;
   if (body.userId != null && body.userId !== '') {
     const requestedUser = Number(body.userId);
-    if (DEMO_STAFF.some(item => item.id === requestedUser)) userId = requestedUser;
+    if (findStaffById(requestedUser)) userId = requestedUser;
   }
 
   const {created, free} = freeCreatedIds();

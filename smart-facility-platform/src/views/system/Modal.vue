@@ -181,7 +181,7 @@ import SelectTree from "@/components/SelectTree";
 import { PHONEREGEXP, EMAILREGEXP } from "@/utils/regExp";
 import { mapState, mapMutations } from "vuex";
 import { getRoleList } from "@/api/system";
-import { userAdd, updateUserBasic, postChangeDeptBatch } from "@/api/user";
+import { userAdd, updateUserBasic, postChangeDeptBatch, updateUserRole } from "@/api/user";
 import {ERROR} from "@/utils/constant";
 export default {
   components: {
@@ -375,11 +375,20 @@ export default {
       handler(newVal) {
         if (newVal.isEdit) {
           let { departmentId } = this.editData;
-          this.selectTreeValue = departmentId.toString();
-          this.form = {
+          this.selectTreeValue = departmentId != null ? departmentId.toString() : "";
+          const nextForm = {
             ...this.editData,
-            departmentId: departmentId.toString(),
+            departmentId: departmentId != null ? departmentId.toString() : "",
           };
+          if (newVal.modalType === "CROLE") {
+            const rid = this.editData.roleIds || this.editData.roleId;
+            nextForm.roleId = Array.isArray(rid)
+              ? rid.map(Number)
+              : rid != null && rid !== ""
+                ? [Number(rid)]
+                : [];
+          }
+          this.form = nextForm;
         } else if (newVal.modalType === "CDEPT") {
           this.selectTreeValue = this.selectedRows[0].departmentId.toString();
           this.form = {
@@ -501,6 +510,32 @@ export default {
       }
     },
 
+    async changeRoleAsync() {
+      try {
+        this.submitLoading = true;
+        let { id } = this.editData;
+        let roleId = this.form.roleId;
+        let result = await updateUserRole({
+          id,
+          roleId,
+        });
+        if (result.code == 1) {
+          this.$message.success(this.$t('common.editSuccess'));
+          this.$emit("handle");
+          this.submitLoading = false;
+          this.handleRefresh();
+          this.handleHideModalMu();
+        } else {
+          this.submitLoading = false;
+          this.$message.error(result.message);
+        }
+      } catch (err) {
+        this.submitLoading = false;
+        this.$message.error(ERROR);
+        throw err;
+      }
+    },
+
     handleRolesChange(value) {
       let roles = [];
       if (value && value.length) {
@@ -549,6 +584,11 @@ export default {
     },
 
     handleFormSubmit(formName) {
+      if (this.submitLoading) return;
+      if (this.modalType === "CROLE") {
+        this.changeRoleAsync();
+        return;
+      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.isEdit) {
@@ -568,13 +608,6 @@ export default {
             });
             this.changeDeptAsync(ids);
           }
-          // if (this.modalType == "USER") {
-          //   if (this.isEdit) {
-          //     this.editUserAsync();
-          //   } else {
-          //     this.addUserAsync();
-          //   }
-          // }
         } else {
           return false;
         }
