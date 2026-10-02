@@ -23,7 +23,6 @@
             :start-placeholder="$t('common.startDate')"
             :end-placeholder="$t('common.endDate')"
             @change="handleEquipmentData"
-            @close="handleEquipmentData"
             align="right"
             :default-time="defaultTime">
         </el-date-picker>
@@ -84,6 +83,7 @@ export default {
     return {
       active: 2,
       equipmentDate: "",
+      lastEmittedRangeKey: ""
     }
   },
   created() {
@@ -97,14 +97,30 @@ export default {
     }
   },
   methods: {
+    rangeEmitKey(value) {
+      if (!Array.isArray(value) || value.length < 2) {
+        return "";
+      }
+      return value.map(item => {
+        if (item == null || item === "") return "";
+        const ms = item instanceof Date ? item.getTime() : Number(new Date(item));
+        return Number.isFinite(ms) ? String(ms) : String(item);
+      }).join("|");
+    },
     handleCutSensor(e) {
       this.equipmentDate = "";
+      this.lastEmittedRangeKey = "";
       this.$emit("handle", e);
     },
     handleInterval(e) {
       this.$emit("change", e);
     },
     handleEquipmentData() {
+      const key = this.rangeEmitKey(this.equipmentDate);
+      if (key === this.lastEmittedRangeKey) {
+        return;
+      }
+      this.lastEmittedRangeKey = key;
       this.active = "";
       this.$emit("handleTime", this.equipmentDate);
     }

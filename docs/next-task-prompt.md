@@ -1,11 +1,9 @@
-# 下一任务：数据统计之后——高级统计页或其他模块（可选）
+# 下一任务：数据统计 S2——无效日期/小时区间校验
 
-4A–4E 已覆盖 `/ds/statistics` 主路径：总览、告警、状态饼图、使用统计（含时长/次数/功耗）、使用率排行。工作区 E:\project\smart-facility-original；仅改 smart-facility-platform 和 docs。先读 STATUS 文末与 statistics-4*-contract。用户身份按前端主力及 Vue 2 重构组成员表述。
+S1 已完成（自定义日期清空恢复默认日维度）。先读 STATUS 文末、review-statistics-module.md。工作区 E:\project\smart-facility-original；仅改 smart-facility-platform 和 docs。用户身份按前端主力及 Vue 2 重构组成员表述。
 
-## 可选下一小任务（择一，勿并行）
+## 本轮范围（仅 S2）
 
-**方案 A**：有限开放 `/ds/device/chart` 记录仪图表统计（另页），单独放行路由与 Mock，不回改 4A–4E。
+前端与 Mock 一致校验无效日期区间、无效小时时段：区分「未指定」与「已输入但非法/逆序/缺一端」；非法须拒绝或明确提示，禁止静默回退默认天数/全天。涉及 `statistic.js` windowDays / 小时解析、`UseRanHighSearch` 提交、handlers 可选拒绝。勿并行 S3/S4，勿开新模块。
 
-**方案 B**：切到其他未演示模块（系统用户/工单等），另写 next-task-prompt。
-
-若选 A：先契约 → Mock 会话保护 → 单测 + 浏览器 → 更新 STATUS/demo-guide；不安装依赖、不 commit/push、不重写 Vue 2。未执行验证须标明。
+验证：补单测 + `test:demo`；浏览器能跑则跑。更新 STATUS；不安装依赖、不 commit/push、不重写 Vue 2。完成后停止，下一提示词再写 S3。

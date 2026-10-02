@@ -2019,3 +2019,36 @@
 - 本轮停止。未暂存/提交/推送。
 - 建议 commit：`feat: 接通数据统计设备功耗维度演示`。
 - 下一提示词：`docs/next-task-prompt.md`（高级统计页或其他模块可选）。
+
+# 数据统计复盘补记（2026-10-01）
+
+- 基线 3cc1969；仅修改本 STATUS、review-statistics-module.md、next-task-prompt.md，未改业务源码、未提交或推送。
+- 验证：独立全量单测 31 套 / 161 项通过；日期处理方法传 null 复现 TypeError，数字零点默认值错误已确认。
+- 未验证：本轮浏览器、生产构建、真实后端、全站行为。
+- 设计决定：先收尾日期清空、非法区间回退、零点回显；保留现有派生 Mock，建议页面说明模拟统计及估算能耗。
+- 下一最小任务：next-task-prompt 的 S1，完成后停止，再分别处理 S2–S4。完整文件依据见 review-statistics-module.md。
+
+## 2026-10-01 — 数据统计 S1（自定义日期清空）
+
+### 做了什么
+
+- `Statistics.vue`：`handleUserTime` / `handleEquipmentData` 在清空或非法区间时恢复 `dateType=1`、清空 begin/end，再请求；不再直接读 `val[0]/val[1]`。
+- 抽出 `utils/statisticCustomRange.js`；`ChartDimension` 去掉 `@close` 重复触发，并对同值去重 emit。
+- 单测 `statistics-s1.spec.js`；浏览器 `test:demo:statistics:s1`。
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：32 套 / 166 项通过。
+- `$env:DEMO_PORT='8090'; npm run test:demo:statistics:s1` → `externalAttempts=0`；证据 `docs/evidence/statistics-s1`。
+- 未跑生产构建、全站浏览器、真实后端。
+
+### 设计决定
+
+- 清空后统一回到默认「日」（`dateType=1`），与冷启动一致；与 LabDeviceDrawer「清空回维度」同思路。
+- 共享 ChartDimension 只去重/去掉 close，不改其它业务页清空语义（transport 等仍可能有同类 bug，本轮不做）。
+
+### 下一步
+
+- 本轮停止。未暂存/提交/推送。
+- 建议 commit：`fix: 数据统计自定义日期清空恢复日维度`。
+- 下一提示词：`docs/next-task-prompt.md`（S2 无效区间校验）。

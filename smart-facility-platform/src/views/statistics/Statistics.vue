@@ -148,6 +148,7 @@ import {items, TIME_FORMAT} from "@/utils/constant";
 import moment from "moment";
 import VeBar from "v-charts/lib/bar.common";
 import DataEmpty from "@c/DataEmpty"
+import {isStatisticCustomDateRange} from "@/utils/statisticCustomRange";
 export default {
     name: "Statistics",
     components: {
@@ -442,8 +443,15 @@ export default {
                 }
             })
         },
-        // 使用统计自定义时间
+        // 使用统计自定义时间（清空 → 默认日 + 清区间；勿直接读 val[0]/val[1]）
         handleUserTime(val) {
+            if (!isStatisticCustomDateRange(val)) {
+                this.equipmentUse.beginTime = "";
+                this.equipmentUse.endTime = "";
+                this.equipmentUse.dateType = 1;
+                this.handleEquipmentUsers();
+                return;
+            }
             this.equipmentUse.endTime = moment(val[1]).format(TIME_FORMAT);
             this.equipmentUse.beginTime = moment(val[0]).format(TIME_FORMAT);
             this.equipmentUse.dateType = null;
@@ -482,6 +490,13 @@ export default {
         },
         // 使用率自定义时间
         handleEquipmentData(val) {
+            if (!isStatisticCustomDateRange(val)) {
+                this.useRanKing.beginTime = "";
+                this.useRanKing.endTime = "";
+                this.useRanKing.dateType = 1;
+                this.handleGetInstrumentUserRanKing();
+                return;
+            }
             this.useRanKing.endTime = moment(val[1]).format(TIME_FORMAT);
             this.useRanKing.beginTime = moment(val[0]).format(TIME_FORMAT);
             this.useRanKing.dateType = null;

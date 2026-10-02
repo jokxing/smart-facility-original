@@ -28,6 +28,7 @@
     "test:demo:statistics:4c": "node scripts/check-demo-statistics-4c.cjs",
     "test:demo:statistics:4d": "node scripts/check-demo-statistics-4d.cjs",
     "test:demo:statistics:4e": "node scripts/check-demo-statistics-4e.cjs",
+    "test:demo:statistics:s1": "node scripts/check-demo-statistics-s1.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",
