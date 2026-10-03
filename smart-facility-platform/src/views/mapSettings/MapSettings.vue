@@ -19,7 +19,7 @@
         />
       </div>
       <div class="left-bottom">
-        <el-button icon="el-icon-plus" type="primary" @click="handleAddGarden">
+        <el-button v-if="!isDemo" icon="el-icon-plus" type="primary" @click="handleAddGarden">
           {{ $t('dataV.addGarden') }}
         </el-button>
       </div>
@@ -34,13 +34,16 @@
           {{ item.label }}
           <span v-show="item.level !== breadcrumb.length"> > </span>
         </h3>
+        <el-button class="return-room-button" icon="el-icon-back" @click="$router.push('/rm/room')">
+          返回房间管理
+        </el-button>
       </div>
       <div class="session">
         <div class="clearfix">
           <div class="table-title">{{ tableTitle }}</div>
           <div>
             <el-button
-                v-if="addTitle"
+                v-if="addTitle && !(isDemo && level !== 2)"
                 type="primary"
                 @click="handleAdd">
               <i class="icon-addto"></i>
@@ -71,16 +74,17 @@
           </el-table-column>
           <el-table-column fixed="right" :label="$t('common.handle')" min-width="150">
             <template v-slot="scope">
-              <el-button v-if="level !== 3" type="text" @click="handleEditMap(scope.row)">
+              <el-button v-if="level !== 3 && !(isDemo && level === 1)" type="text" @click="handleEditMap(scope.row)">
                   {{ $t('common.edit') }}
               </el-button>
               <el-button
-                  v-if="level !== 1"
+                  v-if="level !== 1 && !isDemo"
                   type="text"
                   @click="handleConfiguration(scope.row, level)">
                   {{ $t('dataV.deploy') }}
               </el-button>
               <el-button
+                  v-if="!isDemo"
                   class="abnormal"
                   type="text"
                   @click="handleDeleteMap(scope.$index, scope.row)">
@@ -96,8 +100,8 @@
     <CreateBuilding ref="CreateBuilding" @handle="handleFlush"/>
     <create-floor ref="CreateFloor" @handle="handleFlush"/>
     <create-room ref="CreateRoom" @handle="handleRoomList(floorId)"/>
-    <el-dialog :visible.sync="isImage">
-      <img :src="dialogImageUrl" alt="" width="100%"/>
+    <el-dialog :visible.sync="isImage" title="底图预览" width="85%" top="5vh">
+      <img v-if="isImage && dialogImageUrl" :src="dialogImageUrl" alt="底图预览" width="100%" style="display: block; max-height: 75vh; object-fit: contain;" @error="handlePreviewError"/>
     </el-dialog>
   </div>
 </template>
@@ -117,6 +121,9 @@ import CreateBuilding from "@/views/mapSettings/components/CreateBuilding";
 import CreateFloor from "@/views/mapSettings/components/CreateFloor";
 import CreateRoom from "@/views/mapSettings/components/CreateRoom";
 import {BASE_URL} from "@/utils/constant";
+import {resolveFloorMapUrl} from '@/utils/demoFloorMapUrl';
+import {resolveRoomMapUrl} from '@/utils/demoRoomMapUrl';
+import {hydrateDemoMediaCache} from '@/utils/demoMediaStore';
 import i18n from "@/i18n";
 let nodeDefault;
 const TABLE_ARRAY = {
@@ -162,6 +169,7 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      isDemo: process.env.VUE_APP_DEMO === 'true',
       tableTitle: i18n.t('dataV.bingList'),
       isImage: false,
       dialogImageUrl: "",
@@ -212,7 +220,7 @@ export default {
         this.handleGetMapGardenList();
       }
     },
-    handleGetMapGardenList() {
+    handleGetMapGardenList(preserve) {
       this.treeLoading = true;
       this.loading = true;
       this.companyNames = [];
@@ -271,7 +279,14 @@ export default {
             }
             this.companyNames.push(grandpa);
           }
-          if (!this.defaultOpenArray.length) {
+          // After create/edit, keep the current table level (floor/room list) instead of jumping to garden.
+          if (preserve && preserve.level === 2 && preserve.buildingId) {
+            this.handleTableData(2, preserve.buildingId, preserve.buildingName);
+          } else if (preserve && preserve.level === 3 && preserve.floorId) {
+            this.handleTableData(3, preserve.floorId, preserve.floorName);
+          } else if (preserve && preserve.level === 1 && preserve.gardenId) {
+            this.handleTableData(1, preserve.gardenId, preserve.gardenName);
+          } else if (!this.defaultOpenArray.length) {
             this.companyObject.gardenId = res.items[0].gardenId;
             this.companyObject.gardenName = res.items[0].gardenName;
             this.$set(this.breadcrumb, 0, {
@@ -292,6 +307,9 @@ export default {
       });
     },
     handleAdd() {
+      if (this.isDemo && this.level !== 2) {
+        return this.$message.info('演示仅开放楼层新增/编辑。');
+      }
       const ref = CREATE[this.level];
       this.$refs[ref].open(0, this.companyObject);
     },
@@ -324,9 +342,15 @@ export default {
       localStorage.setItem("garden", this.defaultOpenArray);
     },
     handleEditGarden(data) {
+      if (this.isDemo) {
+        return this.$message.info('演示未开放园区编辑。');
+      }
       this.$refs.CreateGarden.open(0, data);
     },
     handleAddGarden() {
+      if (this.isDemo) {
+        return this.$message.info('演示未开放园区新增。');
+      }
       this.$refs.CreateGarden.open(1);
     },
     handleTableData(level, id, label) {
@@ -401,14 +425,31 @@ export default {
         });
       }
     },
-    handlePreviewImg(fileName) {
-      this.$message({
-        type: "warning",
-        message: i18n.t('dataV.resource'),
-        duration: 1000,
-      });
+    async handlePreviewImg(fileName) {
+      let url;
+      if (this.isDemo) {
+        const resolve = this.level === 3 ? resolveRoomMapUrl : resolveFloorMapUrl;
+        url = resolve(fileName, BASE_URL);
+        if (!url) {
+          await hydrateDemoMediaCache();
+          url = resolve(fileName, BASE_URL);
+        }
+      } else {
+        url = fileName ? BASE_URL + fileName : null;
+      }
+      if (!url) {
+        this.isImage = false;
+        this.dialogImageUrl = '';
+        this.$message.warning('底图不可用，请重新上传。');
+        return;
+      }
+      this.dialogImageUrl = url;
       this.isImage = true;
-      this.dialogImageUrl = BASE_URL + fileName;
+    },
+    handlePreviewError() {
+      this.isImage = false;
+      this.dialogImageUrl = '';
+      this.$message.error('底图加载失败，请重新上传。');
     },
     handleEditMap(row) {
       const ref = CREATE[this.level];
@@ -481,7 +522,15 @@ export default {
       }
     },
     handleFlush() {
-      this.handleGetMapGardenList();
+      this.handleGetMapGardenList({
+        level: this.level,
+        gardenId: this.companyObject.gardenId,
+        gardenName: this.companyObject.gardenName,
+        buildingId: this.companyObject.buildingId,
+        buildingName: this.companyObject.buildingName,
+        floorId: this.floorId || this.companyObject.floorId,
+        floorName: this.companyObject.floorName
+      });
     },
   },
   beforeDestroy() {
@@ -548,7 +597,14 @@ export default {
 
     .breadcrumb {
       display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
       color: #303F9F;
+
+      .return-room-button {
+        margin-left: auto;
+      }
 
       h3 {
         line-height: 1.5;

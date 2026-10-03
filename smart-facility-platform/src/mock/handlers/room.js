@@ -5,18 +5,15 @@ import {
   listRoomMonitorInstrument,
   listRoomReports,
   listThingsUsers,
-  exportDemoRooms
+  exportDemoRooms,
+  createDemoRoom,
+  updateDemoRoomBasic,
+  removeDemoRoom
 } from '../fixtures/room';
-import {DEMO_FLOOR_ROOMS} from '../fixtures/floor';
 import {protectedRoute, success, failure} from '../response';
+import {validateDemoStoredMedia} from '../../utils/demoMediaStore';
 
-const DEMO_ROOM_IDS = Object.values(DEMO_FLOOR_ROOMS).flat().map(room => room.id);
-
-const removeRoutes = DEMO_ROOM_IDS.map(id =>
-  protectedRoute('POST', `/room/remove/${id}`, () => failure('本阶段演示未开放房间删除。'))
-);
-
-// RoomDrawerNew read path + dashboard + export + explicit write refusals.
+// RoomDrawerNew read path + dashboard + export + room entity writes (M2).
 export default [
   protectedRoute('GET', '/room/detail', ({params}) => {
     const detail = getDemoRoomDetail(params.id);
@@ -28,9 +25,31 @@ export default [
   protectedRoute('POST', '/roomReport/list', () => success(listRoomReports())),
   protectedRoute('GET', '/thingsUser/list', () => success(listThingsUsers())),
 
-  protectedRoute('POST', '/room/add', () => failure('本阶段演示未开放房间新增。')),
-  protectedRoute('POST', '/room/update/basic', () => failure('本阶段演示未开放房间编辑。')),
-  ...removeRoutes,
+  protectedRoute('POST', '/room/add', async ({body}) => {
+    const mediaCheck = await validateDemoStoredMedia(body && (body.mapUrl || (body.media && body.media.url)));
+    if (!mediaCheck.ok) return failure(mediaCheck.message);
+    try {
+      const result = createDemoRoom(body || {});
+      return result.ok ? success(result.item) : failure(result.message);
+    } catch (_) {
+      return failure('保存失败，请检查浏览器存储空间后重试。');
+    }
+  }),
+  protectedRoute('POST', '/room/update/basic', async ({body}) => {
+    const mediaCheck = await validateDemoStoredMedia(body && (body.mapUrl != null ? body.mapUrl : body.media && body.media.url));
+    if (!mediaCheck.ok) return failure(mediaCheck.message);
+    try {
+      const result = updateDemoRoomBasic(body || {});
+      return result.ok ? success(result.item) : failure(result.message);
+    } catch (_) {
+      return failure('保存失败，请检查浏览器存储空间后重试。');
+    }
+  }),
+  protectedRoute('POST', /^\/room\/remove\/(\d+)$/, ({path}) => {
+    const id = Number(String(path).split('/').pop());
+    const result = removeDemoRoom(id);
+    return result.ok ? success(true) : failure(result.message);
+  }),
   protectedRoute('POST', '/room/batch/delete', () => failure('本阶段演示未开放房间批量删除。')),
   protectedRoute('POST', '/room/batch/update', () => failure('本阶段演示未开放房间批量更新。')),
   protectedRoute('POST', '/room/export', async ({body}) => exportDemoRooms(body || {})),

@@ -28,7 +28,10 @@
 </template>
 
 <script>
+import {putDemoMediaFile, isDemoMediaKey, peekDemoMediaUrl} from '@/utils/demoMediaStore';
+
 const UPLOAD_UNAVAILABLE_HINT = "文件上传未接入本副本，当前不可用。";
+const isDemo = process.env.VUE_APP_DEMO === 'true';
 
 export default {
     name: "chuxouUpload",
@@ -68,12 +71,16 @@ export default {
             type: Number,
             default: 4
         },
+        /** Demo: allow local IndexedDB media (PNG/JPEG). */
+        demoLocal: {
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
             dialogVisible: false,
             dialogImageUrl: "",
-            // No hardcoded external upload host; action stays empty until a local demo upload is wired.
             httpRequest: "",
             ossData: {
                 policy: "",
@@ -85,6 +92,7 @@ export default {
                 key: ""
             },
             hide: false,
+            uploading: false,
         }
     },
     computed: {
@@ -92,35 +100,31 @@ export default {
             const fileList = [];
             if (this.value.length > 0) {
                 for (let i = 0; i < this.value.length; i++) {
-                    fileList.push(this.value[i])
+                    const item = {...this.value[i]};
+                    if (isDemo && isDemoMediaKey(item.name) && !item.url) {
+                        item.url = peekDemoMediaUrl(item.name);
+                    }
+                    fileList.push(item)
                 }
-                this.hide = fileList.length = this.limit;
+                this.hide = fileList.length >= this.limit;
+            } else {
+                this.hide = false;
             }
             return fileList;
         }
     },
     methods: {
         handleChange(file, fileList) {
-            this.hide = fileList.length = this.limit;
+            this.hide = fileList.length >= this.limit;
         },
         handlePictureCardPreview(file) {
             this.dialogVisible = true;
             this.dialogImageUrl = file.url;
         },
         handleRemove(file, fileList) {
-            let indexFlag = null;
-            this.fileList.map((item, index) => {
-                if (item.uid === file.uid) {
-                    indexFlag = index;
-                } else {
-                    indexFlag = null;
-                }
-            })
-            if (indexFlag !== null) {
-                this.fileList.splice(indexFlag, 1)
-            }
-            this.hide = false;
-            this.handleReturnUrl(fileList);
+            const next = (this.value || []).filter(item => String(item.uid) !== String(file.uid));
+            this.hide = next.length >= this.limit;
+            this.handleReturnUrl(next);
         },
         handleReturnUrl(fileList) {
             let array = [];
@@ -133,6 +137,26 @@ export default {
             this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
         },
         beforeAvatarUpload(file) {
+            if (isDemo && this.demoLocal) {
+                if (this.uploading) return false;
+                this.uploading = true;
+                putDemoMediaFile(file).then(stored => {
+                    const item = {
+                        name: stored.id,
+                        uid: String(Date.now()),
+                        url: stored.url
+                    };
+                    const next = (this.value || []).concat([item]).slice(0, this.limit);
+                    this.hide = next.length >= this.limit;
+                    this.handleReturnUrl(next);
+                    this.$message.success('底图已保存到本地。');
+                }).catch(err => {
+                    this.$message.error((err && err.message) || '底图保存失败。');
+                }).finally(() => {
+                    this.uploading = false;
+                });
+                return false;
+            }
             this.$message.warning(UPLOAD_UNAVAILABLE_HINT);
             return false;
         },

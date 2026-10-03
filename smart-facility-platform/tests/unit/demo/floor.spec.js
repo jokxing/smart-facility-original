@@ -76,22 +76,24 @@ test('wired floor returns synthetic labList markers with confirmed fields', asyn
       fontSize: expect.any(Number),
       color: expect.any(String),
       senorStatus: expect.any(Number),
-      equipments: expect.any(Array)
+      equipments: expect.any(Array),
+      openTwoSystem: true
     });
     expect(Array.isArray(room.equipments)).toBe(true);
   });
   expect(overview.items).toEqual(listFloorOverview(930001));
 });
 
-test('unwired floors keep empty labList; designer write stays blocked; room list is empty for sidebar', async () => {
+test('floors without layout keep empty labList; seed floor designer sidebar empty; marker write blocked', async () => {
   await establishSession();
   expect((await client.get('/map/floor/overview', {params: {floorId: 930002}})).data.items.labList).toEqual([]);
   expect((await client.get('/map/floor/overview', {params: {floorId: 999999}})).data.items.labList).toEqual([]);
+  // Seed rooms on 930001 are already placed → designer candidate list empty.
   const rooms = (await client.post('/room/list', {floorId: 930001, pageNum: 1, pageSize: 10000})).data;
   expect(rooms.code).toBe(1);
   expect(rooms.items.list).toEqual([]);
   expect(rooms.items.total).toBe(0);
-  // Floor room-marker writes (type:11) stay rejected; empty body is also rejected.
+  // Floor room-marker writes (type:11) stay rejected until M4; empty body is also rejected.
   expect((await client.post('/map/element/config', [{type: 11, elementId: 950001, x: 1, y: 1}])).data.code).toBe(0);
   expect((await client.post('/map/element/config', {})).data.code).toBe(0);
 });

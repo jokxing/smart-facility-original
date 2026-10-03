@@ -12,7 +12,7 @@
       <el-scrollbar style="height: 100%">
         <el-form
             :model="form"
-            label-width="230px">
+            label-width="150px">
           <div class="flexBox margin-center">
             <el-form-item :label="$t('dataV.floorName')" required>
               <el-input v-model.trim="form.name" maxlength="16" :placeholder="$t('common.pleaseInput')"/>
@@ -22,13 +22,15 @@
             </el-form-item>
             <el-form-item :label="$t('route.floorConfiguar')" required>
               <chuxou-upload
-                  :accept="'jpg,.png,.svg'"
+                  :accept="isDemo ? 'image/png,image/jpeg,.png,.jpg,.jpeg' : 'jpg,.png,.svg'"
                   :dir="'svg'"
                   :limit="1"
-                  :max="15"
+                  :max="isDemo ? 5 : 15"
+                  :demo-local="isDemo"
                   :value="fileList"
                   @handleUploadSuccess="handleUploadSuccess"
               />
+              <div v-if="isDemo" class="demo-map-hint">仅 PNG/JPEG，≤5MB；替换底图不会自动迁移或清除已有布局。</div>
             </el-form-item>
           </div>
         </el-form>
@@ -45,6 +47,10 @@
 import ChuxouUpload from "@/views/room/components/chuxouUpload";
 import {postMapFloor, putMapFloor} from "@/api/mapSet";
 import {BASE_URL} from "@/utils/constant";
+import {isDemoMediaKey, peekDemoMediaUrl} from "@/utils/demoMediaStore";
+import {resolveFloorMapUrl} from "@/utils/demoFloorMapUrl";
+
+const isDemo = process.env.VUE_APP_DEMO === 'true';
 
 export default {
   name: "CreateFloor",
@@ -52,6 +58,7 @@ export default {
   data() {
       const _this = this;
     return {
+      isDemo,
       form: {
         name: "",
         media: {
@@ -63,13 +70,15 @@ export default {
       dialogVisible: false,
       type: "",
       fileList: [],
-      disabled: true
+      disabled: true,
+      originalMapUrl: ""
     }
   },
   methods: {
     handleClose() {
       this.dialogVisible = false;
       this.fileList = [];
+      this.originalMapUrl = "";
       this.form = {
         name: "",
         media: {
@@ -77,17 +86,21 @@ export default {
           uid: ""
         }
       }
+      this.disabled = true;
     },
     open(type, object, parentObject) {
       this.dialogVisible = true;
       this.type = type;
       this.fileList = [];
+      this.originalMapUrl = "";
       if (type) {
         // 编辑
         this.title = this.$t('dataV.editFloor');
         const {buildingName, buildingId} = parentObject;
         const {id, name, mapUrl, uid} = object;
-        this.fileList.push({name: mapUrl, uid, url: BASE_URL + mapUrl});
+        this.originalMapUrl = mapUrl || "";
+        const preview = resolveFloorMapUrl(mapUrl) || (isDemoMediaKey(mapUrl) ? peekDemoMediaUrl(mapUrl) : (BASE_URL + mapUrl));
+        this.fileList.push({name: mapUrl, uid: uid || String(id), url: preview});
         this.form.name = name;
         this.form.buildingName = buildingName;
         this.form.id = id;
@@ -99,6 +112,7 @@ export default {
         const {buildingName, buildingId} = object;
         this.form.buildingName = buildingName;
         this.form.buildingId = buildingId;
+        this.disabled = true;
       }
     },
     handleSubmit() {
@@ -106,22 +120,30 @@ export default {
         return this.$message.error(this.$t('dataV.inputFloor'));
       }
       delete this.form.buildingName;
-      this.form.media["url"] = this.fileList[0].name;
-      this.form.media["uid"] = this.fileList[0].uid;
-      if (this.type) {
-        // 编辑
-        putMapFloor(this.form).then(res => {
-          this.handleMessage(res);
-        })
-      } else {
-        // 新增
-        postMapFloor(this.form).then(res => {
-          this.handleMessage(res);
-        });
+      const file = this.fileList && this.fileList[0];
+      if (!file || !file.name) {
+        return this.$message.error('请上传楼层底图。');
       }
+      if (this.type && this.originalMapUrl && file.name !== this.originalMapUrl) {
+        this.$message.info('替换底图不会自动迁移或清除已有布局。');
+      }
+      this.form.media = {
+        url: file.name,
+        uid: file.uid != null ? String(file.uid) : ''
+      };
+      if (this.type) {
+        return putMapFloor(this.form).then(res => {
+          this.handleMessage(res);
+          return res;
+        }).catch(() => this.$message.error('保存失败，请重试。'));
+      }
+      return postMapFloor(this.form).then(res => {
+        this.handleMessage(res);
+        return res;
+      }).catch(() => this.$message.error('保存失败，请重试。'));
     },
     handleMessage(res) {
-      if (res.code) {
+      if (res.code === 1) {
         this.$message.success(res.message);
         this.handleClose();
         this.$emit("handle");
@@ -131,7 +153,7 @@ export default {
     },
     handleUploadSuccess(e) {
       this.fileList = e;
-      this.disabled = false;
+      this.disabled = !(e && e[0] && e[0].name);
     }
   }
 }

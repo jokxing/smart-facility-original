@@ -346,6 +346,7 @@ import {
   removeRoomThings
 } from "@/api/room";
 import {BASE_URL, DEVICE_ID, items, MONITORSTATUS, TIME_FORMAT} from "@/utils/constant";
+import {resolveDeviceAssetUrl} from "@/utils/demoDeviceUrl";
 import HardwareValue from "@/components/HardwareValue/index";
 import {postInstrumentList} from "@/api/labDevice";
 import {mapMutations, mapState} from "vuex";
@@ -578,7 +579,7 @@ export default {
             let obj = {
               id: item.id,
               name: item.name,
-              url: BASE_URL + item.logoUrl,
+              url: resolveDeviceAssetUrl(item.logoUrl, BASE_URL),
               sensors: []
             };
             item.simpleEquipments.map(i => {

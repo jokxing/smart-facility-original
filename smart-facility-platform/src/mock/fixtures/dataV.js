@@ -1,9 +1,18 @@
 import {DEMO_SPACE} from './space';
-import {DEMO_FLOOR_ROOMS} from './floor';
+import {listFloorsByBuildingId} from './mapFloor';
 import {DEMO_USER} from './auth';
 import {listInstrumentsByRoomId, listInstrumentsForFloorRooms} from './instrument';
 import {getDemoScenario, statusForScenario} from './scenario';
 import {EQUIPMENT_TYPE_META} from './equipment';
+
+function roomsForFloorCards(floorId) {
+  try {
+    const {allDemoRoomRows} = require('./room');
+    return allDemoRoomRows().filter(row => Number(row.floorId) === Number(floorId));
+  } catch (_) {
+    return [];
+  }
+}
 
 /**
  * FloorDataV (POST /map/floor/screenV1) projection from shared space/room seeds.
@@ -15,7 +24,8 @@ function findFloorContext(floorId) {
   const key = floorId == null || floorId === '' ? null : Number(floorId);
   for (const garden of DEMO_SPACE) {
     for (const building of garden.buildings) {
-      for (const floor of building.subDivisions || []) {
+      const floors = listFloorsByBuildingId(building.id);
+      for (const floor of floors) {
         if (key != null && floor.id === key) {
           return {garden, building, floor};
         }
@@ -26,16 +36,16 @@ function findFloorContext(floorId) {
   // Only an omitted ID selects the default demo floor.
   const garden = DEMO_SPACE[0];
   const building = garden.buildings[0];
-  const floor = building.subDivisions[0];
+  const floor = listFloorsByBuildingId(building.id)[0];
   return {garden, building, floor};
 }
 
 function roomCardsForFloor(floorId, statusFilter) {
-  const rooms = DEMO_FLOOR_ROOMS[floorId] || [];
+  const rooms = roomsForFloorCards(floorId);
   const {senorStatus: scenarioStatus} = statusForScenario(getDemoScenario());
   return rooms.map((room, index) => {
     const hasInstruments = listInstrumentsByRoomId(room.id).length > 0;
-    const senorStatus = hasInstruments ? scenarioStatus : room.senorStatus;
+    const senorStatus = hasInstruments ? scenarioStatus : (room.senorStatus != null ? room.senorStatus : 3);
     return {
       id: room.id,
       name: room.name,
@@ -64,7 +74,7 @@ export function listMapGardenTree() {
     subDivisions: garden.buildings.map(building => ({
       id: building.id,
       name: building.name,
-      subDivisions: (building.subDivisions || []).map(floor => ({
+      subDivisions: listFloorsByBuildingId(building.id).map(floor => ({
         id: floor.id,
         name: floor.name
       }))
@@ -76,7 +86,7 @@ export function listFloorScreen(body = {}) {
   const ctx = findFloorContext(body.floorId) || {garden: {}, building: {}, floor: {}};
   const statusFilter = body.status;
   const roomList = roomCardsForFloor(ctx.floor.id, statusFilter);
-  const roomData = (DEMO_FLOOR_ROOMS[ctx.floor.id] || []).map(room => ({
+  const roomData = roomsForFloorCards(ctx.floor.id).map(room => ({
     id: room.id,
     name: room.name,
     screenShowFlag: 1
@@ -133,7 +143,7 @@ function findBuildingContext(buildingId) {
 }
 
 function instrumentCardsForFloor(floorId, statusFilter) {
-  const rooms = DEMO_FLOOR_ROOMS[floorId] || [];
+  const rooms = roomsForFloorCards(floorId);
   const {senorStatus} = statusForScenario(getDemoScenario());
   return listInstrumentsForFloorRooms(rooms.map(room => room.id)).map((entity, index) => ({
     id: entity.id,
@@ -167,7 +177,9 @@ export function listRoomScreen(body = {}) {
   // Intersect explicit scopes; invalid IDs never select another space.
   if (ctx && body.buildingId != null && body.buildingId !== '' && Number(body.buildingId) !== ctx.building.id) ctx = null;
   const floorScoped = body.floorId != null && body.floorId !== '';
-  const floors = ctx ? (floorScoped ? [ctx.floor] : ctx.building.subDivisions || []) : [];
+  const floors = ctx
+    ? (floorScoped ? [ctx.floor] : listFloorsByBuildingId(ctx.building.id))
+    : [];
   let instrumentList = floors.reduce((cards, floor) => cards.concat(instrumentCardsForFloor(floor.id, statusFilter)), []);
   if (body.roomIds != null && body.roomIds !== '') {
     const ids = (Array.isArray(body.roomIds) ? body.roomIds : String(body.roomIds).split(','))

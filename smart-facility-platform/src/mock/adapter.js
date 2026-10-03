@@ -34,7 +34,11 @@ export function createMockAdapter(routes) {
     const [pathname, query = ''] = url.split('?');
     const path = pathname.startsWith(DEMO_BASE_URL + '/') ? pathname.slice(DEMO_BASE_URL.length) : pathname;
     const method = (config.method || 'get').toUpperCase();
-    const route = routes.find(item => item.method === method && item.path === path);
+    const route = routes.find(item => {
+      if (item.method !== method) return false;
+      if (item.path instanceof RegExp) return item.path.test(path);
+      return item.path === path;
+    });
     if (!route) {
       throw mockError('MOCK_NOT_IMPLEMENTED', '当前演示尚未接入此接口。', config);
     }

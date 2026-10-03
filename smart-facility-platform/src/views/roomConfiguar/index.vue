@@ -5,26 +5,40 @@
     v-loading="loading"
     element-loading-background="rgba(0, 0, 0, 0.8)"
     style="touch-action: none;">
-    <div class="designerHeader">
-      <div
-        class="unfolder"
-        :class="overviewVisible ? 'folderUp' : ''"
-        @click="handleClickIsFolder"
-      ></div>
-      <div class="title">{{ title }}</div>
-      <div class="tab">
+    <div class="designerHeader" :class="{ 'demo-header-toolbar': isDemo }">
+      <div class="layout-left-nav">
         <div
-          v-for="(item,index) in tabs"
-          :key="item.types"
-          :class="{ active: index == tabIndex}"
-          @click="handleTab(item,index)">
-            {{ item.text }}
+          class="unfolder"
+          :class="overviewVisible ? 'folderUp' : ''"
+          @click="handleClickIsFolder"
+        ></div>
+        <div class="header-toolbar">
+          <div v-if="isDemo" class="toolbar-group demo-scenario-group" data-testid="demo-scenario-group">
+            <span class="toolbar-label">场景</span>
+            <div class="layout-switch demo-scenario-switch">
+              <div :class="demoScenario === 'normal' ? 'is-active':''" class="type-button" @click="handleDemoScenario('normal')">正常</div>
+              <div :class="demoScenario === 'alarm' ? 'is-active':''" class="type-button" @click="handleDemoScenario('alarm')">异常</div>
+              <div :class="demoScenario === 'offline' ? 'is-active':''" class="type-button" @click="handleDemoScenario('offline')">离线</div>
+            </div>
+          </div>
+          <div class="toolbar-group filter-group" data-testid="device-type-filter-group">
+            <span class="toolbar-label">筛选</span>
+            <div class="tab layout-switch">
+              <div
+                v-for="(item,index) in tabs"
+                :key="item.types"
+                :class="{ active: index == tabIndex, 'is-active': index == tabIndex, 'type-button': true }"
+                @click="handleTab(item,index)">
+                  {{ item.text }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <div class="title">{{ title }}</div>
       <div class="nav">
         <div class="navItem back" @click="handleBackToList"><i></i> {{ $t('common.back') }}</div>
         <div class="navItem" @click="handleConfiguar">{{ $t('dataV.inDeploy') }}</div>
-        <div v-if="isDemo" class="navItem" @click="handleDemoScenarioCycle">场景·{{ demoScenarioLabel }}</div>
         <div class="navItem" @click="handleToScreen">{{ $t('dataV.inDataV') }}</div>
       </div>
     </div>
@@ -97,7 +111,7 @@
   </div>
 </template>
 <script>
-import { roomFrame } from "@/utils/demoLayoutGeometry";
+import { roomBackgroundFrame } from "@/utils/demoLayoutGeometry";
 import { demoDeviceStatusColor, countDemoDeviceStatus } from "@/utils/demoDeviceStatus";
 import ImageNode from "./components/ImageNode.vue";
 import RoomStatisticsDrawer from "./components/RoomStatistics.vue";
@@ -276,22 +290,32 @@ export default {
       }
     },
 
-    async handleDemoScenarioCycle() {
+    async handleDemoScenario(scenario) {
       this.hoveredDeviceId = null;
-      const order = ['normal', 'alarm', 'offline'];
-      const next = order[(order.indexOf(this.demoScenario) + 1) % order.length];
+      if (!isDemo) return;
       try {
-        const res = await updateDemoScenario(next);
+        const res = await updateDemoScenario(scenario);
         if (res && res.code === 1 && res.items) {
           this.demoScenario = res.items.scenario;
           const roomId = this.$route.query && this.$route.query.roomId;
           if (roomId) {
             await this.getDrawerDataAsync(+roomId);
           }
+          const label = this.demoScenario === 'alarm' ? '异常' : (this.demoScenario === 'offline' ? '离线' : '正常');
+          this.$message.success('已切换演示场景：' + label);
+        } else if (res && res.message) {
+          this.$message.error(res.message);
         }
       } catch (err) {
         this.$message.error((err && err.message) || '场景切换失败');
       }
+    },
+
+    // Kept for existing browser smoke helpers that cycle scenarios.
+    async handleDemoScenarioCycle() {
+      const order = ['normal', 'alarm', 'offline'];
+      const next = order[(order.indexOf(this.demoScenario) + 1) % order.length];
+      return this.handleDemoScenario(next);
     },
 
     async getDrawerDataAsync(id) {
@@ -359,7 +383,7 @@ export default {
             image,
             width: width,
             height: height,
-            ...(isDemo ? roomFrame(roomId, width / 1600) : {}),
+            ...(isDemo ? roomBackgroundFrame(roomId, width / 1600, image.naturalWidth, image.naturalHeight) : {}),
           };
         };
       });

@@ -5,8 +5,6 @@
   <pattern id="corridor" width="104" height="40" patternUnits="userSpaceOnUse"><rect width="104" height="40" fill="#698895"/><path d="M0 40H104" stroke="#809aa5"/></pattern>
 </defs>
 <rect width="1678" height="795" rx="10" fill="#10293c"/>
-<text x="70" y="38" fill="#b9d9e7" font-family="sans-serif" font-size="20" letter-spacing="3">LABORATORY · 1F</text>
-<text x="1608" y="38" text-anchor="end" fill="#719aaf" font-family="sans-serif" font-size="15">实验空间 / 楼层总览</text>
 <rect x="78" y="80" width="1534" height="662" fill="#071a29" opacity=".6"/>
 <rect x="70" y="70" width="1538" height="660" fill="url(#tile)" stroke="#213e50" stroke-width="16"/>
 <!-- Two large laboratories above a continuous circulation spine. -->
@@ -29,9 +27,5 @@
 <g transform="translate(1124 552)"><rect x="4" y="6" width="190" height="52" rx="4" fill="#102838" opacity=".3"/><rect width="190" height="52" rx="4" fill="#b6cbd2" stroke="#375c70" stroke-width="3"/><rect x="8" y="8" width="174" height="36" rx="2" fill="#e1e9e8"/><path d="M12 26H178" stroke="#9bb5bf" stroke-width="2"/><rect x="73" y="22" width="44" height="8" rx="2" fill="#7e9eac"/></g><g transform="translate(1124 646)"><rect x="4" y="6" width="190" height="52" rx="4" fill="#102838" opacity=".3"/><rect width="190" height="52" rx="4" fill="#b6cbd2" stroke="#375c70" stroke-width="3"/><rect x="8" y="8" width="174" height="36" rx="2" fill="#e1e9e8"/><path d="M12 26H178" stroke="#9bb5bf" stroke-width="2"/><rect x="73" y="22" width="44" height="8" rx="2" fill="#7e9eac"/></g>
 <g fill="#c5d9de" stroke="#7896a6" stroke-width="2"><rect x="1380" y="555" width="78" height="62" rx="8"/><rect x="1490" y="555" width="78" height="62" rx="8"/><rect x="1380" y="652" width="188" height="40" rx="4"/></g>
 <path d="M700 521h100 M920 521h100" stroke="#698895" stroke-width="14"/>
-<g font-family="sans-serif" font-size="15" fill="#d2e4e9" text-anchor="middle">
-<text x="200" y="716">楼梯</text><text x="463" y="716">电梯</text><text x="840" y="701">公共准备区</text><text x="1220" y="630">辅助区</text>
-</g>
 <path d="M710 465h-70m12-8-12 8 12 8 M975 465h70m-12-8 12 8-12 8" fill="none" stroke="#bad6df" stroke-width="3"/>
-<text x="70" y="770" fill="#688fa4" font-family="sans-serif" font-size="14">实验区 / 公共准备区 / 辅助区</text>
 </svg>

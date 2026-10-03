@@ -4,24 +4,32 @@
       class="designerLayout designer_fullScreen"
       element-loading-background="rgba(0, 0, 0, 0.8)"
       style="touch-action: none;">
-    <div class="designerHeader" >
+    <div class="designerHeader" :class="{ 'demo-header-toolbar': isDemo }">
       <div class="layout-left-nav" v-show="allBtn">
         <span :class="overviewVisible ? 'folderUp' : ''" class="unfolder" @click="handleClickIsFolder"></span>
-        <div class="layout-switch">
-          <div :class="senorStatusType === 3000 ? 'is-active':''" class="type-button" @click="handleShowAllData">{{ $t('dataV.allShow') }}
+        <div class="header-toolbar">
+          <div v-if="isDemo" class="toolbar-group demo-scenario-group" data-testid="demo-scenario-group">
+            <span class="toolbar-label">场景</span>
+            <div class="layout-switch demo-scenario-switch">
+              <div :class="demoScenario === 'normal' ? 'is-active':''" class="type-button" @click="handleDemoScenario('normal')">正常</div>
+              <div :class="demoScenario === 'alarm' ? 'is-active':''" class="type-button" @click="handleDemoScenario('alarm')">异常</div>
+              <div :class="demoScenario === 'offline' ? 'is-active':''" class="type-button" @click="handleDemoScenario('offline')">离线</div>
+            </div>
           </div>
-          <div :class="senorStatusType === null ? 'is-active':''" class="type-button" @click="handleCloseAllData">{{ $t('dataV.allClose') }}
+          <div class="toolbar-group filter-group" data-testid="status-filter-group">
+            <span class="toolbar-label">筛选</span>
+            <div class="layout-switch">
+              <div :class="senorStatusType === 3000 ? 'is-active':''" class="type-button" @click="handleShowAllData">{{ $t('dataV.allShow') }}
+              </div>
+              <div :class="senorStatusType === null ? 'is-active':''" class="type-button" @click="handleCloseAllData">{{ $t('dataV.allClose') }}
+              </div>
+              <div :class="senorStatusType === 1 ? 'is-active':''" class="type-button" @click="senorStatusType = 1">{{ $t('common.normal') }}</div>
+              <div :class="senorStatusType === 2 ? 'is-active':''" class="type-button" @click="senorStatusType = 2">{{ $t('common.abnormal') }}</div>
+              <div :class="senorStatusType === -100 ? 'is-active':''" class="type-button" @click="senorStatusType = -100">
+                  {{ $t('common.offLine') }}
+              </div>
+            </div>
           </div>
-          <div :class="senorStatusType === 1 ? 'is-active':''" class="type-button" @click="senorStatusType = 1">{{ $t('common.normal') }}</div>
-          <div :class="senorStatusType === 2 ? 'is-active':''" class="type-button" @click="senorStatusType = 2">{{ $t('common.abnormal') }}</div>
-          <div :class="senorStatusType === -100 ? 'is-active':''" class="type-button" @click="senorStatusType = -100">
-              {{ $t('common.offLine') }}
-          </div>
-        </div>
-        <div v-if="isDemo" class="layout-switch demo-scenario-switch">
-          <div :class="demoScenario === 'normal' ? 'is-active':''" class="type-button" @click="handleDemoScenario('normal')">场景·正常</div>
-          <div :class="demoScenario === 'alarm' ? 'is-active':''" class="type-button" @click="handleDemoScenario('alarm')">场景·异常</div>
-          <div :class="demoScenario === 'offline' ? 'is-active':''" class="type-button" @click="handleDemoScenario('offline')">场景·离线</div>
         </div>
       </div>
       <div class="title">{{ floorName }}</div>
@@ -645,16 +653,30 @@ export default {
         this.loading = false;
         if (result.code === 1) {
           this.floorData = result.items;
+          // Prefer overview as source of truth for name/map (SaaS edits sync on refresh).
+          if (result.items) {
+            if (result.items.floorName) this.floorName = result.items.floorName;
+            if (result.items.mapId != null) this.mapId = result.items.mapId;
+            if (result.items.mapUrl != null && result.items.mapUrl !== '' && result.items.mapUrl !== this.mapUrl) {
+              this.mapUrl = result.items.mapUrl;
+              this.handleInit(this.config && this.config.width, this.config && this.config.height);
+            }
+          }
           if (
               result.items &&
               result.items.labList &&
               result.items.labList.length >= 0
           ) {
-            temp = result.items.labList;
+            // Only paint placed markers (reject sentinel / invalid coords).
+            temp = result.items.labList.filter(room => {
+              const x = Number(room && room.x);
+              const y = Number(room && room.y);
+              return Number.isFinite(x) && Number.isFinite(y) && x > -1000 && y > -1000;
+            });
             for (let i = 0; i < temp.length; i++) {
               let ctemp = [];
-              for (let j = 0; j < temp[i].equipments.length; j++) {
-                for (let k = 0; k < temp[i].equipments[j].sensors.length; k++) {
+              for (let j = 0; j < (temp[i].equipments || []).length; j++) {
+                for (let k = 0; k < (temp[i].equipments[j].sensors || []).length; k++) {
                   ctemp.push(temp[i].equipments[j].sensors[k]);
                 }
                 this.sensors = [];
@@ -1178,10 +1200,6 @@ export default {
   small { color: #8faab7; }
 }
 @import "./index.less";
-
-.layout-left-nav {
-  display: flex;
-}
 
 .right-bg {
   width: 200px;

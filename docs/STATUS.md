@@ -2382,3 +2382,177 @@
 - 设计决定：本批只完成部门与成员，不声称完整权限引擎或所有系统管理页；多角色未改则保留，基本编辑显式改变主角色同步为单角色。
 - 整批 commit 建议：feat: 完成部门与员工管理演示闭环及跨模块一致性修复。
 - 下一最小任务：7A 已开放模块跨模块验收。剩余按四批收尾（7A–7D）及可选扩展列于 remaining-work.md，不以旧系统全部目录数量估完成率。
+
+## 2026-10-02 — 调整优先级：中控地图 M1–M3 交接
+
+- 用户明确后置 7A–7D；当前先完善地图与 SaaS 楼层/房间底图读侧联动。
+- 本轮仅新增 docs/map-m1-m3-handoff.md，更新 next-task-prompt.md 与 STATUS.md，未改业务源码、未安装、未提交或推送。
+- 源码核对：CreateFloor.vue 使用 api/mapSet 的 /map/floor 与媒体字段；房间管理使用 /room/add、/room/update/basic，当前 Mock 写侧拒绝；floorConfiguar 顶部场景/筛选复用布局类并有混合房间点击事件，需先做 M1。
+- 设计决定：另 AI 按 M1→M2→M3 分步、每步验证后停止；全部交付后原 AI 复盘修复并给整批 commit。M4 房间标记交互/拖拽/移除/保存由原 AI 后续实施；M5 及后续不安排。
+- 验证：仅检查当前 Git 状态、入口/API/Mock 源码；本轮未跑业务测试或浏览器，提示词不代表功能已实现。
+- 下一最小任务：把 map-m1-m3-handoff.md 交另 AI，首次只做 M1。
+
+## 2026-10-02 — 中控地图 M1（顶部场景/筛选排版）
+
+### 做了什么
+
+- 楼层/房间预览顶部改为分组工具栏：`场景`（切换演示数据）与 `筛选`（楼层状态 / 房间设备类型）带标签、flex 排布，去掉两个 `layout-switch` 共用绝对定位叠字。
+- 房间页场景从右侧循环按钮改为与楼层一致的三态按钮；保留 `handleDemoScenarioCycle` 兼容既有浏览器烟测。
+- 约定文档 `docs/map-m1-contract.md`（信息卡双入口交 M4；本步不改完整导航）。
+- 单测 `tests/unit/demo/map-m1.spec.js`；浏览器 `scripts/check-demo-map-m1.cjs` → `npm run test:demo:map:m1`；证据 `docs/evidence/map-m1`。
+
+### 修改文件
+
+- platform：`src/views/floorConfiguar/index.vue`、`index.less`；`src/views/roomConfiguar/index.vue`、`index.less`；`tests/unit/demo/map-m1.spec.js`；`scripts/check-demo-map-m1.cjs`；`package.json`
+- docs：`map-m1-contract.md`、`STATUS.md`、`demo-guide.md`、`next-task-prompt.md`
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：45 套 / **228** 项通过。
+- `$env:DEMO_PORT='8097'; npm run test:demo:map:m1` → `externalAttempts=0`；1440 与 1280 宽度断言场景/筛选/标题/右侧操作无矩形重叠；场景与筛选真实切换生效。
+- 未跑生产构建、全站 `test:demo:browser`、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 场景与筛选分组标签固定中文「场景」「筛选」，与既有演示场景文案一致；筛选语义仍跟各页原逻辑（楼层状态气泡 / 房间设备类型）。
+- M1 不实现信息卡「查看详情 / 进入房间」；演示单击仍开抽屉，交 M4。
+
+### 未验证
+
+- 超窄宽度（&lt;1280）与超宽大屏人工观感；配置器页顶栏；M4 交互。
+
+### 下一步
+
+- **本轮停止**。用户说继续后再做 M2（见 `docs/map-m1-m3-handoff.md` / `docs/next-task-prompt.md`）。不给 commit 信息。
+
+## 2026-10-02 — 修：楼层图房间详情设备图标路径
+
+### 做了什么
+
+- 根因：楼层 overview 的 `labList` 无 `openTwoSystem`，点房间走进旧 `RoomModule`，图标用 `BASE_URL + logoUrl` → `/__demo_api__/file/picUrl?fileName=demo-device-incubator` 裂图；房间管理走 `MonitorEquipment` + `resolveDeviceAssetUrl` → `/demo/devices/incubator.svg` 正常。
+- `RoomModule` 改为 `resolveDeviceAssetUrl`；`listFloorOverview` 补 `openTwoSystem: true`，与房间管理同抽屉。
+- 单测：`floor.spec.js`、`map-m1.spec.js` 断言。
+
+### 验证
+
+- `npm run test:demo` 相关：45 套 / **229** 项通过。未提交、未推送。
+
+### 下一步
+
+- 仍停在 M1 后；用户继续再做 M2。
+
+## 2026-10-02 — 中控地图 M2（楼层/房间 CRUD + 本地底图）
+
+### 做了什么
+
+- 契约 `docs/map-m2-contract.md`：开放 `/ms/mapSet` 楼层增改、`/rm/room` 房间增改单删；本地媒体键与 ID 池。
+- 楼层：`POST/PUT /map/floor` Mock（`mapFloor.js` overlay）；`CreateFloor` 缺图校验、demo 本地上传、提交后按当前 level 刷新列表（修 `handleFlush` 不再跳回园区）。
+- 房间：`POST /room/add`、`/room/update/basic`、`/room/remove/:id` 接通；有设备/硬件拒删；空房间删清布局索引。
+- 底图：`demoMediaStore`（IndexedDB Blob）+ `chuxouUpload` `demoLocal`；内置 SVG 登记键保留；新上传仅 PNG/JPEG。
+- 权限/菜单：演示开放 `/ms/mapSet`；单测 `map-m2.spec.js`；浏览器 `test:demo:map:m2` → `docs/evidence/map-m2`。
+
+### 修改文件（本步要点）
+
+- platform：`src/mock/fixtures/mapFloor.js`；`handlers/map.js`、`room.js`；`adapter.js`；`utils/demoMediaStore.js`、`demoFloorMapUrl.js`、`demoRoomMapUrl.js`；`mapSettings/MapSettings.vue`、`CreateFloor.vue`；`room/Room.vue`、`Create.vue`、`chuxouUpload.vue`；`permission.js`；`auth`/`space`/`floor`/`dataV` fixtures；`tests/unit/demo/map-m2.spec.js`、`room-list.spec.js`；`scripts/check-demo-map-m2.cjs`；`package.json`
+- docs：`map-m2-contract.md`、`STATUS.md`、`demo-guide.md`、`next-task-prompt.md`、`evidence/map-m2/`
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：46 套 / **233** 项通过。
+- `$env:DEMO_PORT='8098'; npm run test:demo:map:m2` → `externalAttempts=0`；楼层新建 id=`931201`；空房间增删；有设备房间拒删。
+- 未跑生产构建、全站 browser 套件、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 底图元数据存媒体键（`demo-media-*` / 内置 key），Blob 仅 IndexedDB；不把 blob: URL 写入 localStorage。
+- 地图设置刷新：`handleFlush` 重建树后按当前 `level` 恢复楼层/房间表，避免创建 后看不到新行。
+- 不开放楼宇 CRUD、楼层删除、房间批量；中控读侧同步交 M3。
+
+### 未验证
+
+- 真实文件选择器上传大图/解码失败的人工观感；跨标签页 IndexedDB 并发；M3 楼层切换读侧。
+
+### 下一步
+
+- **本轮停止**。用户说继续后再做 M3（见 `docs/map-m1-m3-handoff.md` / `docs/next-task-prompt.md`）。不给 commit 信息。
+
+## 2026-10-03 — 中控地图 M3（SaaS 与中控读侧同步）
+
+### 做了什么
+
+- 契约 `docs/map-m3-contract.md`：未布局/已布局语义、坐标系、给 M4 的保存边界（`type:11` 仍拒绝）。
+- overview `labList` 仅有效坐标；designer `POST /room/list`（仅 floorId+page）返回未布局房间。
+- 楼层预览从 overview 回填 `mapUrl`/`floorName`；过滤 sentinel 标记。
+- `roomTree` / `dataV` 投影合并 created floors/rooms。
+- 单测 `map-m3.spec.js`；浏览器 `test:demo:map:m3` → `docs/evidence/map-m3`。
+
+### 修改文件（本步要点）
+
+- platform：`src/mock/fixtures/room.js`、`floor.js`、`roomTree.js`、`dataV.js`；`handlers/floor.js`；`floorConfiguar/index.vue`、`Layout.vue`；`room/components/Create.vue`；`tests/unit/demo/map-m3.spec.js`、`floor.spec.js`、`room-list.spec.js`、`instrument-list.spec.js`；`scripts/check-demo-map-m3.cjs`；`package.json`
+- docs：`map-m3-contract.md`、`STATUS.md`、`demo-guide.md`、`next-task-prompt.md`、`evidence/map-m3/`
+
+### 验证
+
+- `npm run test:demo -- --watch=false`：47 套 / **237** 项通过。
+- `$env:DEMO_PORT='8098'; npm run test:demo:map:m3` → `externalAttempts=0`；新建楼层进楼宇/预览；候选列表增改删同步。
+- 未跑生产构建、全站 browser 套件、真实后端。未安装依赖、未提交、未推送。
+
+### 设计决定
+
+- 业务归属 `room.floorId` 与布局坐标分离；未布局不进 overview。
+- M4 保存仍走既有 URL 时须与设备布局 schema 区分；本轮不开放写成功。
+
+### 未验证
+
+- 人工拖拽观感（本轮禁用）；换楼层后旧标记清理（无布局存储时尚无残留路径）；超大新建楼层池上限压测。
+
+### 下一步
+
+- **本轮停止**。M1–M3 交付完毕，交原 AI 复盘并实施 M4（见 `docs/map-m3-contract.md` / `docs/next-task-prompt.md`）。不给 commit 信息。
+
+## 2026-10-03 原 AI 复盘 M1–M3
+
+- 修改文件：`src/utils/demoMediaStore.js`、`src/mock/handlers/map.js`、`src/mock/handlers/room.js`、`src/mock/fixtures/room.js`、`src/views/mapSettings/components/CreateFloor.vue`、`src/views/room/components/Create.vue`、`tests/unit/demo/map-m2.spec.js`（均位于 smart-facility-platform）；新增 `docs/review-map-m1-m3.md`，维护本状态文件。
+- 修复：不存在的持久底图键禁止保存；数据库失败可重试；楼层改名同步已有房间；会话失效不被弹窗当作成功；存储和请求失败明确提示。
+- 验证：47 套、240 项单测通过，新增三项回归。
+- 未验证：本轮未重新执行浏览器脚本；真实 PNG/JPEG 上传及刷新恢复尚缺浏览器验收。既有另一 AI 记录不能替代该项。
+- 设计决定：保留 Vue 2、统一 Mock 和原有非演示上传限制；M4 未开始；miniprogram 不纳入本批。
+- 下一步最小任务：验证真实图片上传及刷新恢复，再实施 M4 房间交互和布局闭环。不自动扩大到设备布局等后续任务。
+
+## 2026-10-03 PNG 素材与上传补验完成
+
+- 新增素材：`smart-facility-platform/public/demo/floors/floor-a-1f.png`（1678×795）、`room-a.png`（762×327）、`room-b.png`（760×327），均小于 5 MB；保留 SVG 原稿及默认 SVG 登记键。
+- 新增 `scripts/check-demo-map-png.cjs`：复用既有隔离浏览器脚本导出原稿，验证 PNG 经上传组件存入 IndexedDB、新增楼层和房间、刷新恢复及预览底图尺寸。证据新增 `docs/evidence/map-png/`。
+- 修复文件（平台内）：`src/utils/demoLayoutGeometry.js`、`src/views/roomConfiguar/index.vue`、`src/views/roomConfiguar/components/Designer.vue`。新房间没有种子几何，原来虽解码成功却以零尺寸渲染；现在按图片比例居中显示，不改变已有种子设备坐标和布局保存边界。
+- 新增回归：`tests/unit/demo/map-png.spec.js`；文档维护：素材 README、demo-guide、review-map-m1-m3、next-task-prompt、本 STATUS。
+- 验证：48 套、242 项单测通过；8098 本地浏览器补验通过，外部请求 0，人工检查新房间刷新后截图可见。
+- 未验证：系统文件选择窗口未自动操作（浏览器构造真实 File 调用上传组件）；JPEG、超限图片全边界未验。新增设备布局、房间标记保存属于后续任务。
+- 决定与下一步：不放开任意 SVG 上传，不安装依赖、不提交或推送、不处理 miniprogram；M1–M3 可提供整批提交说明。下一步最小任务 M4 房间标记与布局闭环，由当前 AI 处理；本轮停止。
+
+## 2026-10-03 底图移除固定文字
+
+- 用户要求所有底图不带文字，名称与标签由动态层负责。
+- 修改 `smart-facility-platform/scripts/write-floor-svg.cjs`，去掉楼层标题、实验操作区、楼梯/电梯/准备区等全部可见文字；重新生成 `public/demo/floors/` 下三张 SVG 及三张 PNG，尺寸和建筑几何保持原值。非绘制 title 元数据保留，现有动态房间标记不改。
+- `scripts/check-demo-map-png.cjs` 增加无可见文字校验，避免后续生成重新带入静态文案；素材 README 说明使用方式。
+- 验证：三张 SVG 搜索无可见文字节点；重新导出 PNG 后浏览器上传、刷新恢复通过，外部请求 0，证据已更新；`git diff --check` 通过。本轮仅素材和导出约束变化，未重复全量单测。
+- 已存入 IndexedDB 的旧 PNG 不自动替换，用户需在对应楼层/房间重新上传新版 PNG 保存。
+- 下一步仍是 M4，本轮不开始、不提交或推送。
+
+## 2026-10-03 楼层列表底图预览空白修复
+
+- 原因：`smart-facility-platform/src/views/mapSettings/MapSettings.vue` 的弹窗仍使用旧文件地址拼接，无法解析 `demo-floor-*` 和 `demo-media-*`。
+- 修改：预览按当前层级使用楼层/房间底图解析器；本地缓存未命中时恢复 IndexedDB 媒体缓存；不可用底图不给空白弹窗，图片加载错误明确提示；保留非演示原地址规则。
+- 验证文件：`scripts/check-demo-map-png.cjs` 增加内置 SVG 与上传 PNG 的楼层列表预览回归；浏览器检查弹窗图片解码成功且可见尺寸大于零。两条预览及已有上传刷新验收通过，外部请求 0；截图 `docs/evidence/map-png/08-builtin-dialog-preview.png`、`09-uploaded-dialog-preview.png`。脚本语法检查、Git diff 空白检查通过。
+- 未验证：本轮未复跑全量单测、非演示旧服务未连接；房间列表层级的预览解析已接入但无专项弹窗浏览器验收。
+- 下一步：仍为 M4，本轮只修预览，不提交或推送，不改 miniprogram。
+
+## 2026-10-03 加宽底图预览弹窗
+
+- 修改 `smart-facility-platform/src/views/mapSettings/MapSettings.vue`：弹窗宽度 85%，距顶部 5vh；图片最大高度 75vh，等比完整显示。
+- 验证：`git diff --check` 通过；本轮未重跑浏览器或全量测试。仅调整展示尺寸，下一步仍为 M4。
+
+## 2026-10-03 地图设置返回入口
+
+- 修改 `smart-facility-platform/src/views/mapSettings/MapSettings.vue`：面包屑右侧增加「返回房间管理」，跳转已有 `/rm/room` 路由；窄屏可换行。
+- 验证：确认目标路由存在，Git diff 空白检查通过；未执行浏览器验收。
+- 下一步仍为 M4；未提交或推送。

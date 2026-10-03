@@ -150,7 +150,7 @@ test('batch/update stays rejected; categories/menus support labdevice entry', as
   expect(DEMO_MENUS.some(menu => menu.path === '/ld/labdevice')).toBe(true);
 });
 
-test('room list: designer floorId empty; modal/keyword returns shared rooms', async () => {
+test('room list: designer floorId unplaced-only; modal/keyword returns shared rooms', async () => {
   await establishSession();
   const designer = (await client.post('/room/list', {floorId: 930001, pageNum: 1, pageSize: 10000})).data;
   expect(designer.items.total).toBe(0);

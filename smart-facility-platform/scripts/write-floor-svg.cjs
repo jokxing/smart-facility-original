@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-// Architecture/fixed benches only. Device icons, readings and positions belong to Mock + Konva.
+// Architecture/fixed benches only. All visible text, devices and readings belong to Mock + Konva.
 const bench = (x,y,w=230,h=66) => `<g transform="translate(${x} ${y})"><rect x="4" y="6" width="${w}" height="${h}" rx="4" fill="#102838" opacity=".3"/><rect width="${w}" height="${h}" rx="4" fill="#b6cbd2" stroke="#375c70" stroke-width="3"/><rect x="8" y="8" width="${w-16}" height="${h-16}" rx="2" fill="#e1e9e8"/><path d="M12 ${h/2}H${w-12}" stroke="#9bb5bf" stroke-width="2"/><rect x="${w/2-22}" y="${h/2-4}" width="44" height="8" rx="2" fill="#7e9eac"/></g>`;
 const windows = [150,310,470,630,930,1090,1250,1410].map(x => `<g stroke="#80b6c7"><rect x="${x}" y="64" width="112" height="12" fill="#c7eaf0" stroke-width="3"/><path d="M${x+56} 64v12" stroke-width="2"/></g>`).join('');
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1678" height="795" viewBox="0 0 1678 795">
@@ -10,8 +10,6 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1678" height="795" v
   <pattern id="corridor" width="104" height="40" patternUnits="userSpaceOnUse"><rect width="104" height="40" fill="#698895"/><path d="M0 40H104" stroke="#809aa5"/></pattern>
 </defs>
 <rect width="1678" height="795" rx="10" fill="#10293c"/>
-<text x="70" y="38" fill="#b9d9e7" font-family="sans-serif" font-size="20" letter-spacing="3">LABORATORY · 1F</text>
-<text x="1608" y="38" text-anchor="end" fill="#719aaf" font-family="sans-serif" font-size="15">实验空间 / 楼层总览</text>
 <rect x="78" y="80" width="1534" height="662" fill="#071a29" opacity=".6"/>
 <rect x="70" y="70" width="1538" height="660" fill="url(#tile)" stroke="#213e50" stroke-width="16"/>
 <!-- Two large laboratories above a continuous circulation spine. -->
@@ -34,11 +32,7 @@ ${bench(635,574,410,76)}
 ${bench(1124,552,190,52)}${bench(1124,646,190,52)}
 <g fill="#c5d9de" stroke="#7896a6" stroke-width="2"><rect x="1380" y="555" width="78" height="62" rx="8"/><rect x="1490" y="555" width="78" height="62" rx="8"/><rect x="1380" y="652" width="188" height="40" rx="4"/></g>
 <path d="M700 521h100 M920 521h100" stroke="#698895" stroke-width="14"/>
-<g font-family="sans-serif" font-size="15" fill="#d2e4e9" text-anchor="middle">
-<text x="200" y="716">楼梯</text><text x="463" y="716">电梯</text><text x="840" y="701">公共准备区</text><text x="1220" y="630">辅助区</text>
-</g>
 <path d="M710 465h-70m12-8-12 8 12 8 M975 465h70m-12-8 12 8-12 8" fill="none" stroke="#bad6df" stroke-width="3"/>
-<text x="70" y="770" fill="#688fa4" font-family="sans-serif" font-size="14">实验区 / 公共准备区 / 辅助区</text>
 </svg>
 `;
 const outDir = path.join(__dirname, '../public/demo/floors');
@@ -59,7 +53,6 @@ function writeRoomCrop(name, viewBox, width, height, title) {
     <path d="M${left+11} ${bottom-12}V${top+12}H${right-12}V${bottom-12}" fill="none" stroke="#bdd1d8" stroke-width="2"/>
     ${windowXs.map(x => `<g fill="#b9e0e9" stroke="#4e8298" stroke-width="2"><rect x="${x}" y="${top+1}" width="112" height="10"/><path d="M${x+56} ${top+1}v10"/></g>`).join('')}
     <path d="M${doorLeft} ${bottom-4}h90" stroke="#b7ced6" stroke-width="2" stroke-dasharray="4 4"/>
-    <text x="${left+width/2}" y="${top+62}" text-anchor="middle" fill="#456778" font-family="sans-serif" font-size="16" letter-spacing="3">实验操作区</text>
   </g>`;
   const cropped = svg
     .replace('width="1678" height="795" viewBox="0 0 1678 795"', `width="${width}" height="${height}" viewBox="${viewBox}"`)

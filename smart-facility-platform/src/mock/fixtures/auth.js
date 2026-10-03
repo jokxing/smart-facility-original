@@ -68,7 +68,8 @@ export const DEMO_MENUS = [
     {id: 'demo-hardware-home', name: '主页', englishName: 'home', path: '/lhd/hardware/home', icon: 'icon-home1', subMenu: []}
   ]},
   {id: 'rm', name: '房间管理', englishName: 'room', path: '/rm/room', subMenu: [
-    {id: 'demo-room', name: '房间', englishName: 'room', path: '/rm/room', icon: 'icon-home1', subMenu: []}
+    {id: 'demo-room', name: '房间', englishName: 'room', path: '/rm/room', icon: 'icon-home1', subMenu: []},
+    {id: 'demo-map-set', name: '地图设置', englishName: 'mapSettings', path: '/ms/mapSet', icon: 'icon-building1', subMenu: []}
   ]},
   {id: 'ds', name: '数据统计', englishName: 'statistics', path: '/ds/statistics', subMenu: [
     {id: 'demo-statistics', name: '数据统计', englishName: 'statistics', path: '/ds/statistics', icon: 'icon-statistics', subMenu: []}

@@ -22,6 +22,16 @@ export function placementBounds(item) {
   return {left: item.x - halfW, right: item.x + halfW, top: item.y - halfH, bottom: item.y + halfH};
 }
 
+// Keep seeded device coordinates; fit uploaded backgrounds for new rooms.
+export function roomBackgroundFrame(roomId, ratio, imageWidth, imageHeight) {
+  const frame = roomFrame(roomId, ratio);
+  if (frame.scale > 0) return frame;
+  const scale = Math.min(ROOM_CANVAS.width / imageWidth, ROOM_CANVAS.height / imageHeight) * ratio;
+  const width = imageWidth * scale, height = imageHeight * scale;
+  return {x: (ROOM_CANVAS.width * ratio - width) / 2,
+    y: (ROOM_CANVAS.height * ratio - height) / 2, width, height};
+}
+
 export function validPlacement(item, roomId) {
   if (!['x', 'y', 'rotation', 'scaleX', 'scaleY', 'sortIndex'].every(k => Number.isFinite(item[k]))) return false;
   if (item.scaleX < 0.2 || item.scaleX > 3 || item.scaleY < 0.2 || item.scaleY > 3

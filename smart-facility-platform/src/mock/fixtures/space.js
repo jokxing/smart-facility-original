@@ -126,10 +126,15 @@ export function listBuildingsByGardenId(gardenId) {
   if (key == null || Number.isNaN(key)) return [];
   const garden = DEMO_SPACE.find(item => item.gardenId === key);
   if (!garden) return [];
-  return garden.buildings.map(({id, name, url, subDivisions}) => ({
-    id,
-    name,
-    url,
-    subDivisions: subDivisions.map(floor => ({...floor}))
-  }));
+  // Lazy require avoids circular init with mapFloor → space.
+  const {mergeBuildingFloors} = require('./mapFloor');
+  return garden.buildings.map(building => {
+    const merged = mergeBuildingFloors(building, garden);
+    return {
+      id: merged.id,
+      name: merged.name,
+      url: merged.url,
+      subDivisions: merged.subDivisions
+    };
+  });
 }

@@ -1,3 +1,5 @@
+import {peekDemoMediaUrl, isDemoMediaKey} from './demoMediaStore';
+
 /**
  * Room preview backgrounds for /room/view (task 8B).
  * Cropped from the lab floor SVG — not the full-floor image stretched as a room map.
@@ -27,7 +29,7 @@ export function resolveRoomMapUrl(url, fileBaseUrl) {
     return String(fileBaseUrl || '') + value;
   }
 
-  if (/^(https?:)?\/\//i.test(value) || /^\/\//.test(value) || /^[a-z][a-z0-9+.-]*:/i.test(value)) {
+  if (/^(https?:)?\/\//i.test(value) || /^\/\//.test(value) || /^blob:/i.test(value)) {
     return null;
   }
   if (value.includes('\\') || value.includes('..') || /%2e%2e/i.test(value)) {
@@ -37,11 +39,21 @@ export function resolveRoomMapUrl(url, fileBaseUrl) {
     return DEMO_ROOM_MAP_REGISTRY[value];
   }
   if (ALLOWED_PATHS.has(value)) return value;
+  if (isDemoMediaKey(value)) return peekDemoMediaUrl(value);
   return null;
 }
 
 export function resolveRoomMapUrlByRoomId(roomId, fileBaseUrl) {
-  const key = DEMO_ROOM_BACKGROUND_BY_ID[Number(roomId)];
+  let key = null;
+  if (process.env.VUE_APP_DEMO === 'true') {
+    try {
+      const {getRoomMapUrlKey} = require('../mock/fixtures/room');
+      key = getRoomMapUrlKey(roomId);
+    } catch (_) {
+      key = null;
+    }
+  }
+  if (!key) key = DEMO_ROOM_BACKGROUND_BY_ID[Number(roomId)] || null;
   if (!key) return null;
   return resolveRoomMapUrl(key, fileBaseUrl);
 }

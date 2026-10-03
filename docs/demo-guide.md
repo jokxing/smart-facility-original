@@ -2,11 +2,15 @@
 
 房间详情更新：设备分类随设备编辑生效；切分类、搜索或Tab会回第一页；设备卡片展示与平面图同源的本地SVG设备外观。
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）** + **部门与成员（6A–6D）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/sys/department`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ds/statistics`。不开放 `/apply/maintenance`、`/asset/maintenance`、`/sys/user`（个人资料）、员工导入导出。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）** + **部门与成员（6A–6D）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/sys/department`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ms/mapSet`、`/ds/statistics`。不开放 `/apply/maintenance`、`/asset/maintenance`、`/sys/user`（个人资料）、员工导入导出。
 
 首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开详情；可编辑名称/部门/分类；可单条/批量删除（**已绑定智能硬件须先解绑**）；可手填新增；可 XLSX 导入（先预览再确认）；可导出。批量改部门等仍拒绝。
 
-首页「房间管理」进入房间列表：关键词/部门/位置/状态筛选、分页、统计卡；可**导出**当前筛选全部匹配行。点房间名称打开只读详情（基本信息 + 已上图关联仪器 + **未监测设备** Tab + 已绑定智能硬件只读表）。**不开放**房间新增/编辑/删除/导入/绑定解绑；列表上的关联硬件类型筛选取消（不假生效）。
+首页「房间管理」进入房间列表：关键词/部门/位置/状态筛选、分页、统计卡；可**导出**；可**新增/编辑/单删**房间（有设备或硬件时拒删）；可选上传房间底图（PNG/JPEG→本地 IndexedDB）。批量/导入仍隐藏。
+
+侧栏 **地图设置**（`/ms/mapSet`）：仅开放楼宇下**楼层新增/编辑底图**；园区/楼宇增删改、楼层删除、房间绑定未开放。内置 SVG 登记键可继续作底图；新图仅 PNG/JPEG。
+
+没有其他图片也可演示上传：直接选择 `smart-facility-platform/public/demo/floors/floor-a-1f.png`（楼层）、`room-a.png` 或 `room-b.png`（房间）。它们由现有 SVG 原稿同尺寸导出；设备仍由 Mock 动态布局，不嵌入图片。
 
 首页「数据统计」进入总览 + 报警 + 状态饼图 + 使用统计 + **使用率排行表**（工作日/自然日、高级时段）。真实电量与 `/ds/device/chart` 本阶段隐藏。
 
@@ -22,8 +26,9 @@ npm run demo
 
 登录 → 楼宇 → 1F → **查看设备布局** → 悬停看读数 / **点击设备**打开只读详情与曲线 → **进入配置**拖动保存。  
 顶栏 **系统 → 报警记录**：查看设备告警列表，单条「添加处理」后刷新为已处理。  
-楼层/房间可用 **场景·正常/异常/离线**；切换不改坐标。  
-楼层「进入配置」仍只读；不支持从侧栏新增/删除设备。  
+楼层/房间顶部工具栏：**场景**（切换演示数据）与 **筛选**（过滤当前画布）分组显示、互不重叠；切换场景不改坐标。
+
+地图设置新建楼层后，楼宇页可切换并预览底图；该层新建未布局房间出现在楼层配置左侧候选列表，预览画布不出现幽灵点；改名/删除后读侧同步。楼层「进入配置」仍只读（不可拖拽保存，交 M4）。
 首页或顶栏 **设备管理**：筛选分页 → 详情/编辑/删除 → **解绑（若已绑定）** → **新增** → **多选批量删除** → **导入**（预览确认）→ **导出**当前筛选结果。  
 首页 **房间管理**：筛选分页 → 点名称打开只读详情与关联仪器；可导出；未监测 Tab 依赖设备管理新增未上图仪器。
 首页 **数据统计**：总览 → 报警 → 状态饼图 → 使用统计条图 → 使用率排行表。
@@ -52,7 +57,11 @@ npm run demo
 | 房间未监测仪器 | `POST /instrument/list`（`roomId` + `monitor:"2"`：归属未上图） |
 | 房间关联硬件只读 | `GET /monitorIndicator/things/newList?objType=3`（共享 `equipmentBindings` type:11） |
 | 房间导出 | `POST /room/export`（当前筛选 → 本地 XLSX，忽略分页） |
-| 房间写 | add/update/remove/batch/goods/remove **明确拒绝**；导入未开放 |
+| 房间新增/编辑/单删 | `POST /room/add`；`POST /room/update/basic`；`POST /room/remove/:id`（有仪器/硬件拒删；空房间清布局） |
+| 房间批量/导入等 | batch/goods/remove **明确拒绝**；导入未开放 |
+| 楼层列表/增改 | `GET/POST/PUT /map/floor`（`floorCreated`/`floorMeta`；新建 id `931201+`；底图媒体键） |
+| 楼层删除 | `DELETE /map/floor` **明确拒绝** |
+| 本地底图媒体 | IndexedDB `smart-facility-demo-media`（`demo-media-*`）；内置 `demo-floor-*` / `demo-room-*` |
 | 数据统计总览 | `GET /statistic/overview`（仪器/房间/硬件当前状态分桶） |
 | 数据统计告警 | `GET /statistic/alarm/overview`；`GET /statistic/equipment/alarm`（历史未处理） |
 | 数据统计状态饼图 | `GET /instrument/instrumentStatistics`（活跃仪器 run/standby/close） |
@@ -95,8 +104,8 @@ npm run demo
 npm run test:demo -- --watch=false
 
 $env:DEMO_PORT = '8088'   # 以实际端口为准
-npm run test:demo:system:6d
-# 可选：npm run test:demo:system:6c / 6b / 6a
+npm run test:demo:map:m3
+# 可选：npm run test:demo:map:m2 / map:m1
 ```
 
 顶栏「系统 → 报警记录」支持多选批量处理（须有处理时间与类型）。曲线非法自定义日期应失败/空态，不再变成默认窗口。

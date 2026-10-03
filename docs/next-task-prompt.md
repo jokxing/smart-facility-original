@@ -1,15 +1,15 @@
-# 下一任务：7A——已开放模块的跨模块演示验收
+# 当前状态：中控地图 M1–M3 已复盘，PNG 上传补验通过
 
-工作区 E:\project\smart-facility-original。先阅读 PROJECT_CONTEXT、适用 AGENTS、STATUS 文末和 Git 状态。仅改 smart-facility-platform 和 docs，保留 Vue 2、既有接口与统一 Mock。不复制工程、不安装依赖、不连接旧服务、不部署、不 commit/push。用户身份为前端主力及第二版重构组成员。
+用户指示：执行 docs/map-m1-m3-handoff.md。**M1、M2、M3 均已完成并停止**。M4（房间标记拖入/移动/移除/保存）留给原 AI；本回合不做 M4。
 
-## 说明
+工作区 E:\project\smart-facility-original。复盘时先读 PROJECT_CONTEXT、适用 AGENTS、STATUS 文末、docs/map-m3-contract.md、map-m1-m3-handoff.md。仅改 smart-facility-platform 和 docs；不安装依赖、不部署、不 commit/push，除非用户另行要求。
 
-先读 remaining-work.md 和 review-system-module.md 最新独立复核。部门与成员已收尾。本轮仅 7A，不新增原系统业务模块，也不连做构建/素材批。
+## M3 已交付要点
 
-建立一条可复现的本地浏览器组合链路：登录→创建部门/成员→设备转入部门和选择负责人→设备/硬件绑定及布局读回→申请维保并完成→查看告警处理及统计。引用真实现有入口和共享 ID，不用直接写缓存伪造成功，未开放能力保持诚实限制。可分段验证，不强迫不存在的业务关联；记录实际按钮操作与状态变化。
+- 契约 `docs/map-m3-contract.md`（含 M4 交接：未布局列表、已布局结构、坐标系、保存边界）。
+- Building / overview / designer 读侧与 M2 实体同步；候选 = 未布局；labList 不含 sentinel。
+- 验证：`test:demo` + `test:demo:map:m3`；证据 `docs/evidence/map-m3`。
 
-重点验证：新增员工被负责人选项读取、部门改名及删除引用保护、离职活跃池与历史记录、设备解绑后删除、布局和业务归属、详情/列表刷新、重新加载持久化、未接入入口及外部请求为零。演示时钟下统计是合成数据，不断言真实采集。
+## 原 AI 下一步
 
-只修明确可复现缺陷，新增回归不得只匹配源码字符串。独立浏览器存储，与已有演示会话隔离，不清用户当前数据。执行相关与全量单测，记录浏览器错误和外部请求，更新 STATUS（文末追加）、demo-guide 及 docs/review-demo-integration.md，列未验证项。完成后停止，不给切片 commit 信息；最终闭环经复盘后统一给。
-
-后续另做 7B 演示构建、7C 素材内容审查、7D 展示材料，详见 remaining-work.md。本轮不执行。
+M1–M3 独立复盘及修复已完成，见 `docs/review-map-m1-m3.md`；PNG 素材在 `smart-facility-platform/public/demo/floors/`，上传刷新证据在 `docs/evidence/map-png/`。48 套、242 项单测通过，PNG 浏览器验收外部请求为 0。下一步由当前 AI 实施 M4（见 map-m3-contract 保存边界），本轮未开始。

@@ -40,8 +40,9 @@ test('room list requires auth', async () => {
   expect((await client.post('/room/list', {pageNum: 1, pageSize: 10, gardenId: ''})).data.code).toBe(2);
 });
 
-test('room list pagination and fields; designer floorId stays empty', async () => {
+test('room list pagination and fields; designer floorId returns only unplaced', async () => {
   await establishSession();
+  // All seed rooms on 930001 are placed → unplaced total 0.
   const designer = (await client.post('/room/list', {floorId: 930001, pageNum: 1, pageSize: 10000})).data;
   expect(designer.items.total).toBe(0);
 
@@ -146,12 +147,12 @@ test('detail opens new drawer contract; monitor instruments are on-map owned ent
   expect(unmapped.items.total).toBe(0);
 });
 
-test('unknown room / writes refused; menu has room entry', async () => {
+test('unknown room / writes validation; batch still refused; menu has room entry', async () => {
   await establishSession();
   expect((await client.get('/room/detail', {params: {id: 999999}})).data.code).toBe(0);
-  expect((await client.post('/room/add', {name: 'x'})).data.message).toMatch(/未开放/);
-  expect((await client.post('/room/update/basic', {id: 950001})).data.message).toMatch(/未开放/);
-  expect((await client.post('/room/remove/950001', {})).data.message).toMatch(/未开放/);
+  expect((await client.post('/room/add', {name: 'x'})).data.code).toBe(0);
+  expect((await client.post('/room/update/basic', {id: 950001})).data.code).toBe(0);
+  expect((await client.post('/room/remove/950001', {})).data.code).toBe(0);
   expect((await client.post('/room/batch/delete', {ids: [950001]})).data.message).toMatch(/未开放/);
   expect((await client.post('/room/batch/update', {})).data.message).toMatch(/未开放/);
   // 3C: export returns workbook buffer (not JSON failure envelope)
@@ -159,5 +160,6 @@ test('unknown room / writes refused; menu has room entry', async () => {
   expect(exported.data.byteLength).toBeGreaterThan(100);
   expect((await client.post('/room/goods/remove', {})).data.message).toMatch(/未开放/);
   expect(DEMO_MENUS.some(menu => menu.path === '/rm/room')).toBe(true);
+  expect(DEMO_MENUS.some(menu => (menu.subMenu || []).some(s => s.path === '/ms/mapSet'))).toBe(true);
   expect(listRooms({pageNum: 1, pageSize: 10, gardenId: ''}).total).toBe(3);
 });

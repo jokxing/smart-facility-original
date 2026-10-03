@@ -48,6 +48,17 @@
             show-word-limit
             type="textarea"/>
       </el-form-item>
+      <el-form-item v-if="isDemo" label="房间底图">
+        <chuxou-upload
+            accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+            :limit="1"
+            :max="5"
+            :demo-local="true"
+            :value="fileList"
+            @handleUploadSuccess="handleMapUpload"
+        />
+        <div class="demo-map-hint">可选；PNG/JPEG ≤5MB。缺图时中控不串用其他房间底图。</div>
+      </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="handleClose">{{ $t('common.cancel') }}</el-button>
@@ -61,20 +72,29 @@ import SelectTree from "@/components/SelectTree";
 import {addRoom, updateRoomBasic} from "@/api/room";
 import SelectDepartment from "@c/SelectdePartment";
 import FloorSelectTree from "@c/FloorSelectTree";
+import ChuxouUpload from "@/views/room/components/chuxouUpload";
+import {resolveRoomMapUrl} from "@/utils/demoRoomMapUrl";
+import {isDemoMediaKey, peekDemoMediaUrl} from "@/utils/demoMediaStore";
+
+const isDemo = process.env.VUE_APP_DEMO === 'true';
 
 export default {
   name: "Create",
   components: {
     FloorSelectTree,
     SelectDepartment,
-    SelectTree
+    SelectTree,
+    ChuxouUpload
   },
   inject: ["reload"],
   data() {
       const _this = this;
     return {
+      isDemo,
       title: _this.$t('room.addRoom'),
       dialogVisible: false,
+      fileList: [],
+      originalMapUrl: "",
       form: {
         buildingName: "",
         buildingId: 0,
@@ -95,7 +115,8 @@ export default {
         status: 0,
         unitName: "",
         userNames: "",
-        gradenName: ""
+        gradenName: "",
+        mapUrl: ""
       },
       selectTreeValue: "0",
       type: 0,
@@ -105,6 +126,8 @@ export default {
     handleClose() {
       this.dialogVisible = false;
       this.selectTreeValue = "0";
+      this.fileList = [];
+      this.originalMapUrl = "";
       this.form = {
         buildingName: "",
         companyId: 0,
@@ -122,13 +145,16 @@ export default {
         senorStatus: 0,
         status: 0,
         unitName: "",
-        userNames: ""
+        userNames: "",
+        mapUrl: ""
       };
     },
     open(type, row) {
+      this.fileList = [];
+      this.originalMapUrl = "";
       if (type) {
         this.title = this.$t('room.editRoom');
-        let {remark, id, name, no, departmentId, floorId, buildingName, gradenName} = row;
+        let {remark, id, name, no, departmentId, floorId, buildingName, gradenName, mapUrl} = row;
         departmentId = departmentId.toString();
         this.form = {
           id,
@@ -139,6 +165,12 @@ export default {
           gradenName,
           departmentId: departmentId,
           remark,
+          mapUrl: mapUrl || ""
+        }
+        this.originalMapUrl = mapUrl || "";
+        if (mapUrl) {
+          const preview = resolveRoomMapUrl(mapUrl) || (isDemoMediaKey(mapUrl) ? peekDemoMediaUrl(mapUrl) : '');
+          this.fileList = [{name: mapUrl, uid: String(id), url: preview}];
         }
         this.selectTreeValue = departmentId;
       } else {
@@ -146,6 +178,11 @@ export default {
       }
       this.type = type;
       this.dialogVisible = true;
+    },
+    handleMapUpload(list) {
+      this.fileList = list || [];
+      const file = this.fileList[0];
+      this.form.mapUrl = file && file.name ? file.name : '';
     },
     handleSubmit() {
       if (!this.form.name) {
@@ -161,23 +198,28 @@ export default {
         return this.$message.error(this.$t('room.selectOwningFloor'));
       }
       this.form.floorId = Number(this.form.floorId);
-      if (this.type) {
-        updateRoomBasic(this.form).then(res => {
-          this.handleMessage(res);
-        })
-      } else {
-        addRoom(this.form).then(res => {
-          this.handleMessage(res);
-        })
+      if (this.fileList && this.fileList[0] && this.fileList[0].name) {
+        this.form.mapUrl = this.fileList[0].name;
+      } else if (this.type) {
+        this.form.mapUrl = this.originalMapUrl || '';
       }
+      if (this.type && this.originalMapUrl && this.form.mapUrl && this.form.mapUrl !== this.originalMapUrl) {
+        this.$message.info('替换底图不会自动迁移或清除已有布局。');
+      }
+      if (this.type) {
+        return updateRoomBasic(this.form).then(res => {
+          this.handleMessage(res);
+          return res;
+        }).catch(() => this.$message.error('保存失败，请重试。'));
+      }
+      return addRoom(this.form).then(res => {
+        this.handleMessage(res);
+        return res;
+      }).catch(() => this.$message.error('保存失败，请重试。'));
     },
     handleMessage(res) {
-      if (res.code) {
+      if (res.code === 1) {
         this.$message.success(this.title + this.$t('common.success'));
-        // 测试提BUG体验非常不便，所以不要刷新组件
-        // setTimeout(() => {
-        //   this.reload();
-        // }, 200)
         this.$emit("handle");
         this.handleClose();
       } else {

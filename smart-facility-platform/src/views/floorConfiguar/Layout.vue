@@ -267,7 +267,11 @@ export default {
               result.items.labList &&
               result.items.labList.length >= 0
           ) {
-            temp = result.items.labList;
+            temp = result.items.labList.filter(room => {
+              const x = Number(room && room.x);
+              const y = Number(room && room.y);
+              return Number.isFinite(x) && Number.isFinite(y) && x > -1000 && y > -1000;
+            });
           }
         }
         // this.roomList = temp;

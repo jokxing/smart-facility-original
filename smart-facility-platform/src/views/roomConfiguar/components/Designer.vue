@@ -55,7 +55,7 @@
   </div>
 </template>
 <script>
-import { roomFrame, validPlacement } from "@/utils/demoLayoutGeometry";
+import { roomBackgroundFrame, validPlacement } from "@/utils/demoLayoutGeometry";
 import { demoDeviceStatusColor } from "@/utils/demoDeviceStatus";
 import ImageNode from "./ImageNode.vue";
 import { BASE_URL } from "@/utils/constant.js";
@@ -117,7 +117,7 @@ export default {
                 image,
                 width: width,
                 height: height,
-                ...(isDemo ? roomFrame(roomId || this.$route.query.roomId, this.ratio) : {}),
+                ...(isDemo ? roomBackgroundFrame(roomId || this.$route.query.roomId, this.ratio, image.naturalWidth, image.naturalHeight) : {}),
               };
             };
             if (isDemo) return;

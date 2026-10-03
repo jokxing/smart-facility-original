@@ -142,18 +142,83 @@
         top: 0;
         left: 0;
         right: 0;
+        display: flex;
+        flex-direction: column;
         background: linear-gradient(155deg, #041520 0%, #1b4460 100%)
         // background: url("../../assets/centerControl/floor-bg.png") no-repeat;
         // background-size: 100%;
     }
     .designerHeader {
-        height: 80px;
+        min-height: 80px;
+        height: auto;
+        flex-shrink: 0;
         color: #42def5;
         font-size: 24px;
         font-weight: 600;
         position: relative;
         line-height: 80px;
         text-align: center;
+        box-sizing: border-box;
+        padding: 12px 0;
+        .title {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            line-height: 1.2;
+            max-width: 18%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1;
+        }
+        &.demo-header-toolbar {
+            .layout-left-nav {
+                max-width: calc(50% - 140px);
+            }
+            .nav {
+                max-width: calc(50% - 140px);
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                top: 12px;
+                row-gap: 8px;
+            }
+        }
+    }
+    .layout-left-nav {
+        position: absolute;
+        left: 0;
+        top: 12px;
+        z-index: 10;
+        display: flex;
+        align-items: flex-start;
+        max-width: calc(50% - 140px);
+        box-sizing: border-box;
+        padding-left: 10px;
+    }
+    .header-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+        margin-left: 36px;
+        min-width: 0;
+    }
+    .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .toolbar-label {
+        flex-shrink: 0;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 34px;
+        color: #8faab7;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
     }
     .unfolder {
         position: absolute;
@@ -162,36 +227,56 @@
         background: url(../../assets/centerControl/unfold.png) no-repeat;
         background-size: contain;
         left: 10px;
-        top: 24px;
+        top: 16px;
         cursor: pointer;
+        z-index: 2;
         &.folderUp {
             transform: rotate(180deg);
         }
     }
+    .layout-switch,
     .tab{
-        position: absolute;
-        top: 20px;
-        left: 60px;
-        div{
-            float: left;
-            font-size: 14px;
-            width: 96px;
-            height: 32px;
-            line-height: 32px;
+        position: static;
+        top: auto;
+        left: auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        float: none;
+        div,
+        .type-button{
+            float: none;
+            font-size: 13px;
+            width: auto;
+            min-width: 64px;
+            height: 34px;
+            line-height: 34px;
+            padding: 0 10px;
+            box-sizing: border-box;
             background-image: url(../../assets/centerControl/right-top-btn.png);
             background-repeat: no-repeat;
-            background-size: contain;
+            background-size: 100% 100%;
             color: #70d8ff;
             cursor: pointer;
-            margin-right: 10px;
+            margin-right: 0;
+            white-space: nowrap;
             &.active,
+            &.is-active,
             &:hover{
                 color: #0fedd5;
                 background-image: url(../../assets/centerControl/right-top-btn-hover.png);
             }
             &:first-child{
-                width: 60px;
-                background-image: url(../../assets/centerControl/room-all.png);
+                width: auto;
+                min-width: 56px;
+                background-image: url(../../assets/centerControl/right-top-btn.png);
+            }
+            &:first-child.active,
+            &:first-child.is-active,
+            &:first-child:hover{
+                background-image: url(../../assets/centerControl/right-top-btn-hover.png);
             }
         }
     }
@@ -201,10 +286,11 @@
         top: 24px;
         right: 0;
         color: #fff;
-        overflow: hidden;
+        overflow: visible;
         box-sizing: border-box;
         display: flex;
         border-radius: 3px;
+        z-index: 1000;
 
         .navItem {
             width: 100px;
@@ -253,7 +339,9 @@
     }
   }
   .layout {
-        height: calc(100% - 80px);
+        flex: 1 1 auto;
+        height: auto;
+        min-height: 0;
         position: relative;
         overflow: auto;
         /deep/ .konvajs-content{

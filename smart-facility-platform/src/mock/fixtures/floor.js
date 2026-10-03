@@ -1,7 +1,7 @@
-import {DEMO_SPACE} from './space';
 import {listInstrumentsByRoomId, listRoonInstrumentInfo} from './instrument';
 import {countDemoDeviceStatus} from '../../utils/demoDeviceStatus';
 import {getDemoScenario, statusForScenario} from './scenario';
+import {findFloorById} from './mapFloor';
 
 /**
  * Synthetic rooms for demo-floor-a-1f (floorId 930001).
@@ -60,43 +60,46 @@ export const DEMO_FLOOR_ROOMS = Object.freeze({
 
 /**
  * mapFloorOverview shape for /floor/view.
- * labList: provisional demo rooms for wired floor only; other floors stay empty.
+ * labList: only rooms with valid layout coords (unplaced rooms go to designer /room/list).
  */
 export function listFloorOverview(floorId) {
   const key = floorId == null || floorId === '' ? null : Number(floorId);
   if (key == null || Number.isNaN(key)) {
     return {labList: []};
   }
-  let found = null;
-  for (const garden of DEMO_SPACE) {
-    for (const building of garden.buildings) {
-      const floor = (building.subDivisions || []).find(item => item.id === key);
-      if (floor) {
-        found = {garden, building, floor};
-        break;
-      }
+  const floor = findFloorById(key);
+  if (!floor) return {labList: []};
+
+  // Lazy: room entity overlay (avoids circular floor ↔ room init).
+  let roomRows = [];
+  try {
+    const roomFx = require('./room');
+    if (typeof roomFx.listRoomMarkersForFloor === 'function') {
+      roomRows = roomFx.listRoomMarkersForFloor(key);
     }
-    if (found) break;
+  } catch (_) {
+    roomRows = (DEMO_FLOOR_ROOMS[key] || []).map(room => ({...room}));
   }
-  if (!found) return {labList: []};
-  const rooms = DEMO_FLOOR_ROOMS[key] || [];
+
   const {senorStatus: scenarioStatus} = statusForScenario(getDemoScenario());
   return {
-    labList: rooms.map(room => {
+    labList: roomRows.map(room => {
       const hasInstruments = listInstrumentsByRoomId(room.id).length > 0;
       return {
         ...room,
+        openTwoSystem: true,
+        isEdit: room.isEdit !== false,
         deviceSummary: countDemoDeviceStatus(listRoonInstrumentInfo(room.id).list),
-        senorStatus: hasInstruments ? scenarioStatus : room.senorStatus,
+        senorStatus: hasInstruments ? scenarioStatus : (room.senorStatus != null ? room.senorStatus : 3),
         equipments: (room.equipments || []).map(eq => ({
           ...eq,
           sensors: eq.sensors ? eq.sensors.map(s => ({...s})) : []
         }))
       };
     }),
-    floorId: found.floor.id,
-    floorName: found.floor.name,
-    mapId: found.floor.mapId,
-    mapUrl: found.floor.mapUrl || ''
+    floorId: floor.id,
+    floorName: floor.name,
+    mapId: floor.mapId,
+    mapUrl: floor.mapUrl || ''
   };
 }

@@ -1,12 +1,21 @@
 import {DEMO_SPACE} from './space';
-import {DEMO_FLOOR_ROOMS} from './floor';
+import {listFloorsByBuildingId} from './mapFloor';
+import {allDemoRoomRows} from './room';
 
 /**
  * POST /room/tree — SelectRoomTree (edit modal). Level 4 nodes are selectable rooms.
  * Shape: garden → building → floor → room; props {id, name, children, level}.
+ * Floors/rooms include M2 overlays (created + meta − deleted).
  */
 export function listRoomTree(body = {}) {
   const keyword = String(body.keyword || '').trim().toLowerCase();
+  const roomsByFloor = new Map();
+  for (const row of allDemoRoomRows()) {
+    if (keyword && !String(row.name).toLowerCase().includes(keyword)) continue;
+    const fid = Number(row.floorId);
+    if (!roomsByFloor.has(fid)) roomsByFloor.set(fid, []);
+    roomsByFloor.get(fid).push({id: row.id, name: row.name, level: 4, children: []});
+  }
   const trees = [];
   for (const garden of DEMO_SPACE) {
     const gardenNode = {
@@ -22,10 +31,8 @@ export function listRoomTree(body = {}) {
         level: 2,
         children: []
       };
-      for (const floor of building.subDivisions || []) {
-        const rooms = (DEMO_FLOOR_ROOMS[floor.id] || [])
-          .filter(room => !keyword || String(room.name).toLowerCase().includes(keyword))
-          .map(room => ({id: room.id, name: room.name, level: 4, children: []}));
+      for (const floor of listFloorsByBuildingId(building.id)) {
+        const rooms = roomsByFloor.get(Number(floor.id)) || [];
         if (!rooms.length) continue;
         buildingNode.children.push({
           id: floor.id,
