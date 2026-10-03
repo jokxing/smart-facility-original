@@ -1,5 +1,6 @@
 <template>
-  <div class="desinerLayout" v-loading="loading">
+  <DemoFloorDesigner v-if="isDemo" v-show="$route.path === '/floor/designer'" ref="demoEditor" />
+  <div v-else class="desinerLayout" v-loading="loading">
     <div ref="container" class="layout">
       <div
           v-if="Object.keys(dragNode).length > 0"
@@ -61,6 +62,7 @@
 </template>
 <script>
 import Designer from "./components/Designer.vue";
+import DemoFloorDesigner from './components/DemoFloorDesigner.vue';
 import {getRoomList} from "@/api/room";
 import {mapElementConfig, mapFloorOverview} from "@/api/centerController";
 import {mapState, mapMutations} from "vuex";
@@ -71,6 +73,7 @@ const isDemo = process.env.VUE_APP_DEMO === "true";
 
 export default {
   components: {
+    DemoFloorDesigner,
     Designer,
   },
   data() {
@@ -125,6 +128,7 @@ export default {
     }),
   },
   created() {
+    if (isDemo) return;
     if (screen.height < 1080) {
       if (screen.height >= 800) {
         height = 611;
@@ -135,6 +139,7 @@ export default {
     }
   },
   mounted() {
+    if (isDemo) return;
     const _ = this;
     _.handleResize();
     let {floorId} = this.$route.query;
@@ -284,6 +289,17 @@ export default {
         throw err;
       }
     },
+  },
+  beforeRouteLeave(to, from, next) {
+    const editor = this.$refs.demoEditor;
+    const leave = () => {
+      // Vue retains the leaving DOM during root transitions even after teardown.
+      // Hide the fixed overlay before confirming navigation, while it is live.
+      if (editor && editor.$el) editor.$el.style.display = 'none';
+      next();
+    };
+    if (!editor || !editor.dirty) return leave();
+    this.$confirm('修改尚未保存，确定退出？', '提示').then(leave).catch(() => next(false));
   },
 };
 </script>

@@ -2556,3 +2556,38 @@
 - 修改 `smart-facility-platform/src/views/mapSettings/MapSettings.vue`：面包屑右侧增加「返回房间管理」，跳转已有 `/rm/room` 路由；窄屏可换行。
 - 验证：确认目标路由存在，Git diff 空白检查通过；未执行浏览器验收。
 - 下一步仍为 M4；未提交或推送。
+
+## 2026-10-03 M4 房间交互与布局闭环完成
+
+- 修改文件（平台）：`src/mock/fixtures/room.js`、`src/mock/handlers/instrument.js`、`src/views/floorConfiguar/Layout.vue`、`src/views/floorConfiguar/index.vue`。
+- 新增（平台）：`src/mock/fixtures/floorRoomLayout.js`、`src/views/floorConfiguar/components/DemoFloorDesigner.vue`、`tests/unit/demo/map-m4.spec.js`、`scripts/check-demo-map-m4.cjs`；新增 `docs/map-m4-contract.md`、`docs/evidence/map-m4/`，维护 demo-guide、next-task-prompt、STATUS。
+- 实现：预览操作卡明确区分详情/进入房间；对应底图或缺图提示；候选拖入/点击放置、选中拖动、移除回候选、撤销、取消离开确认、保存与刷新持久化。空布局可保存，失败保留草稿。删除/换楼层清理索引，原房间与设备保留。
+- 设计决定：统一 Mock 复用 `/map/element/config`，type=11 对象使用独立 floorRoomLayout 快照；设备原 schema 不改。坐标沿用 1678×795 基准、显示 ratio 不持久化；动态名称来自共享业务实体。演示配置增加小组件，非演示历史路径保留，未升级 Vue 2。
+- 验证：49 套、248 项单测通过；浏览器验证详情/进入房间、候选拖入事件、实际鼠标拖动、移除、保存后刷新、取消离开确认，外部请求 0；证据位于 map-m4。
+- 未验证：候选拖入通过 DragEvent/DataTransfer 派发，未做系统原生拖拽/完整触屏及所有屏幕尺寸验收；不支持任意底图尺寸坐标自动迁移，批量字体配置仍关闭。M5 设备联动未实施。
+- 下一步最小任务：用户安排后先核实 M5 设备管理与房间设备布局的同源候选、删除/换归属清理规则，再实施。M4 本轮停止，未安装依赖、部署、提交或推送。
+
+## 2026-10-03 M4 操作卡与移除图标优化
+
+- 修改 `src/views/floorConfiguar/index.vue`（平台）：操作卡在鼠标/触点旁偏移 16px 显示，右侧和底部限制位置，保留详情/进入房间入口。
+- 修改 `src/views/floorConfiguar/components/DemoFloorDesigner.vue`：选中房间框右上角显示 × 图标；点击/触摸移除后回待放置列表，阻止事件冒泡导致拖动或再次选中；左侧移除入口保留。
+- 验证：更新平台 `scripts/check-demo-map-m4.cjs`，断言鼠标坐标与操作卡位置；实际 CDP 鼠标点击右上角图标成功移除，并通过既有拖入、移动、保存刷新、取消验收。外部请求 0，证据 map-m4 已更新；本轮未重复全量单测。
+- 下一步仍为 M5，待用户安排；未提交或推送。
+
+## 2026-10-03 移除图标居中
+
+- 修改平台 `src/views/floorConfiguar/components/DemoFloorDesigner.vue`：圆内 × 改为以圆心为原点的两条对称交叉线，消除字体字形偏移；点击逻辑不变。
+- 验证：坐标对称检查、Git diff 空白检查通过；未重跑浏览器与全量测试。下一步仍为 M5，待安排。
+
+## 2026-10-03 保存退出时配置层遮挡修复
+
+- 原因：根路由 `in-out` 动画保留旧页 DOM，固定定位配置层在新楼层预览出现后仍暂时覆盖；仅关闭动画不足以完全消除离场 DOM。
+- 修改平台 `src/App.vue`：只在演示楼层配置进出时关闭 CSS 路由动画，其余页面沿用原规则。
+- 修改 `src/views/floorConfiguar/Layout.vue`：离开守卫确认通过时立即隐藏配置层；取消确认不隐藏，未保存确认规则保持。加路由可见性约束。
+- 修改 `scripts/check-demo-map-m4.cjs`：保存导航完成后两帧内断言配置层不可见，再验收预览、刷新和取消闭环；浏览器通过，外部请求 0。
+- 下一步仍为 M5，待用户安排；不推送、不安装依赖。
+
+## 2026-10-03 房间操作卡关闭图标
+
+- 修改平台 `src/views/floorConfiguar/index.vue`：文字关闭改为右上角红色圆形 ×，使用 SVG 对称线条绘制，与配置移除图标一致；保留关闭动作，增加可访问名称及悬停提示。
+- 验证：Git diff 空白检查通过；本次展示调整未重复浏览器及全量测试。下一步仍为 M5，待安排。

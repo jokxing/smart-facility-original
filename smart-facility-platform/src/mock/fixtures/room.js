@@ -231,6 +231,15 @@ function markerDefaults(room, meta = {}) {
 export function listRoomMarkersForFloor(floorId) {
   const key = Number(floorId);
   if (!Number.isFinite(key)) return [];
+  const {floorRoomLayout} = require('./floorRoomLayout');
+  const layout = floorRoomLayout(key);
+  if (layout) {
+    const rows = allDemoRoomRows().filter(room => Number(room.floorId) === key);
+    return layout.list.map(position => {
+      const room = rows.find(row => Number(row.id) === Number(position.elementId));
+      return room ? {...markerDefaults(room), x: position.x, y: position.y} : null;
+    }).filter(Boolean);
+  }
   const deleted = new Set(readDeletedRooms());
   const markers = [];
 
@@ -361,6 +370,8 @@ export function updateDemoRoomBasic(body = {}) {
   }
   const created = readCreatedRooms();
   const idx = created.findIndex(r => Number(r.id) === id);
+  const movedFloor = Number(current.floorId) !== floorId;
+  if (movedFloor) require('./floorRoomLayout').clearRoomFloorPlacement(id);
   if (idx >= 0) {
     const row = {
       ...created[idx],
@@ -372,6 +383,7 @@ export function updateDemoRoomBasic(body = {}) {
       remark
     };
     if (nextMap != null) row.mapUrl = nextMap;
+    if (movedFloor) {row.x = -9999; row.y = -9999;}
     created[idx] = row;
     writeCreatedRooms(created);
   } else {
@@ -385,6 +397,7 @@ export function updateDemoRoomBasic(body = {}) {
       remark
     };
     if (nextMap != null) patch.mapUrl = nextMap;
+    if (movedFloor) {patch.x = -9999; patch.y = -9999;}
     meta[String(id)] = patch;
     writeRoomMeta(meta);
   }
@@ -397,6 +410,7 @@ export function removeDemoRoom(roomId) {
   if (!detail) return {ok: false, message: '房间不存在。'};
   const assoc = roomHasAssociations(id);
   if (assoc.blocked) return {ok: false, message: assoc.message};
+  require('./floorRoomLayout').clearRoomFloorPlacement(id);
   const created = readCreatedRooms().filter(r => Number(r.id) !== id);
   writeCreatedRooms(created);
   if ((DEMO_FLOOR_ROOMS[930001] || []).some(r => Number(r.id) === id)) {

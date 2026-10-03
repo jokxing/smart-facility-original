@@ -26,6 +26,7 @@ import {getEquipmentMonitorInfo, unbindInstrumentHardware} from '../fixtures/equ
 import {getDemoScenario, setDemoScenario} from '../fixtures/scenario';
 import {listRoomTree} from '../fixtures/roomTree';
 import {failure, protectedRoute, success} from '../response';
+import {saveFloorRoomLayout} from '../fixtures/floorRoomLayout';
 
 const WRITE_BLOCKED = '本阶段演示未开放仪器写操作。';
 const removeIds = DEMO_INSTRUMENTS.map(item => item.id).concat(listImportRemoveIds());
@@ -45,6 +46,10 @@ export default [
     return success(listRoonInstrumentInfo(params.roomId));
   }),
   protectedRoute('POST', '/map/element/config', ({body}) => {
+    if (body && body.type === 11 && !Array.isArray(body)) {
+      const result = saveFloorRoomLayout(body);
+      return result.ok ? success({floorId: result.floorId, count: result.count}) : failure(result.message);
+    }
     const items = Array.isArray(body) ? body : (body && body.list);
     const result = saveRoomInstrumentLayout(items);
     if (!result.ok) return failure(result.message || '保存失败');

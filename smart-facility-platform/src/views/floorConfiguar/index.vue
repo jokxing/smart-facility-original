@@ -252,6 +252,19 @@
       <small>演示数据</small>
     </div>
     <RoomStatisticsDrawer :floorData="floorData"></RoomStatisticsDrawer>
+    <div v-if="isDemo && selectedRoomCard" :style="{left: roomCardPoint.x + 'px', top: roomCardPoint.y + 'px'}" style="position: fixed; z-index: 30; padding: 20px; width: 290px; box-sizing: border-box; background: #173b50; color: #d5edf4; border: 1px solid #62a6bb; border-radius: 8px;">
+      <strong>{{ selectedRoomCard.name }}</strong>
+      <button class="room-card-close" type="button" aria-label="关闭房间操作卡" title="关闭" @click="selectedRoomCard = null">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="11" fill="#e66060" stroke="#fff" />
+          <path d="M8 8L16 16M8 16L16 8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div style="margin-top: 12px;">
+        <el-button @click="showSelectedRoomDetail">查看详情</el-button>
+        <el-button type="primary" @click="enterSelectedRoom">进入房间</el-button>
+      </div>
+    </div>
     <RoomDrawerNew :isDrawer.sync="isDrawerNew" :roomId.sync="roomId" />
     <Drawer :departments="departments" :is-drawer.sync="isDrawer" :room-id.sync="roomId" @handle="handleCloseDrawer"/>
   </div>
@@ -305,6 +318,8 @@ export default {
       ratio: 1,
       room: {},
       roomId: null,
+      selectedRoomCard: null,
+      roomCardPoint: {x: 12, y: 80},
       isDrawer: false,
       isDrawerNew: false,
       departments: [],
@@ -1003,6 +1018,7 @@ export default {
     },
     // 点击房间名称
     handleMouseDown(data, ev) {
+      if (this.isDemo) {this.openRoomCard(data, ev); return;}
       this.touSet2 = setTimeout(() => {
         if(!this.blockChildEle){
           if (time) {
@@ -1116,7 +1132,34 @@ export default {
       return color;
     },
 
+    openRoomCard(room, event) {
+      const native = event && event.evt;
+      const point = native && ((native.touches && native.touches[0]) || native);
+      const x = point && Number.isFinite(point.clientX) ? point.clientX : window.innerWidth / 2;
+      const y = point && Number.isFinite(point.clientY) ? point.clientY : window.innerHeight / 2;
+      this.roomCardPoint = {
+        x: Math.max(12, Math.min(x + 16, window.innerWidth - 302)),
+        y: Math.max(70, Math.min(y + 16, window.innerHeight - 170))
+      };
+      this.selectedRoomCard = room;
+    },
+    showSelectedRoomDetail() {
+      const room = this.selectedRoomCard;
+      if (!room) return;
+      this.roomId = room.id;
+      this.isDrawerNew = true;
+      this.selectedRoomCard = null;
+    },
+    enterSelectedRoom() {
+      const room = this.selectedRoomCard;
+      if (!room) return;
+      const {resolveRoomMapUrlByRoomId} = require('@/utils/demoRoomMapUrl');
+      if (!resolveRoomMapUrlByRoomId(room.id)) return this.$message.warning('该房间暂无底图，请在房间管理上传。');
+      this.selectedRoomCard = null;
+      this.$router.push({name: 'RoomView', query: {roomId: room.id, roomName: room.name}});
+    },
     async handleRoomDetail(item, e) {
+      if (this.isDemo) {this.openRoomCard(item, e); return;}
       if (time) {
         time = clearTimeout(time);
       }
@@ -1180,6 +1223,19 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.room-card-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+}
 .demo-room-tooltip {
   position: fixed;
   z-index: 20;

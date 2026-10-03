@@ -1,6 +1,6 @@
 <template>
   <div id="app" ref="app">
-    <transition :name="transitionName" mode="in-out">
+    <transition :name="transitionName" :css="!skipRouteAnimation" mode="in-out">
       <router-view v-if="isRouterAlive"></router-view>
     </transition>
   </div>
@@ -15,11 +15,18 @@ export default {
   data() {
     return {
       transitionName: "",
+      skipRouteAnimation: false,
       isRouterAlive: true,
     }
   },
   watch: {
     '$route'(to, from) {
+      this.skipRouteAnimation = process.env.VUE_APP_DEMO === 'true' &&
+        (to.path === '/floor/designer' || from.path === '/floor/designer');
+      if (this.skipRouteAnimation) {
+        this.transitionName = '';
+        return;
+      }
       const toIndex = to.meta.index;
       const fromIndex = from.meta.index;
       if (toIndex > 0) {
