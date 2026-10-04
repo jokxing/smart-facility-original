@@ -1,5 +1,6 @@
 <template>
     <el-dialog
+        title="设备预约日历"
         :width="width"
         :visible="true"
         :before-close="goIsFullcalendar"
@@ -7,6 +8,7 @@
         append-to-body
         top="6vh"
         :close-on-click-modal="false">
+            <p v-if="isDemo" class="reservation-help">拖选未来时段新增预约；点击已有预约可修改或取消。</p>
             <div class='demo-app' v-loading="loading">
                 <div class='demo-app-main' :class="{ 'ban-pastTime': isBanPastTime }">
                     <FullCalendar
@@ -40,7 +42,7 @@
             },
             width: {
                 type: String,
-                default: "50%"
+                default: "85%"
             },
             id: {
                 type: Number,
@@ -53,7 +55,11 @@
         data() {
             const _this = this;
             return {
+                isDemo: process.env.VUE_APP_DEMO === 'true',
+                isDemo: process.env.VUE_APP_DEMO === 'true',
                 loading: false,
+                renderedRange: '',
+                requestVersion: 0,
                 calendarOptions: {
                     height: '100%',
                     plugins: [
@@ -93,8 +99,15 @@
                     dayMaxEvents: true,
                     weekends: true,
                     select: this.handleDateSelect,
-                    datesSet: this.datesSet,
-                    // eventClick: this.handleEventClick,
+                    datesSet: info => {
+                        const key = info.startStr + info.endStr;
+                        if (key === this.renderedRange) return;
+                        this.renderedRange = key;
+                        this.$nextTick(() => this.handleDatesRender());
+                    },
+                    eventClick: info => {
+                        if (process.env.VUE_APP_DEMO === 'true' && info.event.extendedProps.reservation) this.$emit('edit-reservation', info.event.extendedProps.reservation);
+                    },
                     // eventsSet: this.handleEvents,
                 },
                 currentEvents: [],
@@ -111,34 +124,11 @@
             this.$nextTick(() => {
                 this.handleDatesRender()
 
-                const prevBtn = document.querySelector('.fc-prev-button')
-                prevBtn.addEventListener('click', () => {
-                    this.handleDatesRender()
-                })
-
-                const nextBtn = document.querySelector('.fc-next-button')
-                nextBtn.addEventListener('click', () => {
-                    this.handleDatesRender()
-                })
-
-                const todayBtn = document.querySelector('.fc-today-button')
-                todayBtn.addEventListener('click', () => {
-                    this.handleDatesRender()
-                })
-
-                const timeGridWeek = document.querySelector('.fc-timeGridWeek-button')
-                timeGridWeek.addEventListener('click', () => {
-                    this.handleDatesRender()
-                })
-
-                const timeGridDay = document.querySelector('.fc-timeGridDay-button')
-                timeGridDay.addEventListener('click', () => {
-                    this.handleDatesRender()
-                })
             })
         },
         methods: {
             handleDatesRender() {
+                if (!this.$refs.fullCalendar) return;
                 const time = this.$refs.fullCalendar.getApi().currentDataManager.state.dateProfile.renderRange;
                 this.startDate = moment(time.start).format("YYYY-MM-DD") + " 00:00:00";
                 this.endDate = moment(time.end).format("YYYY-MM-DD") + " 00:00:00";
@@ -148,7 +138,9 @@
                     endDate: this.endDate
                 }
                 this.loading = true;
+                const version = ++this.requestVersion;
                 getInstrumentReservationSchedulerListV1(data).then(res => {
+                    if (version !== this.requestVersion) return;
                     this.loading = false;
                     if(res.code === 1){
                         this.calendarOptions.events = [
@@ -162,13 +154,16 @@
                         const items = res.items
                         for(var i = 0;   i < items.length; i++){
                             this.calendarOptions.events.push({
+                                id: String(items[i].id),
+                                extendedProps: {reservation: {...items[i], status: new Date(items[i].timeFrom.replace(' ', 'T')).getTime() <= Date.now() ? 1 : 0}},
                                 title: items[i].userName,
                                 start: items[i].timeFrom,
                                 end: items[i].timeTo,
                             })
                         }
                     }
-                })
+                    else this.$message.error(res.message || '预约加载失败');
+                }).catch(() => {}).finally(() => { if (version === this.requestVersion) this.loading = false; })
             },
             handleWeekendsToggle() {
                 this.calendarOptions.weekends = !this.calendarOptions.weekends
@@ -233,7 +228,7 @@
     .demo-app {
         display: flex;
         min-height: 100%;
-        height: 780px;
+        height: 72vh;
         font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
         font-size: 14px;
 

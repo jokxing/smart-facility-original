@@ -1,8 +1,8 @@
 import {instrumentImportOptions} from '../fixtures/instrument';
+import {listReservations, reservationPage, saveReservation, cancelReservation} from '../fixtures/reservation';
 import {
   DEMO_INSTRUMENTS,
   batchRemoveInstruments,
-  emptyInstrumentSchedulerPage,
   emptyMonitorHistoryPage,
   getDemoInstrumentDetail,
   getDemoMonitorFlag,
@@ -41,6 +41,15 @@ const removeRoutes = removeIds.map(id =>
 // Room instrument layout + device list/dashboard + read-only detail + MonitorInfo series.
 // 2B: update/basic; 2C: remove tombstone; 2D: import creates corridor instrument.
 export default [
+  ...[
+    ['/instrument/reservation/schedulerListV1', listReservations],
+    ['/instrument/reservation/schedulerList', reservationPage],
+    ['/instrument/reservation/add', body => saveReservation(body)],
+    ['/instrument/reservation/update', body => saveReservation(body, true)],
+    ['/demo/instrument/reservation/cancel', cancelReservation]
+  ].map(([path, action]) => protectedRoute('POST', path, ({body}) => {
+    try { return success(action(body || {})); } catch (error) { return failure(error.message || '预约保存失败，请重试。'); }
+  })),
   protectedRoute('GET', '/__demo/instrument/import-options', () => success(instrumentImportOptions())),
   protectedRoute('POST', '/map/element/getRoonInstrumentInfoList', ({params}) => {
     return success(listRoonInstrumentInfo(params.roomId));
@@ -182,5 +191,4 @@ export default [
   protectedRoute('POST', '/monitorIndicator/historyPage', ({body}) => {
     return success(emptyMonitorHistoryPage(body && body.objId));
   }),
-  protectedRoute('POST', '/instrument/reservation/schedulerList', () => success(emptyInstrumentSchedulerPage()))
 ];

@@ -46,7 +46,8 @@
 </template>
 
 <script>
-    import Table from "@c/Tables";
+      import Table from "@c/Tables";
+      import request from '@/utils/request';
     import Pagination from "@/components/Pagination/index";
     import NextMintenanceTime from "./NextMintenanceTime";
     import PrincipalTables from "@c/PrincipalTables";
@@ -419,6 +420,13 @@
             },
             // 取消预约
             handleCancelAppointment(row){
+                if (this.isDemo) {
+                    this.$confirm('确认取消这条预约？', '取消预约', {type:'warning'}).then(() =>
+                        request({url:'/demo/instrument/reservation/cancel',method:'post',headers:{'Content-Type':'application/json'},data:{id:row.id,instrumentId:this.id}})
+                            .then(res => { this.handleMessage(res, '预约已取消'); })
+                    ).catch(() => {});
+                    return;
+                }
                 if(row.status == 1){
                     this.$message.error(this.$t('labDevice.notOrder'))
                 }else{

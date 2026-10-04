@@ -42,6 +42,7 @@
                     </div>
 
                     <div v-if="isDemo">
+                        <el-button type="primary" icon="icon-reserve" @click="handleIsFullcalendar">{{ $t('labDevice.addOrder') }}</el-button>
                         <el-button class="margin-small-right" :disabled="detail.status === 3"
                                    @click="handleMaintenance">{{ $t('labDevice.addMaintenance') }}
                         </el-button>
@@ -367,11 +368,13 @@
 
         </div>
         <Fullcalendar
+            ref="reservationCalendar"
             v-if="isFullcalendar"
             :isBanPastTime="true"
             :id="detail.id"
             @goIsFullcalendar="handleIsFullcalendar"
-            @handleSetDate="handleSetDate(1,$event)"/>
+            @handleSetDate="handleSetDate(1,$event)"
+            @edit-reservation="handleSetDate(2,$event)"/>
         <AdvancedAlarmSet ref="AdvancedAlarmSet" @handle="getDetail"/>
         <ReservationModal ref="reservationModal" v-if="detail" :detail="detail" @handle="handleReservation"/>
         <MaintenanceModal ref="maintenanceModal" @handle="handleMaintenanceSaved"/>
@@ -779,6 +782,11 @@ export default {
         },
         // 新增/更改预约成功
         handleReservation() {
+            if (this.isDemo) {
+                if (this.$refs.reservationCalendar) this.$refs.reservationCalendar.handleDatesRender();
+                if (this.$refs.tagPane && this.$refs.tagPane.activeName === '1') this.$refs.tagPane.getList();
+                return;
+            }
             this.isFullcalendar = false;
             this.$refs.tagPane.getList();
         },

@@ -23,6 +23,7 @@
             </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
+            <el-button v-if="isDemo && type === 2" type="danger" :disabled="btnLoading" @click="cancelReservation">取消预约</el-button>
             <el-button :disabled="btnLoading" @click="handleClose">{{ $t('common.cancel') }}</el-button>
             <el-button type="primary" :loading="btnLoading" @click="handleSubmit">{{ $t('common.confirm') }}</el-button>
         </span>
@@ -33,6 +34,7 @@
     import DateTimeSelect from "@/components/DateTimeSelect";
     import { getInstrumentReservationUpdate, getInstrumentReservationAdd } from "@/api/labDevice";
     import moment from "moment";
+    import request from '@/utils/request';
     export default {
         components: {
             DateTimeSelect
@@ -45,6 +47,7 @@
         },
         data() {
             return {
+                isDemo: process.env.VUE_APP_DEMO === 'true',
                 title: "",
                 btnLoading: false,
                 dialogVisible: false,
@@ -60,9 +63,11 @@
         },
         methods: {
             open(index, item){
+                this.startDisabled = false;
+                this.dateBetween = [];
+                this.form = {};
                 this.dialogVisible = true;
                 this.type = index;
-                console.log(item)
                 // index 1新增 2编辑
                 if(index === 1){
                     this.title = this.$t('labDevice.orderApply');
@@ -124,6 +129,22 @@
                 this.dateBetween = e;
             },
             handleSubmit() {
+                if (this.btnLoading) return;
+                const start = moment(this.dateBetween[0]), end = moment(this.dateBetween[1]);
+                if (!this.dateBetween[0] || !this.dateBetween[1] || !start.isValid() || !end.isValid() || !end.isAfter(start)) {
+                    this.$message.error('请选择完整的预约时间，结束时间须晚于开始时间。');
+                    return;
+                }
+                if (this.isDemo) {
+                    if (end.valueOf() <= Date.now() || (!this.startDisabled && start.valueOf() < Date.now())) {
+                        this.$message.error('请选择未来的预约时间。'); return;
+                    }
+                    this.btnLoading = true;
+                    const data = {id: this.form.id, instrumentId: this.detail.id, timeFrom: start.format('YYYY-MM-DD HH:mm:ss'), timeTo: end.format('YYYY-MM-DD HH:mm:ss')};
+                    (this.type === 1 ? getInstrumentReservationAdd(data) : getInstrumentReservationUpdate(data))
+                        .then(this.handleMessage).catch(() => {}).finally(() => { this.btnLoading = false; });
+                    return;
+                }
                 if(this.type === 1){
                     if(new Date(this.dateBetween[0]).getTime() > new Date(this.dateBetween[1]).getTime()){
                         this.$message.error(this.$t('labDevice.updateMessage'))
@@ -175,6 +196,15 @@
             },
             handleClose() {
                 this.dialogVisible = false
+            },
+            cancelReservation() {
+                if (this.btnLoading) return;
+                this.$confirm('确认取消这条预约？', '取消预约', {type: 'warning'}).then(() => {
+                    this.btnLoading = true;
+                    return request({url: '/demo/instrument/reservation/cancel', method: 'post', headers: {'Content-Type': 'application/json'}, data: {id: this.form.id, instrumentId: this.detail.id}})
+                        .then(res => { if (res.code === 1) { this.$message.success('预约已取消'); this.dialogVisible = false; this.$emit('handle'); } else this.$message.error(res.message); })
+                        .finally(() => { this.btnLoading = false; });
+                }).catch(() => {});
             }
         },
     }
