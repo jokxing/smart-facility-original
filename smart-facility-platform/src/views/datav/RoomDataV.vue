@@ -13,6 +13,7 @@
                         placement="bottom-start"
                         width="400"
                         trigger="click"
+                        v-if="!isDemo"
                         v-model="departmentVisible"
                         @show="isDatavSelectTree = true">
                         <div class="body">
@@ -85,6 +86,7 @@
                         placement="bottom-start"
                         width="400"
                         trigger="click"
+                        v-if="!isDemo"
                         v-model="deviceVisible"
                         @show="handleShowDeviceSelect">
                         <div class="body">
@@ -177,7 +179,7 @@
                             }}：{{ instrumentCount.total ? instrumentCount.total : 0 }}</span>
                     </div>
                     <div class="state">
-                        <div class="state-item normal" @click="handleType('type', 1)">
+                        <div class="state-item normal" :class="{'screen-filter-active': typeData && typeData.status === 1}" @click="handleType('type', 1)">
                             <p>{{ $t('dataV.normalDevice') }}</p>
                             <div class="num">
                                 <h3>{{ instrumentCount.normalCount ? instrumentCount.normalCount : 0 }}
@@ -188,7 +190,7 @@
                                 <!--                <img src="../../assets/dataV/icon-normal.png" >-->
                             </div>
                         </div>
-                        <div class="state-item abnormal" @click="handleType('type', 2)">
+                        <div class="state-item abnormal" :class="{'screen-filter-active': typeData && typeData.status === 2}" @click="handleType('type', 2)">
                             <p>{{ $t('dataV.alarmDevice') }}</p>
                             <div class="num">
                                 <h3>{{ instrumentCount.alarmCount ? instrumentCount.alarmCount : 0 }}
@@ -198,7 +200,7 @@
                                 <i class="icon-alarm1"></i>
                             </div>
                         </div>
-                        <div class="state-item offline" @click="handleType('type', -100)">
+                        <div class="state-item offline" :class="{'screen-filter-active': typeData && typeData.status === -100}" @click="handleType('type', -100)">
                             <p>{{ $t('dataV.offLineDevice') }}</p>
                             <div class="num">
                                 <h3>{{ instrumentCount.offlineCount ? instrumentCount.offlineCount : 0 }}
@@ -648,9 +650,13 @@ export default {
         },
         // 统计和状态分析筛选
         handleType(key, index) {
-            if (typeof (index) !== undefined) {
+            const filterKey = this.isDemo && key === 'type' ? 'status' : key;
+            if (this.isDemo && this.typeData && filterKey && this.typeData[filterKey] === index) {
+                key = undefined;
+            }
+            if (key && index !== undefined) {
                 var data = {}
-                data[key] = index;
+                data[this.isDemo && key === 'type' ? 'status' : key] = index;
                 this.typeData = data;
             } else {
                 this.typeData = undefined
@@ -958,4 +964,6 @@ export default {
 </style>
 <style lang="less" scoped>
 @import "./index.less";
+.screen-filter-active { outline:2px solid #71e6ff; outline-offset:-2px; box-shadow:inset 0 0 24px #71e6ff40; }
+.screen-filter-active.abnormal { outline-color:#ff7a86; box-shadow:inset 0 0 24px #ff7a864d; }
 </style>

@@ -15,6 +15,11 @@ export function statusForInstrument(id) {
   return statusForScenario(current === 'mixed' ? (Number(id) === 970008 ? 'alarm' : 'normal') : current);
 }
 
+// Runtime state is independent of sensor alarms. Legacy scene overrides remain test-compatible.
+export function runningStatusForInstrument(id) {
+  return current === 'mixed' ? 1 : statusForInstrument(id).status;
+}
+
 export function aggregateInstrumentStatus(devices) {
   const states = devices.map(item => statusForInstrument(item.id).senorStatus);
   if (states.includes(2)) return 2;

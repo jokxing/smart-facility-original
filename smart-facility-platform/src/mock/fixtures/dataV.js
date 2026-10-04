@@ -1,7 +1,7 @@
 import {DEMO_SPACE} from './space';
 import {listFloorsByBuildingId} from './mapFloor';
 import {DEMO_USER} from './auth';
-import {listInstrumentsByRoomId, listInstrumentsForFloorRooms, sensorReadingForInstrument} from './instrument';
+import {listInstrumentsByRoomId, listInstrumentsForFloorRooms, sensorReadingForInstrument, buildInstrumentRow} from './instrument';
 import {aggregateInstrumentStatus, statusForInstrument} from './scenario';
 import {EQUIPMENT_TYPE_META} from './equipment';
 
@@ -86,15 +86,16 @@ export function listMapGardenTree() {
 export function listFloorScreen(body = {}) {
   const ctx = findFloorContext(body.floorId) || {garden: {}, building: {}, floor: {}};
   const statusFilter = body.status;
-  const roomList = roomCardsForFloor(ctx.floor.id, statusFilter);
+  const roomList = roomCardsForFloor(ctx.floor.id, statusFilter).filter(room => body.type == null || body.type === '' || room.data.some(sensor => Number(sensor.monitorSensorCatId) === Number(body.type) && sensor.activateFlag === 1));
   const roomData = roomsForFloorCards(ctx.floor.id).map(room => ({
     id: room.id,
     name: room.name,
     screenShowFlag: 1
   }));
-  const alarmTotal = roomList.filter(r => r.senorStatus === 2).length;
-  const offlineCount = roomList.filter(r => r.senorStatus === -100).length;
-  const normalCount = roomList.filter(r => r.senorStatus === 1).length;
+  const scopedRooms = roomCardsForFloor(ctx.floor.id);
+  const alarmTotal = scopedRooms.filter(r => r.senorStatus === 2).length;
+  const offlineCount = scopedRooms.filter(r => r.senorStatus === -100).length;
+  const normalCount = scopedRooms.filter(r => r.senorStatus === 1).length;
   return {
     roomList,
     roomData,
@@ -107,7 +108,7 @@ export function listFloorScreen(body = {}) {
       userName: DEMO_USER.name
     },
     roomCount: {
-      total: roomList.length,
+      total: scopedRooms.length,
       normalCount,
       alarmCount: alarmTotal,
       offlineCount,
@@ -151,6 +152,7 @@ function instrumentCardsForFloor(floorId, statusFilter) {
     floorId,
     name: entity.name,
     senorStatus: statusForInstrument(entity.id).senorStatus,
+    runStatus: buildInstrumentRow(entity).status,
     data: [
       {
         id: 980000 + (entity.id % 1000),
@@ -173,33 +175,38 @@ export function listRoomScreen(body = {}) {
     : body.buildingId != null && body.buildingId !== ''
       ? findBuildingContext(body.buildingId)
       : findFloorContext(null);
-  const statusFilter = body.status;
+  const statusFilter = body.status == null ? body.type : body.status;
   // Intersect explicit scopes; invalid IDs never select another space.
   if (ctx && body.buildingId != null && body.buildingId !== '' && Number(body.buildingId) !== ctx.building.id) ctx = null;
   const floorScoped = body.floorId != null && body.floorId !== '';
   const floors = ctx
     ? (floorScoped ? [ctx.floor] : listFloorsByBuildingId(ctx.building.id))
     : [];
-  let instrumentList = floors.reduce((cards, floor) => cards.concat(instrumentCardsForFloor(floor.id, statusFilter)), []);
+  let instrumentList = floors.reduce((cards, floor) => cards.concat(instrumentCardsForFloor(floor.id)), []);
   if (body.roomIds != null && body.roomIds !== '') {
     const ids = (Array.isArray(body.roomIds) ? body.roomIds : String(body.roomIds).split(','))
       .map(Number)
       .filter(n => !Number.isNaN(n));
     instrumentList = instrumentList.filter(item => ids.includes(item.roomId));
   }
-  const total = instrumentList.length;
+  const scopedInstruments = instrumentList;
+  instrumentList = instrumentList.filter(item => statusFilter == null || statusFilter === '' || Number(item.senorStatus) === Number(statusFilter));
+  if (body.runStatus != null && body.runStatus !== '') {
+    instrumentList = instrumentList.filter(item => Number(item.runStatus) === Number(body.runStatus));
+  }
+  const total = scopedInstruments.length;
   return {
     instrumentCount: {
       notMonitorCount: 0,
       monitorTotal: total,
       total,
-      normalCount: instrumentList.filter(item => item.senorStatus === 1).length,
-      alarmCount: instrumentList.filter(item => item.senorStatus === 2).length,
-      offlineCount: instrumentList.filter(item => item.senorStatus === -100).length,
-      runCount: instrumentList.filter(item => item.senorStatus === 1).length,
-      standbyCount: 0,
-      shutdownCount: 0,
-      maintainCount: 0
+      normalCount: scopedInstruments.filter(item => item.senorStatus === 1).length,
+      alarmCount: scopedInstruments.filter(item => item.senorStatus === 2).length,
+      offlineCount: scopedInstruments.filter(item => item.senorStatus === -100).length,
+      runCount: scopedInstruments.filter(item => item.runStatus === 1).length,
+      standbyCount: scopedInstruments.filter(item => item.runStatus === 2).length,
+      shutdownCount: scopedInstruments.filter(item => item.runStatus === 0).length,
+      maintainCount: scopedInstruments.filter(item => item.runStatus === 3).length
     },
     instrumentList,
     roomDetail: {

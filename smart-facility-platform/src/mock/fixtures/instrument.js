@@ -11,7 +11,7 @@ import storage from '../storage';
 import {DEMO_NOW_MS, formatDemoDateTime, parseDemoDateTime} from '../clock';
 import {isActiveDepartment, findDepartmentById} from './auth';
 import {ROOM_BOUNDS, roomFrame, validPlacement} from '../../utils/demoLayoutGeometry';
-import {statusForInstrument} from './scenario';
+import {statusForInstrument, runningStatusForInstrument} from './scenario';
 import {allDemoRoomRows} from './room';
 
 const FLOOR_W = 1678;
@@ -651,7 +651,7 @@ export function buildInstrumentRow(entity) {
     detailType: 1,
     departmentId: resolved.departmentId,
     departmentName: departmentNameForId(resolved.departmentId),
-    status,
+    status: runningStatusForInstrument(resolved.id),
     bingStatus: senorStatus,
     brand: '演示品牌',
     managerName: '演示负责人',

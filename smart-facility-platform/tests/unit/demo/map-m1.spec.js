@@ -11,7 +11,7 @@ describe('map M1 header toolbar source contract', () => {
     expect(floorVue).not.toMatch(/data-testid="demo-scenario-group"/);
     expect(floorVue).toMatch(/data-testid="status-filter-group"/);
     expect(floorVue).not.toMatch(/class="toolbar-label">场景</);
-    expect(floorVue).toMatch(/class="toolbar-label">筛选</);
+    expect(floorVue).toMatch(/class="toolbar-group filter-group"/);
     expect(floorVue).not.toMatch(/@click="handleDemoScenario/);
     expect(floorVue).toMatch(/handleShowAllData/);
     expect(floorVue).not.toMatch(/场景·正常/);
@@ -27,7 +27,7 @@ describe('map M1 header toolbar source contract', () => {
     expect(roomVue).not.toMatch(/data-testid="demo-scenario-group"/);
     expect(roomVue).toMatch(/data-testid="device-type-filter-group"/);
     expect(roomVue).not.toMatch(/class="toolbar-label">场景</);
-    expect(roomVue).toMatch(/class="toolbar-label">筛选</);
+    expect(roomVue).toMatch(/class="toolbar-group filter-group"/);
     expect(roomVue).not.toMatch(/@click="handleDemoScenario/);
     expect(roomVue).toMatch(/handleDemoScenarioCycle/);
     expect(roomVue).not.toMatch(/@click="handleDemoScenarioCycle"/);

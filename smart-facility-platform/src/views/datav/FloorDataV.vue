@@ -11,6 +11,7 @@
               placement="bottom-start"
               width="400"
               trigger="click"
+              v-if="!isDemo"
               v-model="departmentVisible"
               @show="isDatavSelectTree = true"
               @hide="closeDepartmentVisible">
@@ -82,6 +83,7 @@
                 placement="bottom-start"
                 width="400"
                 trigger="click"
+                v-if="!isDemo"
                 v-model="deviceVisible"
                 @show="handleShowDeviceSelect">
                 <div class="body">
@@ -567,7 +569,10 @@ export default {
     },
     // 统计分析和报警分析点击事件
     handleStatistic(key, index){
-      if(typeof(index) !== undefined){
+      if (this.isDemo && this.typeData && key && this.typeData[key] === index) {
+        key = undefined;
+      }
+      if(key && index !== undefined){
         var data = {}
         data[key] = index;
         this.typeData = data;

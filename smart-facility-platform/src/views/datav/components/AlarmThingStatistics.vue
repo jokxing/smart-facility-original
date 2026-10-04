@@ -17,7 +17,7 @@
       </el-button> -->
     </div>
     <div class="btn date-btn">
-      <span v-if="isDemo" title="快捷日期以此为基准；自定义日期按实际选择查询">演示基准：2026-09-24（UTC+8）</span>
+      <el-tooltip v-if="isDemo" content="演示统计基准：2026-09-24（UTC+8）；自定义按所选日期查询" placement="top"><span style="font-size:14px;margin-right:8px;color:#8daed0;cursor:help" aria-label="演示统计日期说明">ⓘ</span></el-tooltip>
       <el-button
           v-for="item in dateBtn"
           :class="{ 'active': dateActive == item.value }"
