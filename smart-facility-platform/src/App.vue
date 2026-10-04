@@ -1,6 +1,6 @@
 <template>
   <div id="app" ref="app">
-    <transition :name="transitionName" :css="!skipRouteAnimation" mode="in-out">
+    <transition :name="transitionName" :css="!skipRouteAnimation" :mode="skipRouteAnimation ? 'out-in' : 'in-out'">
       <router-view v-if="isRouterAlive"></router-view>
     </transition>
   </div>
@@ -19,14 +19,19 @@ export default {
       isRouterAlive: true,
     }
   },
+  created() {
+    this._unhookDemoRoute = this.$router.beforeEach((to, from, next) => {
+      this.applyDemoRouteTransition(to.path, from.path);
+      next();
+    });
+  },
+  beforeDestroy() {
+    if (this._unhookDemoRoute) this._unhookDemoRoute();
+  },
   watch: {
     '$route'(to, from) {
-      this.skipRouteAnimation = process.env.VUE_APP_DEMO === 'true' &&
-        (['/floor/designer', '/room/designer'].includes(to.path) || ['/floor/designer', '/room/designer'].includes(from.path));
-      if (this.skipRouteAnimation) {
-        this.transitionName = '';
-        return;
-      }
+      this.applyDemoRouteTransition(to.path, from.path);
+      if (this.skipRouteAnimation) return;
       const toIndex = to.meta.index;
       const fromIndex = from.meta.index;
       if (toIndex > 0) {
@@ -37,6 +42,12 @@ export default {
     }
   },
   methods: {
+    applyDemoRouteTransition(toPath, fromPath) {
+      const overlay = ['/floor/designer', '/room/designer'];
+      this.skipRouteAnimation = process.env.VUE_APP_DEMO === 'true' &&
+        (overlay.includes(toPath) || overlay.includes(fromPath));
+      if (this.skipRouteAnimation) this.transitionName = '';
+    },
     reload() {
       this.isRouterAlive = false
       this.$nextTick(function () {

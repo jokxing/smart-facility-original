@@ -1,5 +1,6 @@
 import {listGardens, listBuildingsByGardenId} from '../fixtures/space';
 import {listFloorsByBuildingId, createDemoFloor, updateDemoFloor} from '../fixtures/mapFloor';
+import {listMapLabsByFloorId} from '../fixtures/room';
 import {protectedRoute, success, failure} from '../response';
 import {validateDemoStoredMedia} from '../../utils/demoMediaStore';
 
@@ -31,5 +32,9 @@ export default [
       return failure('保存失败，请检查浏览器存储空间后重试。');
     }
   }),
-  protectedRoute('DELETE', '/map/floor', () => failure('本阶段演示未开放楼层删除。'))
+  protectedRoute('DELETE', '/map/floor', () => failure('本阶段演示未开放楼层删除。')),
+  protectedRoute('GET', '/map/lab', ({params}) => {
+    const result = listMapLabsByFloorId(params && params.floorId);
+    return result.ok ? success(result.items) : failure(result.message);
+  })
 ];

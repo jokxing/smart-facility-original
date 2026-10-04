@@ -27,7 +27,6 @@
       <div class="nav" v-show="allBtn">
         <div class="navItem back" @click="handleBackToList"><i></i>{{ $t('common.back') }}</div>
         <div class="navItem" @click="handleConfiguar" v-if="$store.state.level">{{ $t('dataV.inDeploy') }}</div>
-        <div v-if="isDemo" class="navItem" @click="handleToRoomLayout">查看设备布局</div>
         <div class="navItem" @click="handleToScreen('roomDataV')">{{ $t('dataV.labDeviceDataV') }}</div>
         <div class="navItem" @click="handleToScreen('floorDataV')">{{ $t('dataV.roomDataV') }}</div>
       </div>

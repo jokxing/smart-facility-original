@@ -962,6 +962,7 @@ export function addEquipmentUsers(body = {}) {
         timeFrom: '00:00:00',
         timeTo: '23:59:59',
         timeFlag: Number.isFinite(timeFlag) ? timeFlag : 1,
+        receiveResumeMessageFlag: 1,
         type: body.type || 'DEVICE'
       });
       existing.add(userId);
@@ -975,6 +976,32 @@ export function addEquipmentUsers(body = {}) {
 }
 
 /** POST /equipmentUser/remove */
+export function updateEquipmentUserAlarm(body = {}) {
+  const equipmentId = Number(body.equipmentId);
+  const gate = assertWritableEquipment(equipmentId);
+  if (!gate.ok) return gate;
+  const store = {...readJsonMap(EQUIPMENT_USERS_KEY)};
+  const rows = store[String(equipmentId)];
+  const index = Array.isArray(rows) ? rows.findIndex(row => Number(row.userId) === Number(body.userId)) : -1;
+  if (index < 0) return {ok:false, message:'该负责人不存在，请刷新后重试。'};
+  const patch = {};
+  for (const field of ['weixin','sms','phone']) {
+    if (body[field] == null || body[field] === '' || ![-1,0,1,5,10,15,20,30,45,60,120,180].includes(Number(body[field]))) return {ok:false,message:'请选择有效的报警方式。'};
+    patch[field] = Number(body[field]);
+  }
+  for (const field of ['timeFlag','receiveResumeMessageFlag']) {
+    if (body[field] == null || body[field] === '' || ![0,1].includes(Number(body[field]))) return {ok:false,message:'请选择时间段及恢复提醒设置。'};
+    patch[field] = Number(body[field]);
+  }
+  for (const field of ['timeFrom','timeTo']) {
+    if (!/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(String(body[field] || ''))) return {ok:false,message:'请设置有效的时间范围。'};
+    patch[field] = body[field];
+  }
+  store[String(equipmentId)] = rows.map((row,i)=>i===index ? {...row,...patch} : row);
+  writeJsonMap(EQUIPMENT_USERS_KEY,store);
+  return {ok:true};
+}
+
 export function removeEquipmentUserRecord(body = {}) {
   const equipmentId = Number(body.equipmentId);
   const userId = Number(body.userId);

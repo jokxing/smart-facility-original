@@ -43,6 +43,8 @@
     "test:demo:map:m1": "node scripts/check-demo-map-m1.cjs",
     "test:demo:map:m2": "node scripts/check-demo-map-m2.cjs",
     "test:demo:map:m3": "node scripts/check-demo-map-m3.cjs",
+    "test:demo:map:settings": "node scripts/check-demo-map-settings-room.cjs",
+    "test:demo:map:settings:floor": "node scripts/check-demo-map-settings-floor.cjs",
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode prod",
     "build:dev": "vue-cli-service build --mode development",

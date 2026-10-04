@@ -2633,3 +2633,27 @@
 - 共享设备状态源连接列表、布局、详情、曲线、房间聚合与双大屏。温度告警值 45.2℃ 超过 40℃，湿度 85% 超过 70%；房间卡使用代表设备读数并注明设备名称。业务换房间同步改变聚合，移除布局不消除业务告警。
 - 契约 `docs/map-m6-status-contract.md`，旧场景 API 仅保留兼容回归，页面没有切换入口。不修改生产接口或历史告警记录。
 - 验证：51 套、257 项单测全部通过；8098 本地浏览器 A/B 状态验收通过，外部请求 0，证据 `docs/evidence/map-m6-status/`。Git diff 空白检查通过。本轮仅完成此项，其余任务仍后置；未安装依赖或 commit/push。
+
+## 2026-10-04 地图设置房间列表与配置入口
+
+- 修改平台：`src/mock/fixtures/room.js`、`src/mock/handlers/map.js`、`src/views/mapSettings/MapSettings.vue`；新增 `src/utils/demoRequestSeq.js`、`tests/unit/demo/map-settings-room.spec.js`、`scripts/check-demo-map-settings-room.cjs`。
+- 实现：演示 `GET /map/lab` 按楼层返回全部业务房间（含未布局），字段 `labId/labName/labMapUrl` 及归属；未知楼层空数组，缺参失败，`floorId=0` 不开放未绑定。列表请求序号锁、失败可重试、空成功暂无数据。演示房间行「配置设备」进 `/room/designer`，无底图禁用；楼层配置入口仍隐藏。房间 CRUD 仍在房间管理。
+- 验证：`npm run test:demo -- --watch=false --silent` 53 套、264 项通过。独立 8099 浏览器验收 1F 列表/预览/配置进出/空楼层/失败重试，外部请求 0；证据 `docs/evidence/map-settings-room/`。
+- 未验证：本页真实上传点击、触屏、生产接口。未安装依赖、commit/push。本批结束，其余任务后置。
+
+## 2026-10-04 地图设置楼层配置入口
+
+- 修改平台：`src/views/mapSettings/MapSettings.vue`；`tests/unit/demo/map-settings-room.spec.js` 增楼层底图字段断言；新增 `scripts/check-demo-map-settings-floor.cjs`。
+- 实现：演示楼层列表补「配置房间」，有 mapUrl 进入既有 `/floor/designer`（M4），无底图禁用。不重写设计器，不开放园区楼宇 CRUD。
+- 验证：全量单测 53 套、265 项通过。独立 8100 浏览器：楼层列表、2F 禁用、1F 进入配置并看到三个房间标记、退出到预览，外部请求 0；证据 `docs/evidence/map-settings-floor/`。
+- 未验证触屏与生产接口。未安装依赖、commit/push。本批结束，其余任务后置。
+
+## 2026-10-04 地图设置退出配置层叠影
+
+- 原因：根路由 `in-out` 在 `$route` 监听里才关掉动画，进出配置时旧地图设置页（含表格固定操作列）仍留在 DOM，叠在楼层预览上。
+- 修改 `src/App.vue`：导航前 `beforeEach` 关闭动画，演示配置进出改用 `out-in`。`MapSettings.vue` 离开到设计器时立即隐藏本页。
+- 浏览器脚本补验退出后地图设置与「配置房间」不可见。8101 通过，外部请求 0。未提交。
+
+## 2026-10-04 楼层预览顶栏
+
+- 修改 `floorConfiguar/index.vue`、`index.less`：演示顶栏折叠图标与筛选按钮垂直居中；移除「查看设备布局」入口（方法保留供既有脚本调用）。

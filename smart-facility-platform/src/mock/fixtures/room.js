@@ -13,7 +13,7 @@ import {createRoomExportWorkbook} from '../roomWorkbook';
 import storage from '../storage';
 import {isActiveDepartment, findDepartmentById} from './auth';
 import {isDemoMediaKey} from '../../utils/demoMediaStore';
-import {DEMO_ROOM_MAP_REGISTRY} from '../../utils/demoRoomMapUrl';
+import {DEMO_ROOM_BACKGROUND_BY_ID, DEMO_ROOM_MAP_REGISTRY} from '../../utils/demoRoomMapUrl';
 
 const DEPT_OPS = 900101;
 const DEPT_RD = 900102;
@@ -193,6 +193,37 @@ export function allDemoRoomRows() {
     if (ctx) rows.push(buildRoomRow(ctx));
   }
   return rows;
+}
+
+function resolveListMapUrl(row) {
+  const stored = String((row && row.mapUrl) || '').trim();
+  if (stored) return stored;
+  return DEMO_ROOM_BACKGROUND_BY_ID[Number(row && row.id)] || '';
+}
+
+/**
+ * GET /map/lab — map-settings room table by floor.
+ * All business rooms on the floor (placed and unplaced). Does not open floorId=0 unbound binding.
+ */
+export function listMapLabsByFloorId(floorId) {
+  if (floorId == null || String(floorId).trim() === '') {
+    return {ok: false, message: '请指定楼层。'};
+  }
+  const key = Number(floorId);
+  if (!Number.isFinite(key)) return {ok: false, message: '请指定楼层。'};
+  if (key === 0) return {ok: true, items: []};
+  const items = allDemoRoomRows()
+    .filter(row => Number(row.floorId) === key)
+    .map(row => ({
+      labId: Number(row.id),
+      labName: row.name,
+      labMapUrl: resolveListMapUrl(row),
+      departmentName: row.departmentName || '',
+      floorName: row.floorName || '',
+      buildingName: row.buildingName || '',
+      gardenName: row.gardenName || row.gradenName || ''
+    }));
+  return {ok: true, items};
 }
 
 /** Valid floor-marker coords (not missing / not sentinel -9999). */

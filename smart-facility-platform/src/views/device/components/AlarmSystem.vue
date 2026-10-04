@@ -206,7 +206,7 @@ export default {
         timeFlag: row.timeFlag,
         timeFrom: row.timeFrom.length > 8 ? moment(row.timeFrom).format("HH:mm:ss") : row.timeFrom,
         timeTo: row.timeFrom.length > 8 ? moment(row.timeTo).format("HH:mm:ss") : row.timeTo,
-        receiveResumeMessageFlag: row.receiveResumeMessageFlag,
+        receiveResumeMessageFlag: row.receiveResumeMessageFlag == null ? 1 : row.receiveResumeMessageFlag,
         type: row.type,
         userId: row.userId
       }
@@ -233,6 +233,10 @@ export default {
         }
       } catch (e) {
         this.disabled = false;
+        if (process.env.VUE_APP_DEMO === 'true') {
+          if (!(e && e.code && String(e.code).startsWith('MOCK_'))) this.$message.error('保存失败，请重试。');
+          return;
+        }
         this.$message.error(ERROR);
         throw e;
       }

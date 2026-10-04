@@ -76,7 +76,6 @@
             </div>
             <button slot="reference">{{ $t('labDevice.roomScreen') }}</button>
           </el-popover>
-          <button v-if="isDemo" disabled title="演示为只读，暂不支持保存展示房间">房间展示设置（只读）</button>
 
             <el-popover
                 popper-class="dataV-popover"
@@ -458,6 +457,7 @@ export default {
           }
           let floor = res.items.floorDetail;
           this.floorMessage = {
+            roomName: this.isDemo ? [floor.buildingName, floor.floorName].filter(Boolean).join(' · ') : floor.roomName,
             buildingName: floor.buildingName && floor.buildingName,
             companyName: floor["companyName"] && floor.companyName,
             departmentName: floor["departmentName"] && floor.departmentName,

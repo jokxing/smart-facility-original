@@ -38,6 +38,8 @@
           返回房间管理
         </el-button>
       </div>
+      <p v-if="isDemo && level === 2" class="map-set-hint">无底图的楼层请先编辑上传，再配置房间布局。</p>
+      <p v-if="isDemo && level === 3" class="map-set-hint">房间新增、改名、底图和删除请在房间管理维护。</p>
       <div class="session">
         <div class="clearfix">
           <div class="table-title">{{ tableTitle }}</div>
@@ -51,9 +53,14 @@
             </el-button>
           </div>
         </div>
+        <div v-if="listError" class="map-list-fail">
+          <span>{{ listError }}</span>
+          <el-button class="map-list-retry" type="text" @click="retryTableList">重试</el-button>
+        </div>
         <el-table
             v-loading="loading"
             :data="building"
+            :empty-text="listError ? ' ' : '暂无数据'"
             border
             class="margin-center"
             size="medium"
@@ -66,8 +73,11 @@
               :prop="item.prop"/>
           <el-table-column v-if="urlPropLabel" :label="urlPropLabel">
             <template v-slot="scope">
-              <a :title="$t('dataV.previewImg')"
-                 @click="handlePreviewImg(scope.row[urlPropStr])">
+              <span v-if="!rowHasMap(scope.row)" class="map-url-empty">未设置</span>
+              <a
+                  v-else
+                  :title="$t('dataV.previewImg')"
+                  @click="handlePreviewImg(scope.row[urlPropStr])">
                 {{ scope.row[urlPropStr] }}
               </a>
             </template>
@@ -83,6 +93,29 @@
                   @click="handleConfiguration(scope.row, level)">
                   {{ $t('dataV.deploy') }}
               </el-button>
+              <span
+                  v-if="level === 2 && isDemo"
+                  :title="rowHasMap(scope.row) ? '' : '请先编辑楼层并上传底图后再配置房间'"
+                  style="margin-left: 10px;">
+                <el-button
+                    class="map-floor-config"
+                    type="text"
+                    :disabled="!rowHasMap(scope.row)"
+                    @click="handleConfiguration(scope.row, 2)">
+                  配置房间
+                </el-button>
+              </span>
+              <span
+                  v-if="level === 3 && isDemo"
+                  :title="rowHasMap(scope.row) ? '' : '请先在房间管理设置底图后再配置设备'">
+                <el-button
+                    class="map-room-config"
+                    type="text"
+                    :disabled="!rowHasMap(scope.row)"
+                    @click="handleConfiguration(scope.row, 3)">
+                  配置设备
+                </el-button>
+              </span>
               <el-button
                   v-if="!isDemo"
                   class="abnormal"
@@ -124,6 +157,7 @@ import {BASE_URL} from "@/utils/constant";
 import {resolveFloorMapUrl} from '@/utils/demoFloorMapUrl';
 import {resolveRoomMapUrl} from '@/utils/demoRoomMapUrl';
 import {hydrateDemoMediaCache} from '@/utils/demoMediaStore';
+import {createSeqLock, settleLatestList, isDemoInterceptorMessage} from '@/utils/demoRequestSeq';
 import i18n from "@/i18n";
 let nodeDefault;
 const TABLE_ARRAY = {
@@ -181,6 +215,9 @@ export default {
       addTitle: ADD_TEXT["1"],
       level: 1,
       loading: false,
+      listError: "",
+      lastTableQuery: null,
+      lastLoadKind: "tree",
       keys: [],
       treeLoading: false,
       urlPropLabel: "",
@@ -203,11 +240,55 @@ export default {
     };
   },
   created() {
+    this.tableLock = createSeqLock();
+    this.treeLock = createSeqLock();
     this.handleReadTreeId();
     this.handleGetMapGardenList();
     this.companyName = JSON.parse(localStorage.getItem("USERINFO")).companyName;
   },
   methods: {
+    rowHasMap(row, level) {
+      const current = level == null ? this.level : level;
+      const key = current === 3 ? "labMapUrl" : current === 2 ? "mapUrl" : this.urlPropStr;
+      return !!(row && key && String(row[key] || "").trim());
+    },
+    applySettled(result, options) {
+      if (!result || !result.applied) return false;
+      this.building = result.rows;
+      this.listError = result.error;
+      this.loading = false;
+      if (result.error && !(options && options.silent)) {
+        this.$message.error(result.error);
+      }
+      return true;
+    },
+    beginTableRequest(query) {
+      this.lastLoadKind = "table";
+      this.lastTableQuery = query;
+      this.listError = "";
+      this.loading = true;
+      return this.tableLock.start();
+    },
+    finishTableSuccess(seq, items) {
+      this.applySettled(settleLatestList(this.tableLock, seq, {ok: true, items}), {silent: true});
+    },
+    finishTableFailure(seq, error, silent) {
+      const message = typeof error === "string"
+        ? error
+        : (error && error.message) || "列表加载失败，请重试。";
+      this.applySettled(
+        settleLatestList(this.tableLock, seq, {ok: false, message}),
+        {silent: silent || isDemoInterceptorMessage(error)}
+      );
+    },
+    retryTableList() {
+      if (this.lastLoadKind === "tree" || !this.lastTableQuery) {
+        this.handleGetMapGardenList();
+        return;
+      }
+      const query = this.lastTableQuery;
+      this.handleTableData(query.level, query.id, query.label);
+    },
     handleReadTreeId() {
       if (localStorage.getItem("garden")) {
         let garden = localStorage.getItem("garden");
@@ -221,11 +302,23 @@ export default {
       }
     },
     handleGetMapGardenList(preserve) {
+      this.lastLoadKind = "tree";
+      const seq = this.treeLock.start();
       this.treeLoading = true;
       this.loading = true;
+      this.listError = "";
       this.companyNames = [];
       getMapGardenList().then((res) => {
-        if (res.code && res.items.length) {
+        if (!this.treeLock.accept(seq)) return;
+        if (!res || !res.code) {
+          this.treeLoading = false;
+          this.loading = false;
+          this.building = [];
+          this.listError = (res && res.message) || "列表加载失败，请重试。";
+          this.$message.error(this.listError);
+          return;
+        }
+        if (res.items && res.items.length) {
           for (const item of res.items) {
             let grandpaKey = "a";
             let grandpa = {
@@ -279,6 +372,7 @@ export default {
             }
             this.companyNames.push(grandpa);
           }
+          this.treeLoading = false;
           // After create/edit, keep the current table level (floor/room list) instead of jumping to garden.
           if (preserve && preserve.level === 2 && preserve.buildingId) {
             this.handleTableData(2, preserve.buildingId, preserve.buildingName);
@@ -301,9 +395,18 @@ export default {
             const obj = this.breadcrumb.slice(-1)[0];
             this.handleTableData(obj.level, obj.data.id, obj.label)
           }
+          return;
         }
         this.treeLoading = false;
         this.loading = false;
+        this.building = [];
+      }).catch((error) => {
+        if (!this.treeLock.accept(seq)) return;
+        this.treeLoading = false;
+        this.loading = false;
+        this.building = [];
+        this.listError = (error && error.message) || "列表加载失败，请重试。";
+        if (!isDemoInterceptorMessage(error)) this.$message.error(this.listError);
       });
     },
     handleAdd() {
@@ -384,27 +487,28 @@ export default {
       }
     },
     handleGetGardenList(gardenId) {
-      this.loading = true;
+      const seq = this.beginTableRequest({level: 1, id: gardenId, label: this.companyObject.gardenName});
       getMapBuildingList({gardenId}).then((res) => {
-        this.building = res.items;
-        this.loading = false;
-      });
+        if (!res || !res.code) return this.finishTableFailure(seq, (res && res.message) || "列表加载失败，请重试。");
+        this.finishTableSuccess(seq, res.items);
+      }).catch((error) => this.finishTableFailure(seq, error, isDemoInterceptorMessage(error)));
     },
     handleRoomList(floorId) {
-      this.loading = true;
+      const seq = this.beginTableRequest({level: 3, id: floorId, label: this.companyObject.floorName});
       getMapLabList({floorId}).then((res) => {
-        this.building = res.items;
-        this.loading = false;
-      });
+        if (!res || !res.code) return this.finishTableFailure(seq, (res && res.message) || "列表加载失败，请重试。");
+        this.finishTableSuccess(seq, res.items);
+      }).catch((error) => this.finishTableFailure(seq, error, isDemoInterceptorMessage(error)));
     },
     handleGetFloorList(buildingId) {
-      this.loading = true;
+      const seq = this.beginTableRequest({level: 2, id: buildingId, label: this.companyObject.buildingName});
       getMapFloorList({buildingId}).then((res) => {
-        this.building = res.items;
-        this.loading = false;
-      });
+        if (!res || !res.code) return this.finishTableFailure(seq, (res && res.message) || "列表加载失败，请重试。");
+        this.finishTableSuccess(seq, res.items);
+      }).catch((error) => this.finishTableFailure(seq, error, isDemoInterceptorMessage(error)));
     },
     handleConfiguration(row, level) {
+      if (this.isDemo && !this.rowHasMap(row, level)) return;
       if (level === 2) {
         this.$router.push({
           path: "/floor/designer",
@@ -533,7 +637,15 @@ export default {
       });
     },
   },
+  beforeRouteLeave(to, from, next) {
+    if (this.isDemo && this.$el && (to.path === '/floor/designer' || to.path === '/room/designer')) {
+      this.$el.style.display = 'none';
+    }
+    next();
+  },
   beforeDestroy() {
+    if (this.tableLock) this.tableLock.kill();
+    if (this.treeLock) this.treeLock.kill();
     localStorage.removeItem("garden")
   }
 };
@@ -594,6 +706,24 @@ export default {
     height: 100%;
     padding: 20px 30px;
     overflow-y: auto;
+
+    .map-set-hint {
+      margin: 8px 0 0;
+      color: #909399;
+      font-size: 13px;
+    }
+
+    .map-list-fail {
+      margin: 12px 0;
+      color: #f56c6c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-url-empty {
+      color: #909399;
+    }
 
     .breadcrumb {
       display: flex;

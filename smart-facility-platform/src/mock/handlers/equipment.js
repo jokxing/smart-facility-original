@@ -15,6 +15,7 @@ import {
   listEquipmentHistoryAlarms,
   listEquipmentSort,
   listEquipmentUsers,
+  updateEquipmentUserAlarm,
   listGunPipetteBindings,
   listLabelBindings,
   listBindableCatalog,
@@ -62,6 +63,12 @@ export default [
     const result = addEquipmentUsers(body || {});
     if (!result.ok) return failure(result.message || '添加失败');
     return success({count: result.count});
+  }),
+  protectedRoute('POST', '/equipmentUser/alarmSetting', ({body}) => {
+    try {
+      const result = updateEquipmentUserAlarm(body || {});
+      return result.ok ? success(null) : failure(result.message);
+    } catch (_) { return failure('保存失败，请检查本地存储后重试。'); }
   }),
   protectedRoute('POST', '/equipmentUser/remove', ({body}) => {
     const result = removeEquipmentUserRecord(body || {});
