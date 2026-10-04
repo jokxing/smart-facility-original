@@ -51,7 +51,8 @@ export default [
       return result.ok ? success({floorId: result.floorId, count: result.count}) : failure(result.message);
     }
     const items = Array.isArray(body) ? body : (body && body.list);
-    const result = saveRoomInstrumentLayout(items);
+    if (!Array.isArray(body) && body && (Number(body.type) !== 4 || !Number.isFinite(Number(body.roomId)) || Number(body.roomId) <= 0)) return failure('设备布局需提供 type:4 和有效 roomId。');
+    const result = saveRoomInstrumentLayout(items, body && !Array.isArray(body) && body.type === 4 ? body.roomId : undefined);
     if (!result.ok) return failure(result.message || '保存失败');
     return success({roomId: result.roomId, count: result.count});
   }),

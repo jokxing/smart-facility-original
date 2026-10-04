@@ -1,5 +1,6 @@
 export const ROOM_CANVAS = {width: 1600, height: 790};
 export const DEVICE_SIZE = {width: 128, height: 144};
+import {peekDemoMediaDimensions} from './demoMediaStore';
 export const ROOM_BOUNDS = Object.freeze({
   950001: {minX: 78, minY: 78, w: 762, h: 327},
   950003: {minX: 840, minY: 78, w: 760, h: 327}
@@ -7,7 +8,14 @@ export const ROOM_BOUNDS = Object.freeze({
 
 // One uniform transform for the background and all device centers.
 export function roomFrame(roomId, ratio = 1) {
-  const b = ROOM_BOUNDS[roomId];
+  let b = ROOM_BOUNDS[roomId];
+  if (!b) {
+    const {getRoomMapUrlKey} = require('../mock/fixtures/room');
+    const key = getRoomMapUrlKey(roomId);
+    const dimensions = key === 'demo-room-a' ? {width: 762, height: 327}
+      : key === 'demo-room-b' ? {width: 760, height: 327} : peekDemoMediaDimensions(key);
+    if (dimensions && dimensions.width > 0 && dimensions.height > 0) b = {w: dimensions.width, h: dimensions.height};
+  }
   if (!b) return {x: 0, y: 0, width: 0, height: 0, scale: 0};
   const scale = Math.min(ROOM_CANVAS.width / b.w, ROOM_CANVAS.height / b.h);
   return {x: (1600 - b.w * scale) / 2 * ratio, y: (790 - b.h * scale) / 2 * ratio,

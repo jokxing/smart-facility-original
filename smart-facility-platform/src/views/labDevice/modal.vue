@@ -82,8 +82,7 @@
           </el-col>
           <el-col :span="12">
               <el-form-item :label="$t('common.owningRoom')" prop="roomId">
-              <span v-if="isDemo && isEdit">{{ ruleForm.roomName }}</span>
-              <SelectRoomTree v-else
+              <SelectRoomTree
                 @getValue="selectRoom"
                 class="select-change-p"
                 :updateRoomName="ruleForm.roomName"

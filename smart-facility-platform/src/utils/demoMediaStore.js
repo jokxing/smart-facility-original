@@ -9,6 +9,8 @@ const STORE = 'blobs';
 const MEDIA_KEY_RE = /^demo-media-[a-z0-9-]+$/i;
 
 const urlCache = new Map();
+const dimensionCache = new Map();
+export function peekDemoMediaDimensions(id) { return dimensionCache.get(String(id)) || null; }
 let dbPromise = null;
 
 function openDb() {
@@ -98,6 +100,7 @@ export async function putDemoMediaFile(file, options = {}) {
     tx.objectStore(STORE).put(record);
   });
   const url = cacheBlob(id, file);
+  dimensionCache.set(id, {width: bitmap.width, height: bitmap.height});
   return {id, url, width: bitmap.width, height: bitmap.height, mime, size: file.size};
 }
 
@@ -128,7 +131,10 @@ export async function hydrateDemoMediaCache() {
       req.onerror = () => reject(req.error || new Error('读取媒体库失败。'));
     });
     rows.forEach(row => {
-      if (row && row.id && row.blob) cacheBlob(row.id, row.blob);
+      if (row && row.id && row.blob) {
+        cacheBlob(row.id, row.blob);
+        dimensionCache.set(row.id, {width: row.width, height: row.height});
+      }
     });
     return rows.length;
   } catch (_) {

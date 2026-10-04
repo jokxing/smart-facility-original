@@ -219,7 +219,7 @@ test('type:4 layout save persists and reset restores seeds; illegal writes fail'
 
   expect((await client.post('/map/element/config', [{type: 11, elementId: 950001, x: 1, y: 1}])).data.code).toBe(0);
   expect((await client.post('/map/element/config', [{type: 4, elementId: 999999, mediaId: 950001, x: 10, y: 10}])).data.code).toBe(0);
-  expect(saveRoomInstrumentLayout(moved.slice(0, 1)).ok).toBe(false);
+  expect(saveRoomInstrumentLayout(moved.slice(0, 1)).ok).toBe(true);
 });
 
 test('instrument detail requires auth', async () => {

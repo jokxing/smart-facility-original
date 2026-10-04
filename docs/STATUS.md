@@ -2591,3 +2591,30 @@
 
 - 修改平台 `src/views/floorConfiguar/index.vue`：文字关闭改为右上角红色圆形 ×，使用 SVG 对称线条绘制，与配置移除图标一致；保留关闭动作，增加可访问名称及悬停提示。
 - 验证：Git diff 空白检查通过；本次展示调整未重复浏览器及全量测试。下一步仍为 M5，待安排。
+
+## 2026-10-03 M5 设备档案与房间布局闭环
+
+- 修改平台 `src/mock/fixtures/instrument.js`：新增/导入/种子设备统一归属，改名动态合并，换房间清理原位置；允许部分/空布局快照、删除保留空快照、存储写失败反馈及迁移回滚；候选和导入选项使用当前房间档案。
+- 修改 `src/mock/handlers/instrument.js`：接收设备布局 `{type:4,roomId,list}`，保留非空数组兼容与楼层 type:11 分流；校验房间、设备归属、重复、混合类型与几何。
+- 修改 `src/views/labDevice/modal.vue`：演示编辑允许更换房间；`src/views/roomConfiguar/Layout.vue`：候选、拖入/点击放置、撤销、空列表保存、未保存退出确认、重置确认与保存即返回。
+- 修改 `src/views/roomConfiguar/components/Designer.vue`：选中设备右上角圆形 × 移除，回候选；保留拖动、旋转、缩放与双击移除。`src/App.vue` 将演示配置进出无动画规则扩展到房间配置，离场隐藏旧层。
+- 修改 `src/utils/demoLayoutGeometry.js`、`src/utils/demoMediaStore.js`：新增房间依据登记/上传底图尺寸计算一致边界；恢复 IndexedDB 媒体时恢复尺寸缓存，原种子坐标保留。
+- 新增 `tests/unit/demo/map-m5.spec.js`（7 项）；更新 `tests/unit/demo/instrument.spec.js` 的部分保存断言；新增 `scripts/check-demo-map-m5.cjs` 与 `docs/evidence/map-m5/`。
+- 验证：全量 `npm run test:demo -- --watch=false --silent`，50 套/255 项通过。8098 本地浏览器验证 SaaS 新增→候选→拖入→保存预览→真实点击 × 移除→保存刷新→编辑换房间→新房间候选→业务删除→候选清理，外部请求 0。定位旧离场实例并等待 Konva 绘制完成后操作，最终回归通过。Git diff 空白检查通过。
+- 设计决定：移除只改布局，业务删除须先解绑智能硬件；换房间须重新布置，不复活旧坐标；新增与导入不自动布置；重置是明确确认后的立即保存操作；统一 Mock，不升级 Vue 2，不改小程序。
+- 文档：新增 `docs/map-m5-contract.md`，更新 `docs/demo-guide.md`、`docs/next-task-prompt.md`。
+- 未验证：生产接口、真实硬件、多标签并发、整站生产构建；没有安装依赖、commit/push 或部署。
+- 下一步最小任务：用户本地验收 M5 后再确定下一项；其余任务保持后置，不自动开始 M6。
+
+## 2026-10-04 房间配置底色与页面叠影修复
+
+- 修改平台 `src/views/roomConfiguar/Layout.vue`：演示配置页铺满视口，添加不透明浅色背景与明确层级；侧栏浅色、画布深蓝，覆盖旧预览工具栏与四周空隙，非演示样式保持。
+- 修改 `scripts/check-demo-map-m5.cjs`：补验背景颜色、顶边为 0、覆盖整屏高度；M5 浏览器完整回归通过，外部请求 0，证据更新至 `docs/evidence/map-m5/`。Git diff 空白检查通过；纯样式调整未重复全量单测。
+- 未验证生产环境；未安装依赖、提交或推送。下一步仍为用户验收，其他任务后置。
+
+## 2026-10-04 房间设备交互与按钮层级
+
+- 修改平台 `src/views/roomConfiguar/components/Designer.vue`：拖动/缩放/旋转开始隐藏移除图标，结束后恢复，并使用提交后的边界定位；越界回退也会恢复。
+- 修改 `src/views/roomConfiguar/Layout.vue`：保存保留主色，重置橙色描边，取消白底灰边，撤销浅蓝底描边；仅演示样式改变。
+- 更新 `scripts/check-demo-map-m5.cjs`：真实鼠标拖动期间断言图标不存在、松开后存在，再点击移除并完成保存、刷新、换房间与删除闭环。8098 浏览器通过，外部请求 0，证据更新；Git diff 空白检查通过。未重复全量单测，未验证触屏与生产环境。
+- 未安装依赖、commit/push 或开展其他后置任务。

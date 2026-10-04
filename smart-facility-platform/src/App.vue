@@ -22,7 +22,7 @@ export default {
   watch: {
     '$route'(to, from) {
       this.skipRouteAnimation = process.env.VUE_APP_DEMO === 'true' &&
-        (to.path === '/floor/designer' || from.path === '/floor/designer');
+        (['/floor/designer', '/room/designer'].includes(to.path) || ['/floor/designer', '/room/designer'].includes(from.path));
       if (this.skipRouteAnimation) {
         this.transitionName = '';
         return;

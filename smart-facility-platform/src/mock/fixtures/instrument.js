@@ -12,6 +12,7 @@ import {DEMO_NOW_MS, formatDemoDateTime, parseDemoDateTime} from '../clock';
 import {isActiveDepartment, findDepartmentById} from './auth';
 import {ROOM_BOUNDS, roomFrame, validPlacement} from '../../utils/demoLayoutGeometry';
 import {getDemoScenario, statusForScenario} from './scenario';
+import {allDemoRoomRows} from './room';
 
 const FLOOR_W = 1678;
 const FLOOR_H = 795;
@@ -163,7 +164,7 @@ export function instrumentImportOptions() {
   return {
     departments: [DEPT_OPS, DEPT_RD].map(id => ({id, name: departmentNameForId(id)})),
     types: [...ALLOWED_TYPES].map(id => ({id, name: typeNameFor(id)})),
-    rooms: Object.entries(INSTRUMENT_ROOM_SPACE).map(([id, room]) => ({id: Number(id), name: room.roomName}))
+    rooms: allDemoRoomRows().map(room => ({id: Number(room.id), name: room.name}))
   };
 }
 
@@ -305,7 +306,7 @@ export function addDemoInstrument(body = {}) {
     return {ok: false, message: '请选择有效设备分类。'};
   }
   const roomId = Number(body.roomId);
-  if (!INSTRUMENT_ROOM_SPACE[roomId]) {
+  if (!allDemoRoomRows().some(room => Number(room.id) === roomId)) {
     return {ok: false, message: '请选择有效房间。'};
   }
   const dupKey = roomId + ':' + name;
@@ -352,8 +353,7 @@ function pruneDeletedFromLayouts(deletedId) {
       return elementId !== key;
     });
     if (next.length !== items.length) {
-      if (next.length) map[roomId] = next;
-      else delete map[roomId];
+      map[roomId] = next;
       changed = true;
     }
   }
@@ -429,7 +429,8 @@ export function resolveInstrumentEntity(entity) {
     ...entity,
     name: patch.name != null ? patch.name : entity.name,
     departmentId: patch.departmentId != null ? patch.departmentId : entity.departmentId,
-    types: patch.types != null ? patch.types : entity.types
+    types: patch.types != null ? patch.types : entity.types,
+    roomId: patch.roomId != null ? patch.roomId : entity.roomId
   };
 }
 
@@ -445,6 +446,9 @@ export function updateInstrumentBasic(body = {}) {
   const id = Number(body && body.id);
   const seed = instrumentById(id);
   if (!seed || isInstrumentDeleted(id)) return {ok: false, message: '演示设备不存在。'};
+  const current = resolveInstrumentEntity(seed);
+  const roomId = body.roomId == null ? current.roomId : Number(body.roomId);
+  if (!allDemoRoomRows().some(room => Number(room.id) === roomId)) return {ok: false, message: '请选择有效房间。'};
   const name = String(body.name == null ? '' : body.name).trim();
   if (name.length < 2 || name.length > 26) {
     return {ok: false, message: '请填写 2–26 字的设备名称。'};
@@ -453,22 +457,36 @@ export function updateInstrumentBasic(body = {}) {
   if (!isActiveDepartment(departmentId)) {
     return {ok: false, message: '请选择有效部门。'};
   }
-  const types = body.types == null || body.types === '' ? seed.types : Number(body.types);
+  const types = body.types == null || body.types === '' ? current.types : Number(body.types);
   if (!ALLOWED_TYPES.has(types)) {
     return {ok: false, message: '请选择有效设备分类。'};
   }
   const duplicate = activeInstrumentSeeds().map(resolveInstrumentEntity).some(item =>
-    item && Number(item.id) !== id && Number(item.roomId) === Number(seed.roomId) && item.name.trim() === name);
+    item && Number(item.id) !== id && Number(item.roomId) === roomId && item.name.trim() === name);
   if (duplicate) return {ok: false, message: '同房间设备名称重复。'};
   const next = {...readInstrumentMeta()};
-  next[String(id)] = {name, departmentId, types};
-  writeInstrumentMeta(next);
+  const oldLayoutValue = storage.getItem(LAYOUT_STORAGE_KEY);
+  if (roomId !== current.roomId) {
+    // Materialize the old snapshot so moving back cannot resurrect a seed position.
+    const layouts = readOverrides();
+    layouts[String(current.roomId)] = placementsForRoom(current.roomId).filter(item => item.elementId !== id);
+    try { writeOverrides(layouts); } catch (_) { return {ok: false, message: '本地布局保存失败，请重试。'}; }
+  }
+  next[String(id)] = {name, departmentId, types, roomId};
+  try { writeInstrumentMeta(next); } catch (_) {
+    try {
+      if (oldLayoutValue == null) storage.removeItem(LAYOUT_STORAGE_KEY);
+      else storage.setItem(LAYOUT_STORAGE_KEY, oldLayoutValue);
+    } catch (_) {}
+    return {ok: false, message: '本地设备保存失败，请重试。'};
+  }
   return {
     ok: true,
     id,
     name,
     departmentId,
     departmentName: departmentNameForId(departmentId),
+    roomId,
     types,
     typeName: typeNameFor(types)
   };
@@ -511,34 +529,39 @@ function placementsForRoom(roomId) {
     .filter(seed => seed.roomId === roomId && !isInstrumentDeleted(seed.elementId))
     .map(seedPlacement);
   const overrides = readOverrides()[String(roomId)];
-  if (!Array.isArray(overrides) || !overrides.length) return seeds;
+  if (!Array.isArray(overrides)) return seeds.filter(item => resolveInstrumentEntity(instrumentById(item.elementId)).roomId === roomId);
   const filtered = overrides
-    .filter(item => !isInstrumentDeleted(item.elementId != null ? item.elementId : item.id))
+    .filter(item => {
+      const entity = resolveInstrumentEntity(instrumentById(item.elementId != null ? item.elementId : item.id));
+      return entity && entity.roomId === roomId;
+    })
     .map(item => ({...item, type: 4}));
-  if (!filtered.length) return seeds;
+  if (!filtered.length) return [];
   const result = validateLayout(filtered, roomId);
-  return result.ok ? result.items : seeds;
+  return result.ok ? result.items : seeds.filter(item => resolveInstrumentEntity(instrumentById(item.elementId)).roomId === roomId);
 }
 
 export function listInstrumentsByRoomId(roomId) {
   const key = roomId == null || roomId === '' ? null : Number(roomId);
   if (key == null || Number.isNaN(key)) return [];
-  // Imported rows appear in list/detail but stay off layout save eligibility.
-  return activeInstrumentSeeds().filter(item => item.roomId === key && !item.imported);
+  // Created and imported records share ownership and layout eligibility.
+  return activeInstrumentSeeds().map(resolveInstrumentEntity).filter(item => item && item.roomId === key);
 }
 
 export function listInstrumentsForFloorRooms(roomIds) {
   const idSet = new Set((roomIds || []).map(Number).filter(n => !Number.isNaN(n)));
-  return activeInstrumentSeeds().filter(item => idSet.has(item.roomId) && !item.imported);
+  return activeInstrumentSeeds().map(resolveInstrumentEntity).filter(item => item && idSet.has(item.roomId));
 }
 
 /**
  * Persist type:4 room instrument layout. Returns {ok, message?, roomId?, count?}.
  */
 function validateLayout(items, requiredRoomId) {
-  if (!Array.isArray(items) || !items.length) {
+  if (!Array.isArray(items) || (!items.length && requiredRoomId == null)) {
     return {ok: false, message: '布局列表不能为空。'};
   }
+  if (requiredRoomId != null && !allDemoRoomRows().some(room => Number(room.id) === Number(requiredRoomId))) return {ok: false, message: '房间不存在。'};
+  if (!items.length) return {ok: true, roomId: Number(requiredRoomId), items: []};
   const roomIds = new Set();
   const normalized = [];
   const seen = new Set();
@@ -547,13 +570,13 @@ function validateLayout(items, requiredRoomId) {
       return {ok: false, message: '演示仅接受设备布局（type:4）。'};
     }
     const elementId = Number(raw.elementId != null ? raw.elementId : raw.id);
-    const entity = instrumentById(elementId);
+    const entity = resolveInstrumentEntity(instrumentById(elementId));
     if (!entity || isInstrumentDeleted(elementId) || seen.has(elementId)) {
       return {ok: false, message: '存在未知设备，已拒绝保存。'};
     }
     seen.add(elementId);
     const roomId = Number(raw.mediaId != null ? raw.mediaId : (raw.roomId != null ? raw.roomId : entity.roomId));
-    if (roomId !== entity.roomId || !ROOM_BOUNDS[roomId] || (requiredRoomId != null && roomId !== requiredRoomId)
+    if (roomId !== entity.roomId || (requiredRoomId != null && roomId !== Number(requiredRoomId))
       || (raw.roomId != null && Number(raw.roomId) !== roomId) || (raw.id != null && Number(raw.id) !== elementId)) {
       return {ok: false, message: '设备与房间不匹配，已拒绝保存。'};
     }
@@ -568,31 +591,26 @@ function validateLayout(items, requiredRoomId) {
     return {ok: false, message: '单次保存只能包含同一房间的设备。'};
   }
   const roomId = [...roomIds][0];
-  const expectedIds = new Set(listInstrumentsByRoomId(roomId).map(item => item.id));
-  const savedIds = new Set(normalized.map(item => item.elementId));
-  if (expectedIds.size !== savedIds.size || [...expectedIds].some(id => !savedIds.has(id))) {
-    return {ok: false, message: '演示布局需保留房间内全部已上图设备（不支持增删）。'};
-  }
   return {ok: true, roomId, items: normalized.sort((a, b) => a.sortIndex - b.sortIndex)};
 }
 
-export function saveRoomInstrumentLayout(items) {
-  const result = validateLayout(items);
+export function saveRoomInstrumentLayout(items, roomId) {
+  const result = validateLayout(items, roomId);
   if (!result.ok) return result;
   const map = readOverrides();
   map[String(result.roomId)] = result.items;
-  writeOverrides(map);
+  try { writeOverrides(map); } catch (_) { return {ok: false, message: '本地布局保存失败，请重试。'}; }
   return {ok: true, roomId: result.roomId, count: result.items.length};
 }
 
 export function resetRoomInstrumentLayout(roomId) {
   const key = roomId == null || roomId === '' ? null : Number(roomId);
-  if (key == null || Number.isNaN(key) || !ROOM_BOUNDS[key]) {
+  if (key == null || Number.isNaN(key) || !allDemoRoomRows().some(room => Number(room.id) === key)) {
     return {ok: false, message: '无效房间，无法重置布局。'};
   }
   const map = readOverrides();
   delete map[String(key)];
-  writeOverrides(map);
+  try { writeOverrides(map); } catch (_) { return {ok: false, message: '本地布局保存失败，请重试。'}; }
   return {ok: true, roomId: key};
 }
 
@@ -601,8 +619,8 @@ export function clearAllRoomLayoutOverrides() {
 }
 
 function roomNameForId(roomId) {
-  const space = INSTRUMENT_ROOM_SPACE[Number(roomId)];
-  return space ? space.roomName : '';
+  const room = allDemoRoomRows().find(item => Number(item.id) === Number(roomId));
+  return room ? room.name : '';
 }
 
 function departmentNameForId(departmentId) {
@@ -651,6 +669,7 @@ export function buildInstrumentRow(entity) {
     labelNo: '',
     monitorStatus: null,
     logoUrl: '',
+    layoutAssetKey: resolved.assetKey,
     qrUrl: '',
     labelId: null,
     boundHardware,
@@ -691,7 +710,7 @@ function matchSensorStatus(bingStatus, filter) {
 }
 
 function matchSpace(entity, body) {
-  const space = INSTRUMENT_ROOM_SPACE[entity.roomId];
+  const space = allDemoRoomRows().find(room => Number(room.id) === Number(entity.roomId));
   if (!space) return false;
   const roomIds = asIdList(body.roomIdList);
   if (roomIds.length) return roomIds.includes(entity.roomId);
@@ -1007,7 +1026,7 @@ export function emptyInstrumentSchedulerPage() {
  */
 export function listRoonInstrumentInfo(roomId) {
   const key = roomId == null || roomId === '' ? null : Number(roomId);
-  if (key == null || Number.isNaN(key) || !ROOM_BOUNDS[key]) {
+  if (key == null || Number.isNaN(key)) {
     return {
       list: [],
       board: {normalNum: 0, policeNum: 0, leaveNum: 0},

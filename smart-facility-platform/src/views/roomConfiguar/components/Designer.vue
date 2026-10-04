@@ -27,6 +27,8 @@
               scaleX: item.scaleX * ratio || 1 * ratio,
               scaleY: item.scaleY * ratio || 1 * ratio,
             }"
+            @dragstart="isDemo && (placementBusy = true)"
+            @transformstart="isDemo && (placementBusy = true)"
             @dragend="handleDragEnd(item, $event)"
             @transformend="handleTransformEnd(item, $event)"
             @dblclick="handleDeleteClick(item)"
@@ -46,6 +48,12 @@
           </v-group>
         </template>
         <v-transformer ref="transformer"></v-transformer>
+        <v-group v-if="isDemo && selectedDevice && !placementBusy" :config="{name:'deviceRemove', x:selectedBounds.right*ratio, y:selectedBounds.top*ratio}"
+          @mousedown="removeSelected" @touchstart="removeSelected">
+          <v-circle :config="{radius:14, fill:'#df6666', stroke:'white', strokeWidth:2}" />
+          <v-line :config="{points:[-5,-5,5,5],stroke:'white',strokeWidth:2.5,lineCap:'round'}" />
+          <v-line :config="{points:[-5,5,5,-5],stroke:'white',strokeWidth:2.5,lineCap:'round'}" />
+        </v-group>
       </v-layer>
     </v-stage>
 
@@ -55,7 +63,7 @@
   </div>
 </template>
 <script>
-import { roomBackgroundFrame, validPlacement } from "@/utils/demoLayoutGeometry";
+import { roomBackgroundFrame, validPlacement, placementBounds } from "@/utils/demoLayoutGeometry";
 import { demoDeviceStatusColor } from "@/utils/demoDeviceStatus";
 import ImageNode from "./ImageNode.vue";
 import { BASE_URL } from "@/utils/constant.js";
@@ -90,6 +98,7 @@ export default {
       deviceList: [],
       deviceLayer: {},
       selectedShapeName: "",
+      placementBusy: false,
       statusConfig: {},
       BASE_URL,
       modifyDeviceList: "",
@@ -148,11 +157,14 @@ export default {
     },
   },
   computed:{
+    selectedDevice() { const match = /^deviceGroup(\d+)$/.exec(this.selectedShapeName); return match ? this.deviceDrawerList[Number(match[1])] : null; },
+    selectedBounds() { return this.selectedDevice ? placementBounds(this.selectedDevice) : {}; },
     ...mapState("cmap", {
       deviceDrawerList: "deviceDrawerList",
     }),
   },
   methods: {
+    removeSelected(event) { event.cancelBubble=true; const item=this.selectedDevice; if (item) this.handleDeleteClick(item); this.selectedShapeName=''; },
    ...mapMutations("cmap", {
       handleSetDrawerList: "SETDEVICELIST",
     }),
@@ -179,6 +191,7 @@ export default {
     },
     // 缩放事件
     handleTransformEnd(data, ev) {
+      this.placementBusy = false;
       if (isDemo) return this.commitDemoPlacement(data, ev.target);
       let evtarget = ev.target;
       // console.log("id:" + data.elementId,"w:" + evtarget.scaleX(), "h:" + evtarget.scaleY())
@@ -197,6 +210,7 @@ export default {
     },
     // 拖拽事件
     handleDragEnd(data, ev) {
+      this.placementBusy = false;
       if (isDemo) return this.commitDemoPlacement(data, ev.target);
       let evtarget = ev.target;
       let evstage = ev.target.getStage();
@@ -312,7 +326,11 @@ export default {
     handleDeleteClick(item) {
       var _this = this;
       if (isDemo) {
-        return this.$message.info('演示模式不支持移除设备，可拖动后保存或重置布局');
+        this.handleSetDrawerList({deviceList:this.deviceDrawerList.filter(row => row.elementId !== item.elementId)});
+        this.selectedShapeName = '';
+        this.$refs.transformer.getNode().nodes([]);
+        this.$emit('handleDeviceList', item);
+        return;
       }
       if(item.isEdit == 0){
         this.$message.error(this.$t('dataV.noRule'))

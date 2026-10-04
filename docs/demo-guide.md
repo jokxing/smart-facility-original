@@ -24,6 +24,8 @@ npm run demo
 
 ## 路径
 
+M5：设备新增/导入后，进入对应房间配置，从待放置列表拖入或点击放置；选中右上角 × 移除回候选。编辑换房间清除旧位置，新房间重新放置；删除档案清理布局，已绑定硬件须先解绑。部分/空布局也能保存。详见 `map-m5-contract.md`。
+
 登录 → 楼宇 → 1F → **查看设备布局** → 悬停看读数 / **点击设备**打开只读详情与曲线 → **进入配置**拖动保存。  
 顶栏 **系统 → 报警记录**：查看设备告警列表，单条「添加处理」后刷新为已处理。  
 楼层/房间顶部工具栏：**场景**（切换演示数据）与 **筛选**（过滤当前画布）分组显示、互不重叠；切换场景不改坐标。
@@ -43,7 +45,7 @@ npm run demo
 | --- | --- |
 | 平面 / 标记 | `GET /map/floor/overview`（实验室房间状态跟场景） |
 | 房间设备布局读 | `POST /map/element/getRoonInstrumentInfoList?roomId=` |
-| 房间设备布局写 | `POST /map/element/config`（仅 type:4；演示会话 + 校验） |
+| 房间设备布局写 | `POST /map/element/config`（`{type:4,roomId,list}`，允许部分/空快照；演示会话 + 校验） |
 | 布局重置 | `POST /demo/room-layout/reset` |
 | 演示场景 | `GET/POST /demo/scenario` |
 | 仪器列表 / 统计 | `POST /instrument/list`；`GET /instrument/dashboard/new`（970xxx 共享实体） |

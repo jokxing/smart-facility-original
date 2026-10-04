@@ -1,0 +1,93 @@
+const fs = require('node:fs');
+const path = require('node:path');
+let source = fs.readFileSync(path.join(__dirname, 'check-demo-map-m2.cjs'), 'utf8');
+const start = source.indexOf('    // --- Map settings:');
+const end = source.indexOf('    publishEvidence();', start);
+if (start < 0 || end < 0) throw new Error('M2 harness changed');
+const scenario = `
+    const find = condition => "(() => {const walk=vm=>vm && ("+condition+" ? vm : (vm.$children||[]).map(walk).find(Boolean));return walk(document.querySelector('#app').__vue__);})()";
+    const list = find('vm.handleInstrumentList && vm.dataSource');
+    const modal = find('vm.addAsny && vm.ruleForm');
+    const editor = find('vm.placeDevice && vm.refreshCandidates && vm.$el.getBoundingClientRect().width>0');
+    const view = find('vm.handleDemoScenario && vm.deviceList');
+    await evaluate("location.hash='#/ld/labdevice'");
+    await waitPage("!!("+list+")", 'device list');
+    await evaluate(list+'.handleAdd()');
+    await waitPage(modal+' && !'+modal+'.loading', 'add form');
+    await evaluate(modal+".ruleForm={..."+modal+".ruleForm,name:'M5浏览器检测仪',roomId:950001,departmentId:900101,types:1}");
+    await evaluate(modal+'.addAsny()');
+    await waitPage('!'+modal, 'add saved');
+    const id = await evaluate("JSON.parse(localStorage.getItem('smart-facility-demo:v1:instrumentCreated')).find(row=>row.name==='M5浏览器检测仪').id");
+    await evaluate("location.hash='#/room/designer?roomId=950001&roomName=演示房间A'");
+    await waitPage(editor+' && '+editor+'.designer.some(row=>row.id==='+id+')', 'created candidate');
+    assert.equal(await evaluate('getComputedStyle('+editor+'.$el).backgroundColor'), 'rgb(245, 247, 251)');
+    assert.equal(await evaluate(editor+'.$el.getBoundingClientRect().top'), 0);
+    assert.equal(await evaluate(editor+'.$el.getBoundingClientRect().height === innerHeight'), true);
+    await waitPage("!document.querySelector('[class*=enter-active], [class*=leave-active]')", "transition");
+    await evaluate('(() => {const page='+editor+';const candidate=Array.from(document.querySelectorAll("[data-id]")).find(node=>Number(node.dataset.id)=='+id+');const transfer=new DataTransfer();candidate.dispatchEvent(new DragEvent("dragstart",{dataTransfer:transfer,bubbles:true}));const host=page.$refs.designerLayout;const box=page.$refs.designer.$refs.stage.getNode().container().getBoundingClientRect();host.dispatchEvent(new DragEvent("drop",{dataTransfer:transfer,bubbles:true,clientX:box.left+800*page.ratio,clientY:box.top+395*page.ratio}));})()');
+    await waitPage(editor+'.deviceDrawerList.some(row=>row.elementId==='+id+')', 'placed');
+    assert.equal(await evaluate(editor+'.designer.some(row=>row.id==='+id+')'),false);
+    await screenshot('01-device-placed');
+    await evaluate(editor+'.handleSave()');
+    await waitPage("location.hash.includes('/room/view')", 'saved preview');
+    await waitPage(view+' && '+view+'.deviceList.some(row=>row.elementId==='+id+')', 'preview same device');
+    await evaluate("location.hash='#/room/designer?roomId=950001&roomName=演示房间A'");
+    await waitPage(editor+' && '+editor+'.deviceDrawerList.some(row=>row.elementId==='+id+')', 'editor reload');
+    await waitPage("!document.querySelector('[class*=enter-active], [class*=leave-active]')", "transition");
+    await evaluate('(() => {const page='+editor+';const designer=page.$refs.designer;designer.selectedShapeName="deviceGroup"+page.deviceDrawerList.findIndex(row=>row.elementId==='+id+');designer.updateTransformer();})()');
+    await screenshot('01b-selected-remove');
+    const dragPoint=await evaluate('(() => {const page='+editor+';const item=page.$refs.designer.selectedDevice;const rect=page.$refs.designer.$refs.stage.getNode().container().getBoundingClientRect();return {x:rect.left+item.x*page.ratio,y:rect.top+item.y*page.ratio};})()');
+    await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:dragPoint.x,y:dragPoint.y});
+    await send('Input.dispatchMouseEvent',{type:'mousePressed',x:dragPoint.x,y:dragPoint.y,button:'left',clickCount:1});
+    await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:dragPoint.x+30,y:dragPoint.y+20,buttons:1});
+    await waitPage(editor+'.$refs.designer.placementBusy && !'+editor+'.$refs.designer.$refs.stage.getNode().findOne(".deviceRemove")', 'remove hidden during drag');
+    await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:dragPoint.x+30,y:dragPoint.y+20,button:'left',clickCount:1});
+    await waitPage('!'+editor+'.$refs.designer.placementBusy && !!'+editor+'.$refs.designer.$refs.stage.getNode().findOne(".deviceRemove")', 'remove restored after drag');
+    await screenshot('01c-after-drag');
+    const p=await evaluate('(() => {const page='+editor+';const box=page.$refs.designer.selectedBounds;const rect=page.$refs.designer.$refs.stage.getNode().container().getBoundingClientRect();return {x:rect.left+box.right*page.ratio,y:rect.top+box.top*page.ratio};})()');
+    await send('Input.dispatchMouseEvent',{type:'mousePressed',x:p.x,y:p.y,button:'left',clickCount:1});
+    await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:p.x,y:p.y,button:'left',clickCount:1});
+    await waitPage(editor+'.designer.some(row=>row.id==='+id+')', 'remove returns candidate');
+    await evaluate(editor+'.handleSave()');
+    await waitPage("location.hash.includes('/room/view')", 'removed saved');
+    await waitPage(view+' && !'+view+'.deviceList.some(row=>row.elementId==='+id+')', 'removed preview');
+    await send('Page.reload',{});
+    await waitPage(view+' && '+view+'.deviceList.length===6', 'reload preserves removal');
+    await screenshot('02-after-removal');
+    await evaluate("location.hash='#/ld/labdevice'");
+    await waitPage('!!('+list+')', 'device list after removal');
+    await evaluate(list+".items.keyword='M5';"+list+'.handleInstrumentList()');
+    await waitPage(list+'.dataSource.some(row=>row.id==='+id+')', 'business record retained');
+    await evaluate(list+'.handleEdit('+list+'.dataSource.find(row=>row.id==='+id+'))');
+    await waitPage(modal+' && !'+modal+'.loading', 'edit form');
+    await evaluate(modal+".ruleForm={..."+modal+".ruleForm,name:'M5搬迁检测仪',roomId:950003}");
+    await evaluate(modal+'.updateAsny()');
+    await waitPage('!'+modal, 'edit saved');
+    await evaluate("location.hash='#/room/designer?roomId=950003&roomName=演示房间B'");
+    await waitPage(editor+'.designer.some(row=>row.id==='+id+' && row.name===\"M5搬迁检测仪\")', 'moved candidate in room B');
+    assert.equal(await evaluate(editor+'.deviceDrawerList.some(row=>row.elementId==='+id+')'),false);
+    await evaluate(editor+'.handleExit()');
+    await waitPage("location.hash.includes('/room/view')", 'clean exit');
+    await evaluate("location.hash='#/ld/labdevice'");
+    await waitPage('!!('+list+')', 'device list after move');
+    await evaluate(list+".items.keyword='M5';"+list+'.handleInstrumentList()');
+    await waitPage(list+'.dataSource.some(row=>row.id==='+id+')', 'moved business record');
+    await evaluate(list+'.handleDelete('+list+'.dataSource.find(row=>row.id==='+id+'))');
+    await waitPage("!!document.querySelector('.el-message-box__btns')", 'delete confirmation');
+    await evaluate("Array.from(document.querySelectorAll('.el-message-box__btns button')).find(button=>/确定|确认/.test(button.textContent)).click()");
+    await waitPage('!'+list+'.dataSource.some(row=>row.id==='+id+')', 'business deleted');
+    await evaluate("location.hash='#/room/designer?roomId=950003&roomName=演示房间B'");
+    await waitPage(editor+'.modifyDeviceList.length===6', 'candidate list after deletion');
+    assert.equal(await evaluate(editor+'.designer.some(row=>row.id==='+id+')'),false);
+    const newFloorId=930001;
+`;
+source = source.slice(0,start)+scenario+source.slice(end);
+source = source.replace('../../docs/evidence/map-m2','../../docs/evidence/map-m5')
+  .replace("'demo-map-m2-shots'","'demo-map-m5-shots'").replace("'map-m2 browser OK;","'map-m5 browser OK;");
+source=source.replace('console.error(error);', 'console.error(error); console.error(exceptions.slice(-5)); console.error(await evaluate("document.body.innerText.slice(0,700)"));'); new Function('require','__dirname',source)(require,__dirname);
+
+
+
+
+
+
