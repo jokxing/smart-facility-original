@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     :title="$t('dataV.roomStat')"
-    :visible.sync="overviewVisible"
+    :visible="overviewVisible"
     :direction="direction"
     :withHeader="false"
     :size="size"
@@ -12,6 +12,7 @@
   >
     <div class="roomOverview">
       <div class="roomOverview-title">{{ $t('dataV.floorStat') }}</div>
+      <button class="overview-close" aria-label="关闭楼层统计" @click="handleDrawerClose">×</button>
       <div class="roomOverview-container">
         <div class="box statistics">
           <div class="item">
@@ -47,7 +48,7 @@
                     {{ $t('labDevice.labDeviceSum') }} <em>{{ item.totalNum }}</em>
                 </div>
                 <div class="valStr">
-                    {{ $t('dataV.offLineDevice') }} <em class="errorTxt">{{ item.policeNum }}</em>
+                    {{ $t('dataV.alarmDevice') }} <em class="errorTxt">{{ item.policeNum }}</em>
                 </div>
               </div>
               <div class="flexBox boxPadding">
@@ -68,6 +69,7 @@
 <script>
 import "@/plugins/konva";
 import { mapState, mapMutations } from "vuex";
+const isDemo = process.env.VUE_APP_DEMO === 'true';
 export default {
   props: {
     floorData: {
@@ -87,6 +89,19 @@ export default {
   watch: {
     floorData: {
       handler(newVal) {
+        if (isDemo) {
+          this.roomList = ((newVal && newVal.labList) || []).map(room => {
+            const count = room.deviceSummary || {};
+            return {...room, totalNum: count.total || 0, normalNum: count.normal || 0,
+              policeNum: count.alarm || 0, leaveNum: count.offline || 0};
+          });
+          this.floorStatistics = this.roomList.reduce((sum, room) => ({
+            normalNum: sum.normalNum + room.normalNum,
+            policeNum: sum.policeNum + room.policeNum,
+            leaveNum: sum.leaveNum + room.leaveNum
+          }), {normalNum:0, policeNum:0, leaveNum:0});
+          return;
+        }
         if (
           newVal &&
           Object.keys(newVal).length &&
@@ -130,9 +145,10 @@ export default {
       handleSetIsDrawer: "SETISOVERVIEWDRAWER",
     }),
     handleDrawerClose() {
-      this.handleSetIsDrawer();
+      if (this.overviewVisible) this.handleSetIsDrawer();
     },
     handleSeedRoomDetail(id) {
+      this.handleDrawerClose();
       this.$router.push({
         name: "RoomView",
         query: {
@@ -144,6 +160,7 @@ export default {
 };
 </script>
 <style  lang="less" scoped>
+  .overview-close { position:absolute; right:12px; top:12px; width:28px; height:28px; padding:0; border:1px solid #89bed1; border-radius:50%; background:#173047; color:white; font-size:24px; line-height:24px; cursor:pointer; }
   @import "../index.less";
   .roomList{
     /deep/ .el-scrollbar__wrap{

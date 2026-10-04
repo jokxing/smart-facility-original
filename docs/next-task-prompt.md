@@ -1,6 +1,6 @@
-# 当前状态：中控地图 M5 已完成，后续任务待安排
+# 当前状态：中控地图 M5 及 M6 混合状态已完成，后续任务待安排
 
-M1–M5 已完成。设备档案与房间布局联动契约见 `docs/map-m5-contract.md`。本轮停止，其他后置任务待用户安排。
+M1–M5 已完成。本轮 M6 仅完成用户指定的混合状态：默认 A 正常，B 的 970008 告警，其余正常，移除场景按钮、保留筛选。列表、详情、地图和大屏使用同一状态与超阈值读数。旧场景 API 仅为兼容回归保留，页面无入口；新测试 `map-m6-status.spec.js` 与 `check-demo-map-m6-status.cjs`。51 套、257 项单测通过。其余后置任务待用户安排，设备档案与布局契约见 `docs/map-m5-contract.md`。
 
 工作区 E:\project\smart-facility-original。复盘时先读 PROJECT_CONTEXT、适用 AGENTS、STATUS 文末、docs/map-m3-contract.md、map-m1-m3-handoff.md。仅改 smart-facility-platform 和 docs；不安装依赖、不部署、不 commit/push，除非用户另行要求。
 

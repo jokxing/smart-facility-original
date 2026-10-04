@@ -11,7 +11,7 @@ import storage from '../storage';
 import {DEMO_NOW_MS, formatDemoDateTime, parseDemoDateTime} from '../clock';
 import {isActiveDepartment, findDepartmentById} from './auth';
 import {ROOM_BOUNDS, roomFrame, validPlacement} from '../../utils/demoLayoutGeometry';
-import {getDemoScenario, statusForScenario} from './scenario';
+import {statusForInstrument} from './scenario';
 import {allDemoRoomRows} from './room';
 
 const FLOOR_W = 1678;
@@ -641,7 +641,7 @@ function createDateFor(entity) {
 export function buildInstrumentRow(entity) {
   const resolved = resolveInstrumentEntity(entity);
   if (!resolved) return null;
-  const {status, senorStatus} = statusForScenario(getDemoScenario());
+  const {status, senorStatus} = statusForInstrument(resolved.id);
   const boundHardware = boundEquipmentTypesForInstrument(resolved.id).length > 0;
   return {
     id: resolved.id,
@@ -855,12 +855,12 @@ export function getInstrumentStatistics() {
  * Offline keeps val null — never forge a live normal reading.
  */
 export function sensorReadingForInstrument(elementId) {
-  const {senorStatus} = statusForScenario(getDemoScenario());
+  const {senorStatus} = statusForInstrument(elementId);
   return {
     id: 980000 + (Number(elementId) % 1000),
     sensorType: {name: '演示温度'},
     status: senorStatus === 2 ? -1 : senorStatus,
-    val: senorStatus === -100 ? null : '5.2',
+    val: senorStatus === -100 ? null : (senorStatus === 2 ? '45.2' : '5.2'),
     unit: '℃'
   };
 }
@@ -885,7 +885,7 @@ export function getDemoOpenMonitorFlag(objId) {
   if (!entity) return null;
   const reading = sensorReadingForInstrument(entity.id);
   const offline = reading.val == null;
-  const {senorStatus} = statusForScenario(getDemoScenario());
+  const {senorStatus} = statusForInstrument(objId);
   const humidityVal = offline ? '' : (senorStatus === 2 ? '85.0' : '55.0');
   return {
     list: [
@@ -992,7 +992,8 @@ export function getDemoMonitorInfo(params) {
 
   const range = monitorInfoRange(params);
   if (!range.ok) return null;
-  const scenario = getDemoScenario();
+  const state = statusForInstrument(objId).senorStatus;
+  const scenario = state === 2 ? 'alarm' : state === -100 ? 'offline' : 'normal';
   if (scenario === 'offline') return [];
   const {begin, end} = range;
   const step = monitorInfoStepMs(params, begin, end);
@@ -1034,9 +1035,9 @@ export function listRoonInstrumentInfo(roomId) {
     };
   }
 
-  const {status, senorStatus} = statusForScenario(getDemoScenario());
   const list = placementsForRoom(key).map(place => {
     const entity = resolveInstrumentEntity(instrumentById(place.elementId));
+    const {status, senorStatus} = statusForInstrument(place.elementId);
     return {
       id: place.elementId,
       elementId: place.elementId,
@@ -1063,9 +1064,9 @@ export function listRoonInstrumentInfo(roomId) {
   });
 
   const board = {
-    normalNum: senorStatus === 1 ? list.length : 0,
-    policeNum: senorStatus === 2 ? list.length : 0,
-    leaveNum: senorStatus === -100 ? list.length : 0
+    normalNum: list.filter(item => item.senorStatus === 1).length,
+    policeNum: list.filter(item => item.senorStatus === 2).length,
+    leaveNum: list.filter(item => item.senorStatus === -100).length
   };
 
   const simpleEquipmentList = list.map(item => ({

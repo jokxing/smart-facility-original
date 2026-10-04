@@ -1,6 +1,6 @@
 import {listInstrumentsByRoomId, listRoonInstrumentInfo} from './instrument';
 import {countDemoDeviceStatus} from '../../utils/demoDeviceStatus';
-import {getDemoScenario, statusForScenario} from './scenario';
+import {aggregateInstrumentStatus} from './scenario';
 import {findFloorById} from './mapFloor';
 
 /**
@@ -81,7 +81,6 @@ export function listFloorOverview(floorId) {
     roomRows = (DEMO_FLOOR_ROOMS[key] || []).map(room => ({...room}));
   }
 
-  const {senorStatus: scenarioStatus} = statusForScenario(getDemoScenario());
   return {
     labList: roomRows.map(room => {
       const hasInstruments = listInstrumentsByRoomId(room.id).length > 0;
@@ -90,7 +89,7 @@ export function listFloorOverview(floorId) {
         openTwoSystem: true,
         isEdit: room.isEdit !== false,
         deviceSummary: countDemoDeviceStatus(listRoonInstrumentInfo(room.id).list),
-        senorStatus: hasInstruments ? scenarioStatus : (room.senorStatus != null ? room.senorStatus : 3),
+        senorStatus: hasInstruments ? aggregateInstrumentStatus(listInstrumentsByRoomId(room.id)) : (room.senorStatus == null ? 3 : room.senorStatus),
         equipments: (room.equipments || []).map(eq => ({
           ...eq,
           sensors: eq.sensors ? eq.sensors.map(s => ({...s})) : []

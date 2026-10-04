@@ -1,0 +1,41 @@
+const fs = require('node:fs');
+const path = require('node:path');
+let source = fs.readFileSync(path.join(__dirname, 'check-demo-map-m2.cjs'), 'utf8');
+const start = source.indexOf('    // --- Map settings:');
+const end = source.indexOf('    publishEvidence();', start);
+if (start < 0 || end < 0) throw new Error('M2 harness changed');
+const scenario = `
+    const find = condition => "(() => {const walk=vm=>vm && ("+condition+" ? vm : (vm.$children||[]).map(walk).find(Boolean));return walk(document.querySelector('#app').__vue__);})()";
+    const view = find('vm.handleDemoScenario && vm.deviceList');
+    await evaluate("location.hash='#/room/view?roomId=950003&roomName=演示房间B'");
+    await waitPage(view+' && '+view+'.deviceList.length===6', 'mixed room B');
+    assert.equal(await evaluate('document.querySelector("[data-testid=demo-scenario-group]") === null'), true);
+    assert.deepEqual(await evaluate(view+'.deviceList.filter(row=>row.senorStatus===2).map(row=>row.elementId)'), [970008]);
+    assert.equal(await evaluate(view+'.deviceList.filter(row=>row.senorStatus===1).length'), 5);
+    await screenshot('01-room-b-mixed');
+    await send('Page.navigate', {url: origin + '/#/room/view?roomId=950001&roomName=演示房间A'});
+    await evaluate('location.reload()');
+    await waitPage(view+' && '+view+'.deviceList.length===6 && '+view+'.deviceList.every(row=>row.senorStatus===1)', 'normal room A');
+    await screenshot('02-room-a-normal');
+    const floor = find('vm.handleShowAllData && vm.floorData');
+    const drawer = find('vm.floorStatistics && vm.roomList');
+    await evaluate("location.hash='#/floor/view?floorId=930001&mapUrl=demo-floor-a-1f&mapId=940001&floorName=1F&buildingVal=910001'");
+    await waitPage(floor+' && '+floor+'.deviceList.length===3', 'floor markers');
+    const markers = floor+'.$refs.stage.getNode().getLayers()[1].getChildren().map(node=>node.findOne("Text").text())';
+    for (const [status, names] of [[3000,['演示房间 A','演示走廊','演示房间 B']],[1,['演示房间 A']],[2,['演示房间 B']],[-100,[]],[null,[]]]) {
+      await evaluate(floor+'.senorStatusType='+JSON.stringify(status));
+      await waitPage('JSON.stringify('+markers+')==='+JSON.stringify(JSON.stringify(names)), 'filtered markers '+status);
+    }
+    await evaluate(floor+'.handleShowAllData()');
+    await evaluate(floor+'.handleClickIsFolder()');
+    await waitPage(drawer+' && '+drawer+'.overviewVisible', 'floor sidebar');
+    assert.deepEqual(await evaluate(drawer+'.floorStatistics'), {normalNum:11,policeNum:1,leaveNum:0});
+    assert.equal(await evaluate(drawer+'.roomList.find(row=>row.id===950003).policeNum'), 1);
+    await screenshot('03-floor-sidebar');
+    await evaluate("document.querySelector('.overview-close').click()");
+    await waitPage('!'+drawer+'.overviewVisible', 'sidebar closed');
+    const newFloorId = 930001;
+`;
+source = source.slice(0, start) + scenario + source.slice(end);
+source = source.replaceAll('map-m2', 'map-m6-status');
+new Function('require', '__dirname', source)(require, __dirname);

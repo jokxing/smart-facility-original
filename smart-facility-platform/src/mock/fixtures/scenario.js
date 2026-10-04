@@ -1,13 +1,26 @@
 /**
- * Minimal shared demo scenario for instrument status (task 8B).
+ * Shared per-device demo status, with legacy scenario overrides for regression.
  * Does not move layouts or rewrite historical alarm events.
  *
- * Values: normal | alarm | offline
+ * Default mixed: 970008 alarms, all other devices are normal.
+ * Legacy values: normal | alarm | offline; no UI switching entry.
  */
 
 const STORAGE_KEY = 'demoScenario';
 
-let current = 'normal';
+let current = 'mixed';
+
+// One shared device state source; other devices (including newly created ones) are normal.
+export function statusForInstrument(id) {
+  return statusForScenario(current === 'mixed' ? (Number(id) === 970008 ? 'alarm' : 'normal') : current);
+}
+
+export function aggregateInstrumentStatus(devices) {
+  const states = devices.map(item => statusForInstrument(item.id).senorStatus);
+  if (states.includes(2)) return 2;
+  if (states.includes(-100)) return -100;
+  return states.length ? 1 : 3;
+}
 
 export function getDemoScenario() {
   return current;
@@ -15,7 +28,7 @@ export function getDemoScenario() {
 
 export function setDemoScenario(value) {
   const next = String(value || '').trim();
-  if (next !== 'normal' && next !== 'alarm' && next !== 'offline') {
+  if (next !== 'mixed' && next !== 'normal' && next !== 'alarm' && next !== 'offline') {
     return current;
   }
   current = next;

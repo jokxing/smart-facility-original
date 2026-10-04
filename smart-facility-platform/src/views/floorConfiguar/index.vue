@@ -8,16 +8,7 @@
       <div class="layout-left-nav" v-show="allBtn">
         <span :class="overviewVisible ? 'folderUp' : ''" class="unfolder" @click="handleClickIsFolder"></span>
         <div class="header-toolbar">
-          <div v-if="isDemo" class="toolbar-group demo-scenario-group" data-testid="demo-scenario-group">
-            <span class="toolbar-label">场景</span>
-            <div class="layout-switch demo-scenario-switch">
-              <div :class="demoScenario === 'normal' ? 'is-active':''" class="type-button" @click="handleDemoScenario('normal')">正常</div>
-              <div :class="demoScenario === 'alarm' ? 'is-active':''" class="type-button" @click="handleDemoScenario('alarm')">异常</div>
-              <div :class="demoScenario === 'offline' ? 'is-active':''" class="type-button" @click="handleDemoScenario('offline')">离线</div>
-            </div>
-          </div>
           <div class="toolbar-group filter-group" data-testid="status-filter-group">
-            <span class="toolbar-label">筛选</span>
             <div class="layout-switch">
               <div :class="senorStatusType === 3000 ? 'is-active':''" class="type-button" @click="handleShowAllData">{{ $t('dataV.allShow') }}
               </div>
@@ -50,6 +41,7 @@
         <v-layer>
           <template v-for="(item, index) in deviceList">
             <v-group
+                v-if="!isDemo || senorStatusTypeShow(senorStatusType, item.senorStatus)"
                 :key="item.id"
                 :config="{
                   x: item.x * ratio,
@@ -110,7 +102,7 @@
         <v-layer>
           <template v-for="(item, index) in deviceList">
             <v-group
-                v-if="senorStatusTypeShow(senorStatusType, item.senorStatus)  || downId == item.id"
+                v-if="senorStatusTypeShow(senorStatusType, item.senorStatus) || (!isDemo && downId == item.id)"
                 :key="item.id"
                 :config="{
                 x: item.x * ratio,
@@ -327,7 +319,7 @@ export default {
       floorName: "",
       isScreen: 0,
       isData: false,
-      senorStatusType: 2,
+      senorStatusType: isDemo ? 3000 : 2,
       sensors: [],
       downId: null,
       dataBg: null,
@@ -506,6 +498,7 @@ export default {
       this.senorStatusType = null;
     },
     senorStatusTypeShow(activeValue, value) {
+      if (isDemo) return activeValue != null && (Number(activeValue) === 3000 || Number(activeValue) === Number(value));
       if (Number(activeValue) === value) {
         this.isData = true;
         return true;

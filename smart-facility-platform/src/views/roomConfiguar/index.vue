@@ -13,16 +13,7 @@
           @click="handleClickIsFolder"
         ></div>
         <div class="header-toolbar">
-          <div v-if="isDemo" class="toolbar-group demo-scenario-group" data-testid="demo-scenario-group">
-            <span class="toolbar-label">场景</span>
-            <div class="layout-switch demo-scenario-switch">
-              <div :class="demoScenario === 'normal' ? 'is-active':''" class="type-button" @click="handleDemoScenario('normal')">正常</div>
-              <div :class="demoScenario === 'alarm' ? 'is-active':''" class="type-button" @click="handleDemoScenario('alarm')">异常</div>
-              <div :class="demoScenario === 'offline' ? 'is-active':''" class="type-button" @click="handleDemoScenario('offline')">离线</div>
-            </div>
-          </div>
           <div class="toolbar-group filter-group" data-testid="device-type-filter-group">
-            <span class="toolbar-label">筛选</span>
             <div class="tab layout-switch">
               <div
                 v-for="(item,index) in tabs"

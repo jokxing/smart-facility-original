@@ -8,11 +8,11 @@ const roomLess = fs.readFileSync(path.resolve(__dirname, '../../../src/views/roo
 
 describe('map M1 header toolbar source contract', () => {
   test('floor preview separates scenario and filter groups with labels', () => {
-    expect(floorVue).toMatch(/data-testid="demo-scenario-group"/);
+    expect(floorVue).not.toMatch(/data-testid="demo-scenario-group"/);
     expect(floorVue).toMatch(/data-testid="status-filter-group"/);
-    expect(floorVue).toMatch(/class="toolbar-label">场景</);
+    expect(floorVue).not.toMatch(/class="toolbar-label">场景</);
     expect(floorVue).toMatch(/class="toolbar-label">筛选</);
-    expect(floorVue).toMatch(/handleDemoScenario\('normal'\)/);
+    expect(floorVue).not.toMatch(/@click="handleDemoScenario/);
     expect(floorVue).toMatch(/handleShowAllData/);
     expect(floorVue).not.toMatch(/场景·正常/);
   });
@@ -24,11 +24,11 @@ describe('map M1 header toolbar source contract', () => {
   });
 
   test('room preview mirrors labeled scenario + type filter toolbar', () => {
-    expect(roomVue).toMatch(/data-testid="demo-scenario-group"/);
+    expect(roomVue).not.toMatch(/data-testid="demo-scenario-group"/);
     expect(roomVue).toMatch(/data-testid="device-type-filter-group"/);
-    expect(roomVue).toMatch(/class="toolbar-label">场景</);
+    expect(roomVue).not.toMatch(/class="toolbar-label">场景</);
     expect(roomVue).toMatch(/class="toolbar-label">筛选</);
-    expect(roomVue).toMatch(/handleDemoScenario\('alarm'\)/);
+    expect(roomVue).not.toMatch(/@click="handleDemoScenario/);
     expect(roomVue).toMatch(/handleDemoScenarioCycle/);
     expect(roomVue).not.toMatch(/@click="handleDemoScenarioCycle"/);
     expect(roomLess).toMatch(/\.header-toolbar\s*\{/);

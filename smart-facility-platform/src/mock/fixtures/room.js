@@ -8,7 +8,7 @@ import {
   resolveInstrumentEntity,
   resetRoomInstrumentLayout
 } from './instrument';
-import {getDemoScenario, statusForScenario} from './scenario';
+import {aggregateInstrumentStatus} from './scenario';
 import {createRoomExportWorkbook} from '../roomWorkbook';
 import storage from '../storage';
 import {isActiveDepartment, findDepartmentById} from './auth';
@@ -122,8 +122,7 @@ function findRoomContext(roomId) {
 function roomSenorStatus(roomId, room) {
   const hasInstruments = listInstrumentsByRoomId(roomId).length > 0;
   if (hasInstruments) {
-    const {senorStatus} = statusForScenario(getDemoScenario());
-    return senorStatus;
+    return aggregateInstrumentStatus(listInstrumentsByRoomId(roomId));
   }
   // No instruments: follow floor seed (corridor demo uses 3 = 未监测); keep shared with overview.
   return room.senorStatus != null ? room.senorStatus : 3;

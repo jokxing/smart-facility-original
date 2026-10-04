@@ -1,8 +1,8 @@
 import {DEMO_SPACE} from './space';
 import {listFloorsByBuildingId} from './mapFloor';
 import {DEMO_USER} from './auth';
-import {listInstrumentsByRoomId, listInstrumentsForFloorRooms} from './instrument';
-import {getDemoScenario, statusForScenario} from './scenario';
+import {listInstrumentsByRoomId, listInstrumentsForFloorRooms, sensorReadingForInstrument} from './instrument';
+import {aggregateInstrumentStatus, statusForInstrument} from './scenario';
 import {EQUIPMENT_TYPE_META} from './equipment';
 
 function roomsForFloorCards(floorId) {
@@ -42,27 +42,28 @@ function findFloorContext(floorId) {
 
 function roomCardsForFloor(floorId, statusFilter) {
   const rooms = roomsForFloorCards(floorId);
-  const {senorStatus: scenarioStatus} = statusForScenario(getDemoScenario());
-  return rooms.map((room, index) => {
-    const hasInstruments = listInstrumentsByRoomId(room.id).length > 0;
-    const senorStatus = hasInstruments ? scenarioStatus : (room.senorStatus != null ? room.senorStatus : 3);
+  return rooms.map(room => {
+    const devices = listInstrumentsByRoomId(room.id);
+    const senorStatus = devices.length ? aggregateInstrumentStatus(devices) : (room.senorStatus == null ? 3 : room.senorStatus);
+    const representative = devices.find(device => statusForInstrument(device.id).senorStatus === senorStatus) || devices[0];
+    const reading = representative ? sensorReadingForInstrument(representative.id) : null;
     return {
       id: room.id,
       name: room.name,
       senorStatus,
-      data: [
+      data: reading ? [
         {
           id: 960000 + room.id % 1000,
           monitorSensorCatId: 101,
-          monitorSensorVal: String(20 + index),
+          monitorSensorVal: reading.val == null ? '' : reading.val,
           unit: '℃',
-          sensorAlias: '演示温度',
+          sensorAlias: representative.name + '温度',
           activateFlag: senorStatus === 2 ? 1 : 0,
           signalSwitchStatus: 0,
-          normalMin: 18,
-          normalMax: 28
+          normalMin: 0,
+          normalMax: 40
         }
-      ]
+      ] : []
     };
   }).filter(room => (statusFilter == null || statusFilter === '' ? true : Number(room.senorStatus) === Number(statusFilter)));
 }
@@ -144,24 +145,23 @@ function findBuildingContext(buildingId) {
 
 function instrumentCardsForFloor(floorId, statusFilter) {
   const rooms = roomsForFloorCards(floorId);
-  const {senorStatus} = statusForScenario(getDemoScenario());
   return listInstrumentsForFloorRooms(rooms.map(room => room.id)).map((entity, index) => ({
     id: entity.id,
     roomId: entity.roomId,
     floorId,
     name: entity.name,
-    senorStatus,
+    senorStatus: statusForInstrument(entity.id).senorStatus,
     data: [
       {
         id: 980000 + (entity.id % 1000),
         monitorSensorCatId: 101,
-        monitorSensorVal: String(4 + (index % 5)),
+        monitorSensorVal: sensorReadingForInstrument(entity.id).val == null ? '' : sensorReadingForInstrument(entity.id).val,
         unit: '℃',
         sensorAlias: '演示温度',
-        activateFlag: senorStatus === 2 ? 1 : 0,
+        activateFlag: statusForInstrument(entity.id).senorStatus === 2 ? 1 : 0,
         signalSwitchStatus: 0,
-        normalMin: 2,
-        normalMax: 8
+        normalMin: 0,
+        normalMax: 40
       }
     ]
   })).filter(item => (statusFilter == null || statusFilter === '' ? true : Number(item.senorStatus) === Number(statusFilter)));
@@ -188,16 +188,15 @@ export function listRoomScreen(body = {}) {
     instrumentList = instrumentList.filter(item => ids.includes(item.roomId));
   }
   const total = instrumentList.length;
-  const {senorStatus} = statusForScenario(getDemoScenario());
   return {
     instrumentCount: {
       notMonitorCount: 0,
       monitorTotal: total,
       total,
-      normalCount: senorStatus === 1 ? total : 0,
-      alarmCount: senorStatus === 2 ? total : 0,
-      offlineCount: senorStatus === -100 ? total : 0,
-      runCount: senorStatus === 1 ? total : 0,
+      normalCount: instrumentList.filter(item => item.senorStatus === 1).length,
+      alarmCount: instrumentList.filter(item => item.senorStatus === 2).length,
+      offlineCount: instrumentList.filter(item => item.senorStatus === -100).length,
+      runCount: instrumentList.filter(item => item.senorStatus === 1).length,
       standbyCount: 0,
       shutdownCount: 0,
       maintainCount: 0
