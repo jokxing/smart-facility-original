@@ -1,0 +1,115 @@
+.my-appointment{
+	.picker{
+		width: 430rpx;
+	}
+	.remind-time{
+		padding: 0 34rpx;
+		margin-top: 34rpx;
+		line-height: 60rpx;
+		color: #555;
+		display: flex;
+		.icon{
+			vertical-align: middle;
+			margin-right: 10rpx;
+		}
+	}
+	.remind-hint{
+		padding: 0 34rpx 12rpx;
+		color: #888;
+		font-size: 24rpx;
+	}
+	.tab-box{
+		display: flex;
+		flex-wrap: wrap;
+		margin: 12rpx 20rpx 0;
+		.demo-uni-col{
+			padding: 8rpx 20rpx;
+			margin: 0 12rpx 12rpx 0;
+			background-color: #fff;
+			color: #888;
+			border-radius: 24rpx;
+			font-size: 24rpx;
+			&.active{
+				color: #D9B480;
+				background-color: #F7F1E8;
+			}
+		}
+	}
+	.cardCommon{
+		.empty{
+			padding: 80rpx 0;
+			text-align: center;
+			color: #999;
+			font-size: 28rpx;
+		}
+		::v-deep .uni-card .uni-card__header{
+			padding-left: 22rpx;
+			&::before{
+				content: none;
+			}
+			
+			.uni-card__header-extra-text{
+				padding: 8rpx 16rpx;
+				font-size: 26rpx!important;
+				border-radius: 20rpx;
+			}
+		}
+		::v-deep .uni-col{
+			font-size: 24rpx;
+		}
+		.text{
+			font-size: $fontSmall;
+		}
+		::v-deep .uni-card{
+			position: relative;
+			.actions{
+				display: flex;
+				justify-content: flex-end;
+				margin-top: 16rpx;
+			}
+			.button{
+				height: auto;
+				padding: 14rpx 20rpx;
+				border-radius: 12rpx;
+				background-color: #E96666;
+				color: #fff;
+				line-height: initial;
+				font-size: 26rpx;
+				margin-left: 16rpx;
+			}
+			.button-edit{
+				background-color: #D9B480;
+			}
+		}
+		
+		.not-started{
+			::v-deep .uni-card__header-extra-text{
+				background-color: #F3E9E9;
+				color: #E96666;
+			}
+		}
+		.in-use{
+			::v-deep .uni-card__header-extra-text{
+				background-color: #E2EEFA;
+				color: #5896D3;
+			}
+		}
+		.closed{
+			::v-deep .uni-card__header-extra-text{
+				background-color: #E3F7F3;
+				color: #42C2A9;
+			}
+		}
+		.canceled{
+			::v-deep .uni-card__header-extra-text{
+				background-color: #eee;
+				color: #AAAAAA;
+			}
+			
+			::v-deep .uni-card__header-content-title,
+			.text{
+				color: #999;
+			}
+		}
+	}
+}

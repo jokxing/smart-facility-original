@@ -1,0 +1,245 @@
+<template>
+	<view class="abnormalRecord">
+		<view class="abnormalRecord-content">
+			<uni-card 
+				v-for="item in list"
+				:key="item.id"
+				class="abnormalRecord-card" 
+				:class="[item.process ? 'normal' : 'abnormal']"
+				:title="item.sensorName" 
+				:extra="item.process ? $t('my.disposed') : $t('my.notDispose')" 
+				:margin="0"
+				@click="showAbnormalFormPopup(item)">
+			    <uni-row v-if="handleDeviceType(item.sensorType)">
+					<uni-col :span="14">
+						<text class="text">{{$t('other.alarmValue')}}：{{ item.value }}</text>
+					</uni-col>
+					<uni-col :span="10">
+						<text class="text">{{$t('other.alarmScope')}}：{{ item.min }} ~ {{ item.max }}</text>
+					</uni-col>
+				</uni-row>
+				<uni-row>
+					<uni-col :span="14">
+						<text class="text">{{$t('labDevice.duration')}}：{{ item.duration || ''  }}</text>
+					</uni-col>
+					<uni-col :span="10" v-if="handleDeviceType(item.sensorType)">
+						<text class="text">{{$t('other.recoverValue')}}：{{ item.updateValue || '' }}</text>
+					</uni-col>
+				</uni-row>
+			    <uni-row>
+					<uni-col :span="24">
+						<text class="text">{{$t('labDevice.startDate')}}：{{ $options.filters['forDateTime'](item.createDate) || '' }}</text>
+					</uni-col>
+				</uni-row>
+			    <uni-row>
+					<uni-col :span="24">
+						<text class="text">{{$t('labDevice.endDate')}}：{{ $options.filters['forDateTime'](item.updateDate) || '' }}</text>
+					</uni-col>
+				</uni-row>
+			</uni-card>
+		</view>
+	
+		<AbnormalFormPopup ref="abnormalFormPopup" v-if="isAbnormalFormPopup" @handle="handleToast"></AbnormalFormPopup>
+		
+		<uni-load-more :status="moreStatus" v-if="isList"></uni-load-more>
+		
+		<Toast ref="toast"></Toast>
+	</view>
+</template>
+
+<script>
+	import AbnormalFormPopup from '@/components/AbnormalFormPopup/index.vue';
+	import Toast from '@/components/Toast/index.vue'
+	import { getHistoryThingsAlarmApp, getHistoryDeviceAlarmApp, postHistoryAlarmRecordAlarmApp } from '@/utils/api.js';
+	import { DEVICE_ID } from '@/utils/constant.js'
+	export default{
+		props: ["typeData"],
+		components: {
+			AbnormalFormPopup,
+			Toast
+		},
+		data() {
+			return {
+				isList: false,
+				list: [],
+				// 加载更多
+				moreStatus: "no-more",
+				// 分页
+				pageNum: 1,
+				pageSize: 10,
+				total: 0,
+				isAbnormalFormPopup: false
+			}
+		},
+		onReady() {
+			this.init()
+		},
+		methods: {
+			init(type){
+				this.pageNum = 1;
+				this.pageSize = 10;
+				this.list = [];
+				uni.showLoading({
+					title: this.$t('common.loading'),
+					mask: true
+				});
+				// 硬件1
+				if(this.typeData.type === 1){
+					this.historyDeviceAlarm()
+				}else{
+					if(this.typeData.type === 2 || this.typeData.type === 3){
+						this.historyAlarmRecordAlarm()
+					}else{
+						this.historyThingsAlarm()
+					}
+				}
+			},
+			historyDeviceAlarm() {
+				var data = {
+					deviceId: this.typeData.id, 
+					processFlag: this.typeData.processFlag,
+					pageNum: this.pageNum,
+					pageSize: this.pageSize,
+				};
+				getHistoryDeviceAlarmApp(data).then(res => {
+					this.handleMessage(res)
+				})
+			},
+			historyThingsAlarm() {
+				if(this.typeData.isHead){
+					var data = {
+						isHead: this.typeData.isHead,
+						type: this.typeData.type,
+						process: this.typeData.process,
+						pageNum: this.pageNum,
+						pageSize: this.pageSize,
+					};
+				}else{
+					var data = {
+						isHead: this.typeData.isHead,
+						thingsId: this.typeData.id,
+						type: this.typeData.type,
+						process: this.typeData.process,
+						pageNum: this.pageNum,
+						pageSize: this.pageSize,
+					};
+				}
+				getHistoryThingsAlarmApp(data).then(res => {
+					this.handleMessage(res)
+				})
+			},
+			historyAlarmRecordAlarm(){
+				var data = {
+					isHead: this.typeData.isHead,
+					objId: this.typeData.id,
+					objType: this.typeData.type,
+					process: this.typeData.process,
+					pageNum: this.pageNum,
+					pageSize: this.pageSize,
+					thingsCreateDate: this.typeData.thingsCreateDate
+				};
+				postHistoryAlarmRecordAlarmApp(data).then(res => {
+					this.handleMessage(res)
+				})
+			},
+			handleMessage(res){
+				if(res.code === 1 && res.items){
+					this.isList = true;
+					this.pageSize = res.items.pageSize;
+					this.total = res.items.total;
+					if(res.items.list && res.items.list.length > 0){
+						const { alarmStat, alarmInfo } = res.items.list[0];
+						this.$emit('handleAlarmStat', alarmStat)
+						var info = alarmInfo || []
+						for(var i = 0; i < info.length; i++){
+							this.list.push(info[i])
+						}
+						if(this.pageSize * this.pageNum >= this.total){
+							this.moreStatus = "no-more"
+						}else{
+							this.moreStatus = "more"
+						}
+					}else{
+						this.moreStatus = "no-more"
+					}
+				}
+				uni.stopPullDownRefresh();
+				uni.hideLoading()
+			},
+			// 区分硬件类型
+			handleDeviceType(type){
+				var isType;
+				if(DEVICE_ID[type]){
+					isType = false;
+				}else if(type === 1000){
+					isType = false;
+				}else{
+					isType = true;
+				}
+				
+				return isType
+			},
+			// 显示报警处理
+			showAbnormalFormPopup(item){
+				this.isAbnormalFormPopup = true;
+				var _this = this;
+				setTimeout(function(){
+					if (_this.$refs.abnormalFormPopup) _this.$refs.abnormalFormPopup.open(item)
+				},100)
+			},
+			// 提示语+更新数据
+			handleToast(msg,item){
+				var _this = this;
+				if(msg && item){
+					this.$refs.toast.open(msg,item);
+					this.init();
+					if(item != 'error'){
+						setTimeout(function(){
+							_this.isAbnormalFormPopup = false
+						},500)
+					}
+				}else{
+					setTimeout(function(){
+						_this.isAbnormalFormPopup = false
+					},500)
+				}
+			},
+			// 上拉更新
+			handleReachBottom(){
+				if(this.pageNum * this.pageSize < this.total){
+					this.pageNum++;
+					this.moreStatus = "loading"
+					// 硬件1
+					if(this.typeData.type === 1){
+						this.historyDeviceAlarm()
+					}else{
+						this.historyThingsAlarm()
+					}
+				}else{
+					this.moreStatus = "no-more"
+				}
+			},
+			// 下拉更新
+			handlePullDownRefresh(){
+				this.isList = false;
+				this.init()
+			}
+		},
+	}
+</script>
+
+<style scoped lang="scss">
+	.abnormalRecord-content{
+		margin: 16rpx 20rpx 0;
+		.abnormalRecord-card{
+			margin-bottom: 20rpx;
+			display: block;
+			.uni-card .uni-card__content{
+				padding: 10px 0!important;
+			}
+			.text{
+				font-size: $fontSmall!important;
+			}
+		}
+	}
+</style>

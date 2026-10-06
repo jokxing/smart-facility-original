@@ -335,11 +335,11 @@ export default {
         },
         selectDeliver(item) {
             this.form.deliverAddress = item.address;
-            this.form.deliverUnits = item.receiptDeliverName;
+            this.form.deliverUnits = item.unitName;
         },
         selectReceipt(item) {
             this.form.receiveAddress = item.address;
-            this.form.receiveUnits = item.receiptDeliverName;
+            this.form.receiveUnits = item.unitName;
         },
         handleSelectSample() {
             let selectedIds = [];
@@ -367,7 +367,7 @@ export default {
                         sampleInfoId: item.id,
                         amount: 1,
                         sampleNo: item.sampleNo,
-                        sampleName: item.sampleNo,
+                        sampleName: item.sampleName,
                         unitName: item.unitName,
                     })
                 }
@@ -386,6 +386,7 @@ export default {
                     if (valid) {
                         this.createWaybill();
                     } else {
+                        this.submitButtonDisabled = false;
                         this.$message.error(this.$t('transport.inputCorrect'));
                         return false;
                     }

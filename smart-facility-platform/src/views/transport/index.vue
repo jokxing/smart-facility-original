@@ -47,6 +47,7 @@
             </div>
             <!--   Chrome、火狐以及部分套壳浏览器接入的定位服务在国外，有较大限制，失败率高。     -->
             <el-descriptions :title="$t('transport.trackQuery')"></el-descriptions>
+            <p v-if="isDemoHint" class="demo-clock-hint">演示时钟 2026-09-24 12:00，轨迹为模拟数据，不请求真实定位。</p>
             <div class="flex">
                 <el-date-picker
                     class="w360 margin-small-right"
@@ -271,6 +272,12 @@ import moment from "moment";
 import mixin from "@/utils/mixin";
 import {TIME_FORMAT, HISTORYTIMEINTERVAL} from "@/utils/constant";
 import {getStartAndEndTime} from "@/utils/methods";
+import {DEMO_NOW_MS, formatDemoDateTime} from "@/mock/clock";
+
+const isDemo = process.env.VUE_APP_DEMO === "true";
+function demoRange(days) {
+    return [formatDemoDateTime(DEMO_NOW_MS - days * 86400000), formatDemoDateTime(DEMO_NOW_MS)];
+}
 
 export default {
     name: "Transport",
@@ -389,12 +396,20 @@ export default {
                 {code: 2, text: _this.$t('transport.inTransit')},
                 {code: 3, text: _this.$t('transport.deliveried')},
             ],
-            orderList: []
+            orderList: [],
+            isDemoHint: isDemo
         };
     },
     created() {
-        this.value1[0] = this.mapOrderItems.beginTime = moment().subtract(7, "days").format("YYYY-MM-DD HH:mm:ss");
-        this.value1[1] = this.mapOrderItems.endTime = moment().format("YYYY-MM-DD HH:mm:ss");
+        if (isDemo) {
+            const range = demoRange(7);
+            this.value1 = range.slice();
+            this.mapOrderItems.beginTime = range[0];
+            this.mapOrderItems.endTime = range[1];
+        } else {
+            this.value1[0] = this.mapOrderItems.beginTime = moment().subtract(7, "days").format("YYYY-MM-DD HH:mm:ss");
+            this.value1[1] = this.mapOrderItems.endTime = moment().format("YYYY-MM-DD HH:mm:ss");
+        }
         this.init();
     },
     mounted() {
@@ -437,8 +452,15 @@ export default {
                 tel: "",
                 keyword: ""
             }
-            this.value1[0] = this.mapOrderItems.beginTime = moment().subtract(7, "days").format("YYYY-MM-DD HH:mm:ss");
-            this.value1[1] = this.mapOrderItems.endTime = moment().format("YYYY-MM-DD HH:mm:ss");
+            if (isDemo) {
+                const range = demoRange(7);
+                this.value1 = range.slice();
+                this.mapOrderItems.beginTime = range[0];
+                this.mapOrderItems.endTime = range[1];
+            } else {
+                this.value1[0] = this.mapOrderItems.beginTime = moment().subtract(7, "days").format("YYYY-MM-DD HH:mm:ss");
+                this.value1[1] = this.mapOrderItems.endTime = moment().format("YYYY-MM-DD HH:mm:ss");
+            }
             this.handleGetMapOrderList();
         },
         init() {
@@ -1034,6 +1056,12 @@ export default {
         }
 
     }
+}
+
+.demo-clock-hint {
+    color: #909399;
+    font-size: 13px;
+    margin: 0 0 12px 0;
 }
 
 </style>

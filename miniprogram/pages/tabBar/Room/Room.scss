@@ -1,0 +1,57 @@
+.room{
+	padding-bottom: 160rpx;
+	.location{
+		margin: 20rpx 28rpx;
+		display: flex;
+		justify-content: space-between;
+		.text{
+			margin-left: 10rpx;
+			font-size: 28rpx;
+			color: #333;
+		}
+		.button{
+			width: 114rpx;
+			height: 50rpx;
+			line-height: 46rpx;
+			border-radius: 26rpx;
+			margin: 0;
+			font-size: 26rpx;
+		}
+	}
+	.roomNum{
+		margin: 20rpx 28rpx 0;
+	}
+	.tab-box{
+		display: flex;
+		margin-top: 40rpx;
+		.demo-uni-col{
+			padding: 0 24rpx;
+			margin-right: 30rpx;
+			background-color: #fff;
+			color: #888;
+			position: relative;
+			.num{
+				position: absolute;
+				top: -20rpx;
+				right: -20rpx;
+				color: #fff;
+				padding: 0 10rpx;
+				border-radius: 10rpx;
+				font-size: 26rpx;
+				&.total{
+					background-color: #D9B480;
+				}
+				&.normal{
+					background-color: $normal-color;
+				}
+				&.abnormal{
+					background-color: $abnormal-color;
+				}
+				&.offLine{
+					background-color: $offLine-color;
+				}
+			}
+		}
+	}
+	
+}

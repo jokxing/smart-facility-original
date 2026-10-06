@@ -10,7 +10,7 @@ Vue 2 第二版 Web 工程的本地演示副本，用于展示已接入的中控
 npm run demo
 ```
 
-端口以终端为准。账号、开放路由与操作路径见 `docs/demo-guide.md`。
+端口以终端为准。账号、开放路由与操作路径见 `docs/demo-guide.md`。移液枪与小程序为同一业务契约、独立本地存储，见 `docs/pipette-gun-contract.md`。运单见 `docs/transport-demo-contract.md`。
 
 ## 限制（本批已对齐）
 

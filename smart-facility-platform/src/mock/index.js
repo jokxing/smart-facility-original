@@ -7,6 +7,8 @@ import roomRoutes from './handlers/room';
 import instrumentRoutes from './handlers/instrument';
 import alarmLogRoutes from './handlers/alarmLog';
 import equipmentRoutes from './handlers/equipment';
+import gunRoutes from './handlers/gun';
+import transportRoutes from './handlers/transport';
 import statisticRoutes from './handlers/statistic';
 import maintenanceRoutes from './handlers/maintenance';
 import {setBoundEquipmentTypesResolver} from './fixtures/instrument';
@@ -25,6 +27,8 @@ export default createMockAdapter([
   ...instrumentRoutes,
   ...alarmLogRoutes,
   ...equipmentRoutes,
+  ...gunRoutes,
+  ...transportRoutes,
   ...statisticRoutes,
   ...maintenanceRoutes
 ]);

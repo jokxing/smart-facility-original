@@ -120,6 +120,7 @@
                     type="primary">
                     {{ $t('transport.addTransport') }}
                 </el-button>
+                <el-button @click="handleResetDemo">重置演示运单</el-button>
             </div>
 
         </div>
@@ -353,6 +354,7 @@ import {
     allocateTransportOrderCar,
     changeTransportOrderState,
     deleteTransportOrder,
+    resetDemoTransport,
 } from "@/api/transport";
 import PrintWaybillMonitor from "@/views/transport/components/PrintWaybillMonitor";
 import DepartHint from "@/views/transport/components/DepartHint";
@@ -755,6 +757,22 @@ export default {
 
         handleAdd() {
             this.$refs.createWayBill.open(0);
+        },
+        handleResetDemo() {
+            this.$confirm(
+                '将恢复预置样例并清除本机运单改动，不会同步到小程序。确定继续？',
+                '重置演示运单',
+                {type: 'warning', confirmButtonText: this.$t('common.confirm'), cancelButtonText: this.$t('common.cancel')}
+            ).then(() => {
+                resetDemoTransport().then(res => {
+                    if (res.code) {
+                        this.$message.success('已重置演示运单');
+                        this.handleFilter();
+                    } else {
+                        this.$message.error(res.message);
+                    }
+                });
+            }).catch(() => {});
         },
         handleEdit(row) {
             this.$refs.createWayBill.open(1, row);

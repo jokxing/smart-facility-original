@@ -1,0 +1,46 @@
+$run-color: #01CD9B; //运行中
+$standby-color: #5872A6; //待机中
+$off-color: #5872A6; //已关机
+$maintain-color: #FA9B43; //维护中
+
+$normal-color: #1bd39e; //正常
+$abnormal-color: #ff4949; //报警
+$offLine-color: #5872A6; //离线
+
+$normal-bg: #D9F8F0; //正常-背景色
+$abnormal-bg: #FFE5E5; //报警-背景色
+$offLine-bg: #EEEEEE; //离线-背景色
+
+// 枪的状态
+$noHoming-color: #4D87E9; //在枪架上
+$noHoming-bgColor: #EDF4FF; //在枪架上
+$homing-color: #EFAF2C; //不在枪架上
+$homing-bgColor: #FFF6E3; //不在枪架上
+$errorHoming-color: #EF4D4E; //超时未归还
+$errorHoming-bgColor: #FFF0F0; //超时未归还
+
+// 金色
+$golden: #D6AE7B;
+$bgGolden: #FFFAF0;
+
+// 蓝色
+$blur: #303F9F;
+$bgBlur: #DDE2FD;
+
+// 主色
+$primary: $golden; 
+$primaryBg: $bgGolden; 
+
+// 灰色
+$grey999: #999;
+$bgGrey999: #eee;
+
+// 文字下面的分割线颜色统一
+$borderBottom: 1px solid #DCDCDC;
+
+// 表单背景颜色
+$inputBgColor: #F5F5F5;
+
+// 字号
+$fontSmall: 28rpx;
+$fontMid: 32rpx;

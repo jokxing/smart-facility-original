@@ -145,8 +145,8 @@
         <SetPrincipal ref="SetPrincipal" @handle="getList"/>
         <UpdateAlarmRules ref="UpdateAlarmRules" @handle="getList" />
 
-        <PipetteGunDrawer :is-drawer.sync="isDrawer" :id="id" :no="no" />
-        <PipetteGunRackDrawer :is-drawer.sync="isGunRackDrawer" :id="gunRackId" :strId="strId" />
+        <PipetteGunDrawer :is-drawer.sync="isDrawer" :id="id" :no="no" @handle="handleGunMutated" />
+        <PipetteGunRackDrawer :is-drawer.sync="isGunRackDrawer" :id="gunRackId" :strId="strId" @handle="handleGunMutated" />
     </div>
 </template>
 
@@ -185,8 +185,8 @@
                 tableLoading: false,
                 totalObject: {
                     overview: [
-                        {num: 0, title: _this.$t('labDevice.onGunRack'), status: 0},
-                        {num: 0, title: _this.$t('labDevice.notGunRack'), status: 1},
+                        {num: 0, title: _this.$t('labDevice.onGunRack'), status: 1},
+                        {num: 0, title: _this.$t('labDevice.notGunRack'), status: 0},
                         {num: 0, title: _this.$t('labDevice.overTime'), status: 2},
                     ],
                     total: {title: _this.$t('labDevice.gunSum'), num: null}
@@ -354,14 +354,18 @@
                     }
                 })
             },
+            handleGunMutated() {
+                this.getList();
+                this.handleStatistics();
+            },
             handleStatistics() {
                 this.statisticsLoading = true;
                 postGunPipetteStatistics().then(res => {
                     this.statisticsLoading = false;
                     if(res.code === 1){
                         this.totalObject.total.num = res.items.totalNum;
-                        this.totalObject.overview[0].num = res.items.noHomingNum;
-                        this.totalObject.overview[1].num = res.items.homingNum;
+                        this.totalObject.overview[0].num = res.items.homingNum;
+                        this.totalObject.overview[1].num = res.items.noHomingNum;
                         this.totalObject.overview[2].num = res.items.errorHomingNum;
                     }
                 })
@@ -545,7 +549,7 @@
             },
             handleShowGunRackDrawer(row){
                 this.gunRackId = row.gunRackId;
-                this.strId = row.strId;
+                this.strId = String(row.gunRackId);
                 this.isGunRackDrawer = true;
             }
         },

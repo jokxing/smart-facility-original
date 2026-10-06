@@ -1,0 +1,63 @@
+.patrolReportDetail{
+	margin: 0 30rpx;
+	padding-bottom: 30rpx;
+	.title{
+		::v-deep .uni-title__base{
+			padding-left: 20rpx;
+			position: relative;
+		}
+		::v-deep .uni-title__base::before{
+			display: inline-block;
+			content: "";
+			height: 18px;
+			width: 4px;
+			background-color: #303030;
+			position: absolute;
+			top: 50%;
+			left: 0;
+			transform: translateY(-50%);
+			border-radius: 10px;
+		}
+	}
+	
+	.popup-picker{
+		height: 34px;
+		line-height: 34px;
+		background-color: #fff;
+		font-size: 14px;
+	}
+	.is-disabled{
+		background-color: #F7F6F6;
+		border-color: #e5e5e5;
+		color: #D5D5D5;
+	}
+	
+	.checkItem-content{
+		.text-num{
+			width: 100%;
+			display: inline-block;
+			text-align: center;
+			color: #7cb305;
+			font-size: 30rpx;
+		}
+	}
+	
+	// 统一样式
+	::v-deep .uni-row{
+		padding: 20rpx 0;
+	}
+	.text-form{
+		width: 100%;
+		line-height: 36px;
+		display: inline-block;
+	}
+	.text-right{
+		text-align: right;
+	}
+	::v-deep .uni-easyinput__content{
+		background-color: #fff;
+	}
+	::v-deep .file-picker__box-content{
+		background-color: #ffffff87;
+	}
+}

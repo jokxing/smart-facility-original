@@ -8,6 +8,22 @@ export function postGunPipetteStatistics(data) {
     });
 }
 
+export function postGunTakePipette(data) {
+    return post("/gun/take/pipette", data, {
+        headers: {"content-type": "application/json"}
+    });
+}
+
+export function getGunTake(data) {
+    return get("/gun/take", data);
+}
+
+export function postGunReturnPipette(data) {
+    return post("/gun/return/pipette", data, {
+        headers: {"content-type": "application/json"}
+    });
+}
+
 // 移液枪列表
 export const postGunPipetteList = data => {
     return post("/gun/pipette/listV1", data, {

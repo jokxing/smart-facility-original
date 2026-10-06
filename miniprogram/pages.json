@@ -1,0 +1,273 @@
+{
+	"pages": [
+		{
+			"path": "pages/tabBar/Home/Home",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"enablePullDownRefresh": true,
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/tabBar/Labdevice/index",
+			"style": {
+				"navigationBarTitleText": "设备管理",
+				"enablePullDownRefresh": true,
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/tabBar/Room/Room",
+			"style": {
+				"navigationBarTitleText": "房间管理",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/tabBar/My/My",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"enablePullDownRefresh": true
+			}
+		}, {
+			"path": "pages/tabBar/Transport/Transport",
+			"style": {
+				"navigationBarTitleText": "运单管理",
+				"enablePullDownRefresh": true
+			}
+
+		}
+    ],
+	"subPackages": [
+		{
+			"root": "homePage",
+			"pages": [
+				{
+					"path": "Search/Search",
+					"style": {
+						"navigationBarTitleText": "搜索"
+					}
+				},
+				{
+					"path": "AssetTagDetail/AssetTagDetail",
+					"style": {
+						"navigationBarTitleText": "资产标签详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "AssetTagDetail/common/AssetTagBind",
+					"style": {
+						"navigationBarTitleText": "资产标签绑定",
+						"enablePullDownRefresh": true
+					}
+				}, 
+				{
+					"path": "NewsInform/NewsInform",
+					"style": {
+						"navigationBarTitleText": "消息中心",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "Backlog/Backlog",
+					"style": {
+						"navigationBarTitleText": "待办事项",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "InstallConfirm/InstallConfirm",
+					"style": {
+						"navigationBarTitleText": "入库验证",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "AssetAlarm/AssetAlarm",
+					"style": {
+						"navigationBarTitleText": "报警消息",
+						"enablePullDownRefresh": false
+					}
+				
+				},
+				{
+					"path": "AssetCountReport/AssetCountReport",
+					"style": {
+						"navigationBarTitleText": "资产盘点报告",
+						"enablePullDownRefresh": false
+					}
+				
+				}
+			]
+		},
+		{
+			"root": "detailPage",
+			"pages": [
+				{
+					"path": "LabdeviceDetail/index",
+					"style": {
+						"navigationBarTitleText": "设备管理详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "LabdeviceDetail/common/AssetDetails",
+					"style": {
+						"navigationBarTitleText": "资产详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "PipetteGunDetail/index",
+					"style": {
+						"navigationBarTitleText": "移液枪详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "RoomDetail/index",
+					"style": {
+						"navigationBarTitleText": "房间管理详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "PatrolReportDetail/PatrolReportDetail",
+					"style": {
+						"navigationBarTitleText": "巡查报告"
+					}
+				},
+				{
+					"path": "PipetteGunRackDetail/PipetteGunRackDetail",
+					"style": {
+						"navigationBarTitleText": "移液枪架详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "PipetteGunRackDetail/common/TakeGun",
+					"style": {
+						"navigationBarTitleText": "移液枪架详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "HardwareDetail/index",
+					"style": {
+						"navigationBarTitleText": "智能硬件详情",
+						"enablePullDownRefresh": true
+					}
+				},
+				// {
+				// 	"path": "DataChart/DataChart",
+				// 	"style": {
+				// 		"navigationBarTitleText": "数据图表"
+				// 	}
+				// },
+				{
+					"path": "HistoryDataChart/HistoryDataChart",
+					"style": {
+						"navigationBarTitleText": "数据图表"
+					}
+				}, {
+					"path": "TransportDetail/TransportDetail",
+					"style": {
+						"navigationBarTitleText": "运单详情",
+						"enablePullDownRefresh": false
+					}
+
+				}, {
+					"path": "PrintPreview/PrintPreview",
+					"style": {
+						"navigationBarTitleText": "打印预览",
+						"enablePullDownRefresh": false
+					}
+
+				}
+			]
+		},
+		{
+			"root": "myPage",
+			"pages": [
+				{
+					"path": "Login/Login",
+					"style": {
+						"navigationBarTitleText": "请先登录"
+					}
+				},
+				{
+					"path": "MyAppointment/MyAppointment",
+					"style": {
+						"navigationBarTitleText": "我的预约",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "MyMission/MyMission",
+					"style": {
+						"navigationBarTitleText": "报警",
+						"enablePullDownRefresh": true
+					}
+				},
+				{
+					"path": "UserInfo/UserInfo",
+					"style": {
+						"navigationBarTitleText": "个人信息"
+					}
+				},
+				{
+					"path": "SwitchAccount/SwitchAccount",
+					"style": {
+						"navigationBarTitleText": "切换账号"
+					}
+				},
+				{
+					"path": "MyResponsible/MyResponsible",
+					"style": {
+						"navigationBarTitleText": "我负责的",
+						"enablePullDownRefresh": true
+					}
+				}
+			]
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "智慧设施助手",
+		"navigationBarBackgroundColor": "#ffffff",
+		"backgroundColor": "#F8F8F8",
+		"app-plus": {
+			"background": "#efeff4"
+		},
+		"onReachBottomDistance": 150 //距离底部150上滑有效
+	},
+	"tabBar": {
+		"color": "#555555",
+		"selectedColor": "#303F9F",
+		"borderStyle": "white",
+		"backgroundColor": "#ffffff",
+		"iconWidth": "20px",
+		"list": [
+			{
+				// "text": "首页",
+				"pagePath": "pages/tabBar/Home/Home"
+			},
+			{
+				// "text": "设备管理",
+				"pagePath": "pages/tabBar/Labdevice/index"
+			},
+			{
+				// "text": "房间管理",
+				"pagePath": "pages/tabBar/Room/Room"
+			},
+			{
+				"pagePath": "pages/tabBar/Transport/Transport"
+			},
+			{
+				// "text": "我的",
+				"pagePath": "pages/tabBar/My/My"
+			}
+		]
+	}
+}

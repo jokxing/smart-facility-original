@@ -1,4 +1,5 @@
 import {instrumentImportOptions} from '../fixtures/instrument';
+import {getOrderDetail, monitorSeries} from '../fixtures/transport';
 import {listReservations, reservationPage, saveReservation, cancelReservation} from '../fixtures/reservation';
 import {
   DEMO_INSTRUMENTS,
@@ -158,6 +159,10 @@ export default [
   protectedRoute('POST', '/room/tree', ({body}) => success(listRoomTree(body || {}))),
   protectedRoute('GET', '/monitorIndicator/getOpenMonitorFlag', ({params}) => {
     const objType = Number(params.objType);
+    if (objType === 6) {
+      const order = getOrderDetail(params.objId);
+      return order ? success({list: order.sensors}) : failure('未知运单');
+    }
     if (objType === 3) {
       return success({list: []});
     }
@@ -169,6 +174,10 @@ export default [
   }),
   protectedRoute('GET', '/monitorIndicator/getMonitorFlag', ({params}) => {
     const objType = Number(params.objType);
+    if (objType === 6) {
+      const order = getOrderDetail(params.objId);
+      return order ? success(order.sensors) : failure('未知运单');
+    }
     if (objType === 3) {
       return success([]);
     }
@@ -179,6 +188,10 @@ export default [
     return items ? success(items) : failure('演示设备不存在。');
   }),
   protectedRoute('GET', '/monitorIndicator/monitorInfo', ({params}) => {
+    if (Number(params && params.type) === 6) {
+      const rows = monitorSeries(params);
+      return rows ? success(rows) : failure('运单监测参数无效');
+    }
     if (Number(params && params.type) === 1) {
       const items = getEquipmentMonitorInfo(params);
       if (items == null) return failure('演示硬件监测曲线参数无效。');

@@ -1,5 +1,14 @@
 # 工作状态
 
+## 最新安排：小程序 MP1 交接（2026-10-04）
+
+- 用户已将可直接修改的小程序副本放入 miniprogram，下一步新建对话交另 AI 处理。
+- 本轮只读审查并创建 miniapp-audit.md、miniapp-next-task-prompt.md、miniprogram/README.md，更新 PROJECT_CONTEXT 的目录与范围；未改小程序业务源码、未移动目录、未安装工具或编译。
+- 推荐展示名“智慧设施助手”，目录后续可统一 smart-facility-miniapp；当前没有根 package.json，使用 HBuilderX Vue 2 工程方式编译到微信开发者工具。
+- 已确认旧服务请求、错误登录路由、初始化语言请求与 wx 平台耦合；MP1 先做默认本地 Mock、品牌、登录和首页。实际微信 AppID 必须来自用户有权限的测试项目。
+- Web 浏览器 Mock 与小程序本地存储不自动共享。先统一实体和契约，实时互通另立共享 API 任务。后台原有未提交修改不得覆盖。
+- 小程序第一批执行入口：docs/miniapp-next-task-prompt.md；Web 的旧安排保留作历史参考。
+
 ## 当前下一任务：智能硬件 1A（2026-09-30，用户调整优先级）
 
 - 用户确认转向首页业务模块，不继续把品牌/装饰素材审查作为功能推进前置。剩余素材与授权审查暂缓，公开发布前仍需处理。
@@ -2657,3 +2666,82 @@
 ## 2026-10-04 楼层预览顶栏
 
 - 修改 `floorConfiguar/index.vue`、`index.less`：演示顶栏折叠图标与筛选按钮垂直居中；移除「查看设备布局」入口（方法保留供既有脚本调用）。
+
+## 2026-10-05 小程序 MP1 启动与首页演示
+
+- 范围：`miniprogram` 与本批 docs；未改 `smart-facility-platform`。未 commit/push。
+- 启动：`App.vue` 使用 `onLaunch`/`onShow`，登录页改为 `/myPage/Login/Login`，避免 `onShow` 循环跳转。
+- 请求：`DEMO_MODE` 默认开启，Mock 处理演示接口，未知接口返回未开放且不调用 `uni.request`。
+- 登录：本地 `demo` / `Demo1234`；存储前缀 `sf-mini-demo:`；退出只清演示键。
+- 首页统计与后台种子一致（设备参数 11/1/0，运行 12 台，房间 2 正常 + B 报警）。消息/待办空态，不编造通知。
+- 品牌：智慧设施助手；微信 AppID 留空。上传与旧域名已隔离。
+- 验证：`node scripts/check-mp1-demo.cjs` 通过。无 HBuilderX/微信模拟器，未宣称运行验收成功。
+- 契约：`docs/miniapp-mp1-contract.md`，复盘：`docs/miniapp-mp1-review.md`。
+- 下一步：用户验收或安排 MP2 设备列表；MP6 移液枪按提示词另批，不在本批。
+
+## 2026-10-05 小程序 MP1 微信模拟器补验收
+
+- 实际连接微信开发者工具 2.02.2608080、基础库 3.17.3，测试现有微信编译产物；不再只有静态审查。
+- 已通过原生控件登录、首页统计及刷新、房间卡片导航与设备筛选、退出与 storage 隔离；另检查消息、待办、运单和我的导航。设备/房间业务仍未完成。
+- 更正此前审查误报：handleLoading 由 columns.js 挂在 Vue.prototype，并非缺失；房间加载竞态本轮未复现。
+- 冷启动与退出后重开未完成：close/auto 后独立 storage 标记丢失且页面数据读取超时，不能作会话持久化通过证据；部分截图调用超时。
+- 记录：docs/miniapp-mp1-simulator-review.md；证据：docs/evidence/miniapp-mp1/。没有改业务源码、安装依赖或 commit/push。
+
+## 2026-10-05 小程序 MP2 设备列表与监测
+
+- 范围：`miniprogram` 与本批 docs；后台只读。未 commit/push。未做 MP3–MP6。
+- 12 台设备 970001–970012 与 Web 种子对齐；970008 在房间 B 参数报警、运行中。列表默认 10 条/页，第二页 2 条。
+- 统计随空间/关键字/部门等范围变化，不随参数 Tab 与分页变少。首页报警卡写入的 `labStatus` 消费后立即清除。
+- 详情监测温度为 45.2℃（阈值 40）、湿度 85%（阈值 70）；历史曲线按探头与演示时钟采样。绑定硬件空态。预约/移液枪/告警处理明确未开放。
+- 验证：`node scripts/check-mp1-demo.cjs` 与 `node scripts/check-mp2-demo.cjs` 通过。请用当前源码重新编译后再做微信模拟器验收。
+- 契约：`docs/miniapp-mp2-contract.md`，复盘：`docs/miniapp-mp2-review.md`。
+
+## 2026-10-05 小程序 MP2–MP5 交接
+
+- 用户明确项目用于投简历，优先脱敏与本地 Mock，授权另 AI 顺序完成 MP2 设备、MP3 房间、MP4 预约、MP5 告警/负责人/消息待办。
+- 执行提示词：docs/miniapp-mp2-mp5-task-prompt.md，包含源码入口、接口适配、同源种子/状态、预约校验、处理记录与本地持久化、验证和各批交付要求。
+- 本轮仅整理交接文档时尚未实施；**MP2–MP5 已完成**。后台只读，MP6 另批，不编写履历、不 commit/push。
+
+## 2026-10-05 小程序 MP3 房间列表与详情
+
+- 范围：`miniprogram` 与本批 docs；后台只读。未 commit/push。未做 MP4–MP6。
+- 三间房与设备归属同源；统计 2 正常 / 1 报警 / 0 离线，不随参数 Tab 变成总数 1。走廊无仪器记为正常，不为走廊编造探头。
+- 详情 `instrumentList` 来自同一设备池；B 含 970008、不含 A 的设备。房间级探头与绑定硬件为空。首页 `roomStatus` 消费一次。
+- `POST /api/room/things/list/miniApp` 与芯片 `POST /api/room/list` 分开；无效位置与未知 ID 不回退全量。
+- 验证：`node scripts/check-mp1-demo.cjs`、`check-mp2-demo.cjs`、`check-mp3-demo.cjs` 通过。请重新编译后再做微信模拟器验收。
+- 契约：`docs/miniapp-mp3-contract.md`，复盘：`docs/miniapp-mp3-review.md`。
+
+## 2026-10-05 小程序 MP4 设备预约
+
+- 范围：`miniprogram` 与本批 docs；后台只读。未 commit/push。未做 MP5–MP6。
+- 预约仓库 `sf-mini-demo:reservations` 驱动日历、我的预约与我的页统计。默认空态，记录由创建产生。退出只清会话，预约保留。
+- 冲突按 `[start,end)`；用户取自会话。新增适配 `POST /api/instrument/reservation/update`。提醒仅本地偏好，文案标明不发送通知。
+- 已结束不可取消（比 Web 更严）。进行中只能改结束时间。
+- 验证：`node scripts/check-mp1-demo.cjs` 至 `check-mp4-demo.cjs` 通过。请重新编译后再做微信模拟器验收。
+- 契约：`docs/miniapp-mp4-contract.md`，复盘：`docs/miniapp-mp4-review.md`。
+
+## 2026-10-06 小程序 MP5 告警处理与消息待办
+
+- 范围：`miniprogram` 与本批 docs。未 commit/push。未做 MP6。
+- 统一事件：Web 历史样例 + 当前 990008（970008 待处理）。处理是人工确认，不改变参数报警种子。
+- 负责人默认演示用户；我的负责/我的任务按 isHead 过滤。消息与待办同源 live 事件；已读/清空不删告警。
+- 资产异动与 BPM 完成/转办明确未开放。
+- 验证：`check-mp1` 至 `check-mp5` 通过。请重新编译后验收。
+- 契约：`docs/miniapp-mp5-contract.md`，复盘：`docs/miniapp-mp5-review.md`。
+
+## 2026-10-06 移液枪与枪架（MP6）
+
+- 范围：`miniprogram` + `smart-facility-platform` + 本批 docs。未 commit/push。
+- 同源种子 991001–991004 / 枪架 980023–980024；空枪位不是枪；超时按取出满 24 小时计算。
+- 取枪申请与模拟确认分开；离线枪架不成功；重复取还拒绝。两端独立本地存储，不宣称硬件已连接、不跨端同步。
+- 验证：`node scripts/check-mp6-demo.cjs`；Web `tests/unit/demo/pipette-gun.spec.js`。请重新编译微信并在 `/lhd/pipetteGun` 走列表→枪架→模拟取还。
+- 契约：`docs/pipette-gun-contract.md`，复盘：`docs/review-pipette-gun.md`。
+
+## 2026-10-06 双端运单 Mock 与 SaaS 移液枪复盘
+
+- 范围：`miniprogram` + `smart-facility-platform` + 本批 docs。执行 `docs/transport-dual-client-task-prompt.md`。未 commit/push。
+- T0：SaaS `GUNSTATUS` 0/1 文案颜色与业务码对齐（0 使用中、1 在架、2 超时）；取还后刷新列表/统计；归还时间不得早于取出；补开放 `/lhd/pipetteGun*` 菜单与演示路由。
+- T1–T4：10 条同 ID 合成运单；SaaS 列表/创建/装车/发运/送达与状态机；小程序列表/统计/详情/发运/送达（无创建入口）。查询 `state=0` 在小程序表示全部，实体 0 才是待装车。
+- 两端独立本地存储，不声称跨端实时同步。地图为模拟轨迹，蓝牙/真实打印未接入。
+- 验证：`tests/unit/demo/pipette-gun.spec.js`、`transport.spec.js`；`node scripts/check-mp1-demo.cjs` 至 `check-mp7-transport.cjs`、`check-miniapp-gun-return-list.cjs`。未做 Edge/微信模拟器点击截图，未重编译微信。
+- 契约：`docs/transport-demo-contract.md`，复盘：`docs/transport-demo-review.md`。

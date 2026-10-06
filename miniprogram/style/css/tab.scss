@@ -1,0 +1,20 @@
+.tab-box{
+	width: 94vw;
+	margin: 20rpx auto 0;
+	.demo-uni-col{
+		color: #555;
+		border-radius: 50rpx;
+		.text{
+			width: 100%;
+			display: block;
+			line-height: 60rpx;
+			text-align: center;
+			font-size: 28rpx;
+		}
+		&.active{
+			background-color: $primary;
+			color: #fff;
+			font-weight: 600;
+		}
+	}
+}

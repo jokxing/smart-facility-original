@@ -1,0 +1,182 @@
+// 设备管理的子页面详情与房间管理的子页面详情
+
+// 每个盒子的间距
+$padding: 0 24rpx;
+$marginTop: 30rpx;
+.homeSubpage-detail{
+	padding: $padding;
+	.information{
+		margin-top: 40rpx;
+		::v-deep .uni-row:last-child{
+			margin-top: $marginTop;
+		}
+		.top-box{
+			height: 138rpx;
+			background-repeat: no-repeat;
+			background-size: contain;
+			display: flex;
+			flex-direction: column;
+			background-image: url(@/static/images/offLine-bg.png);
+			&.run{
+				background-image: url(@/static/images/normal-bg.png);
+				.text-2{
+					color: $run-color;
+				}
+			}
+			&.standby,
+			&.off{
+				background-image: url(@/static/images/offLine-bg.png);
+				.text-2{
+					color: $off-color;
+				}
+			}
+			
+			&.normal{
+				background-image: url(@/static/images/normal-bg.png);
+				.text-2{
+					color: $normal-color;
+				}
+			}
+			&.abnormal{
+				background-image: url(@/static/images/abnormal-bg.png);
+				.text-2{
+					color: $abnormal-color;
+				}
+			}
+			&.offLine{
+				background-image: url(@/static/images/offLine-bg.png);
+				.text-2{
+					color: $offLine-color;
+				}
+			}
+			
+			&.manager-name{
+				background-image: url(@/static/images/detail-managerName.png);
+			}
+			
+			.text-1{
+				font-size: 26rpx;
+				color: #888;
+				margin-top: 24rpx;
+				margin-left: 30rpx;
+				display: inline-block;
+				margin-bottom: 10rpx;
+			}
+			.text-2{
+				margin-left: 30rpx;
+				font-size: 30rpx;
+				display: inline-block;
+				font-weight: 600;
+				&.fontSize-small{
+					font-size: 26rpx;
+				}
+			}
+		}
+		
+		.logo-url{
+			width: 200rpx;
+			height: 240rpx;
+			background-repeat: no-repeat;
+			background-size: 80% auto;
+			background-position: center;
+			background-color: #fff;
+		}
+		.detail{
+			font-size: $fontSmall;
+			position: relative;
+			.arrow-right{
+				width: 68rpx;
+				height: 68rpx;
+				position: absolute;
+				top: 0;
+				right: 0;
+			}
+			.text{
+				width: 100%;
+				color: #777;
+				margin-bottom: 25rpx;
+				display: flex;
+				word-wrap: break-word;
+				word-break: normal;
+				.span{
+					color: #333;
+					width: 80%;
+					&.homing{
+						color: $homing-color;
+					}
+					&.errorHoming{
+						color: $errorHoming-color;
+					}
+				}
+				// &:last-child{
+				// 	margin-bottom: 0;
+				// 	color: #00B1FF;
+				// }
+			}
+		}
+	}
+	
+	.latestStatus{
+		margin-top: 40rpx;
+		background-color: #fff;
+		border-radius: 10rpx;
+		padding: 32rpx;
+		.top{
+			.text{
+				font-size: $fontMid;
+				color: #333;
+				font-weight: bold;
+			}
+		}
+		.float-right{
+			font-size: $fontSmall;
+			color: $golden;
+			display: flex;
+			.inner{
+				margin-left: 30rpx;
+				::v-deep .uni-icons{
+					color: $golden!important;
+					margin-right: 6rpx;
+				}
+			}
+		}
+		.top{
+			margin-bottom: 20rpx;
+		}
+		.item{
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			background-color: $bgGolden;
+			border-radius: 10rpx;
+			height: 72rpx;
+			width: 94%;
+			&.mid{
+				margin: 0 auto;
+			}
+			&.right{
+				float: right;
+			}
+			.image{
+				width: 45rpx;
+				height: 45rpx;
+				margin-right: 6rpx;
+			}
+			.text{
+				font-size: 28rpx;
+				color: #333;
+				margin-left: 10rpx;
+			}
+		}
+	}
+	
+	.footer-button{
+		width: calc(100% - 48rpx);
+		margin: 30rpx auto 0;
+		padding-bottom: 100rpx;
+		.button{
+			width: 90%;
+		}
+	}
+}

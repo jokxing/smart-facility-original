@@ -34,9 +34,12 @@ router.beforeEach(async (to, from, next) => {
       || to.path === '/sys/a/log' || to.path === '/sys/department'
       || to.path === '/lhd/hardware/home' || to.path === '/ld/labdevice' || to.path === '/ld/maintenance'
       || to.path === '/rm/room' || to.path === '/ms/mapSet'
-      || to.path === '/ds/statistics' || to.path === '/pro';
+      || to.path === '/ds/statistics' || to.path === '/pro'
+      || to.path === '/lhd/pipetteGun' || to.path === '/lhd/pipetteGun/pipetteGun'
+      || to.path === '/lhd/pipetteGun/pipetteGunRack'
+      || to.path === '/apply/transport' || to.path === '/apply/transport/waybill';
     if (!demoAllowed) {
-      Message.info('本演示已开放中控地图、大屏、报警记录、部门与成员、智能硬件、设备管理、维保管理、房间管理、地图设置（楼层底图）、数据统计总览；当前管理页面尚未接入。');
+      Message.info('本演示已开放中控地图、大屏、报警记录、部门与成员、智能硬件、设备管理、维保管理、房间管理、地图设置（楼层底图）、数据统计总览、移液枪与运单；当前管理页面尚未接入。');
       next('/dashboard');
       NProgress.done();
       return;

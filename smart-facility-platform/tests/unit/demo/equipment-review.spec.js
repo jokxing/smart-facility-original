@@ -70,5 +70,5 @@ test('binding catalog comes from shared entities and is exposed through authenti
 
 test('hardware menu does not advertise the blocked recorder management route', () => {
   const hardware = DEMO_MENUS.find(menu => menu.id === 'lhd');
-  expect(hardware.subMenu.map(item => item.path)).toEqual(['/lhd/hardware/home']);
+  expect(hardware.subMenu.map(item => item.path)).toEqual(['/lhd/hardware/home', '/lhd/pipetteGun/pipetteGun']);
 });

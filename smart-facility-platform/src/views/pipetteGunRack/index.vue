@@ -80,7 +80,7 @@
             @handleUpdateInit="handleUpdateInit"
             @hiddenModalVisible="hiddenModalVisible"></ImportFile>
 
-        <Drawer :is-drawer.sync="isDrawer" :strId="strId" :id="id"/>
+        <Drawer :is-drawer.sync="isDrawer" :strId="strId" :id="id" @handle="getList"/>
     </div>
 </template>
 

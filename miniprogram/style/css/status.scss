@@ -1,0 +1,119 @@
+.status{
+	position: relative;
+	text-align: center;
+	.status-big{
+		width: 200rpx;
+		height: 200rpx;
+		border-radius: 50%;
+		position: relative;
+		.status-mid{
+			width: 154rpx;
+			height: 154rpx;
+			border-radius: 50%;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			.status-samll{
+				width: 120rpx;
+				height: 120rpx;
+				text-align: center;
+				color: #fff;
+				border-radius: 50%;
+				// line-height: 120rpx;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				font-size: 30rpx;
+				font-weight: bold;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				.text{
+					width: 94%;
+					font-size: 28rpx;
+					font-weight: initial;
+				}
+			}
+		}
+	}
+	.status-bottom-test{
+		&.errorHoming{
+			color: $errorHoming-color;
+			font-size: 26rpx;
+		}
+	}
+}
+// 正常/新建
+.normal{
+	.status-big{
+		background-color: #1bd39e14;
+		.status-mid{
+			background-color: #1bd39e26;
+			.status-samll{
+				background-color: #1bd39e;
+			}
+		}
+	}
+}
+// 其他状态
+.abnormal{
+	.status-big{
+		background-color: #ef4d4e14;
+		.status-mid{
+			background-color: #ef4d4e26;
+			.status-samll{
+				background-color: #EF4D4E;
+			}
+		}
+	}
+}
+// 新建
+.noHoming{
+	.status-big{
+		background-color: rgba(68, 137, 255, 0.05);
+		.status-mid{
+			background-color: rgba(68, 137, 255, 0.18);
+			.status-samll{
+				background-color: $noHoming-color;
+			}
+		}
+	}
+}
+// 离线
+.offLine{
+	.status-big{
+		background-color: rgba(173, 186, 203, 0.05);
+		.status-mid{
+			background-color: rgba(173, 186, 203, 0.18);
+			.status-samll{
+				background-color: $offLine-color;
+			}
+		}
+	}
+}
+// 不在枪架上
+.homing{
+	.status-big{
+		background-color: rgba(239, 175, 44, 0.05);
+		.status-mid{
+			background-color: rgba(239, 175, 44, 0.18);
+			.status-samll{
+				background-color: $homing-color;
+			}
+		}
+	}
+}
+// 超时未归还
+.errorHoming{
+	.status-big{
+		background-color: rgba(239, 77, 78, 0.05);
+		.status-mid{
+			background-color: rgba(239, 77, 78, 0.18);
+			.status-samll{
+				background-color: $errorHoming-color;
+			}
+		}
+	}
+}

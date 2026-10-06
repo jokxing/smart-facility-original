@@ -1,0 +1,71 @@
+.login{
+	text-align: center;
+	.logo{
+		margin-top: 20%;
+		margin-bottom: 6%;
+	}
+	::v-deep .uni-h2{
+		width: 100%;
+	}
+	.text{
+		color: #666;
+	}
+	.logo-image{
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 50%;
+	}
+	.form{
+		width: 70%;
+		margin: 48rpx auto 0;
+		.input{
+			height: 88rpx;
+			line-height: 88rpx;
+			padding: 0 24rpx;
+			margin-bottom: 24rpx;
+			background: #fff;
+			border-radius: 12rpx;
+			text-align: left;
+			font-size: 28rpx;
+		}
+	}
+	.button{
+		width: 70%;
+		margin: 10% auto 0;
+		background-color: #303F9F;
+		color: #fff;
+	}
+	
+	.popup-content {
+		width: 640rpx;
+		display: flex;
+		flex-wrap: wrap;
+		border-radius: 16rpx;
+		max-height: 90vh;
+		.scroll-Y {
+			max-height: 90vh;
+		}
+		.user-list{
+			background-color: #fff;
+			width: 87%;
+			border-radius: 10rpx;
+			padding: 30rpx 40rpx;
+			margin-bottom: 16rpx;
+			.text{
+				width: 100%;
+				display: block;
+				text-align: left;
+				font-size: 28rpx;
+			}
+			::v-deep .uni-title__box{
+				padding: 0;
+			}
+		}
+		// ::v-deep .uni-data-checklist{
+		// 	width: 424rpx;
+		// 	.checklist-group .checklist-box.is--list{
+		// 		padding-left: 15px;
+		// 	}
+		// }
+	}
+}

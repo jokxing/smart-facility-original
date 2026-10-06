@@ -49,7 +49,12 @@
             </div>
 
             <div class="detail-padding">
-                <el-descriptions :title="$t('labDevice.gunList')"></el-descriptions>
+                <el-descriptions :title="$t('labDevice.gunList')">
+                    <template v-if="isDemo" #extra>
+                        <el-button size="mini" @click="handleDemoTake">模拟取枪</el-button>
+                        <el-button size="mini" @click="handleDemoReturn">模拟归还在用枪</el-button>
+                    </template>
+                </el-descriptions>
                 <Table :data="list" :tableData="tableData" v-loading="pipetteGunLoading">
                     <template slot-scope="data">
                         <div v-if="data.prop === 'no'">{{ data.data.no === 'null' ? '' : data.data.no }}</div>
@@ -119,7 +124,7 @@
         getDeviceDetail,
         updateAlarmLight
     } from "@/api/device";
-    import { postGunPipetteBindingList } from "@/api/gun";
+    import { postGunPipetteBindingList, postGunTakePipette, getGunTake, postGunReturnPipette } from "@/api/gun";
     import {getEquipmentUserList} from "@/api/user";
     import { statusText, statusColor } from "@/utils/methods";
     import { GUNRACKSTATUS,GUNSTATUS,items } from "@/utils/constant"
@@ -299,6 +304,33 @@
                         this.total = res.items.total
                     }
                 })
+            },
+            handleDemoTake() {
+                postGunTakePipette({gunRackId: this.powerOutage.id, userId: 900001}).then(res => {
+                    if (res.code !== 1) return this.$message.error(res.message);
+                    getGunTake({gunRackId: this.powerOutage.id}).then(poll => {
+                        if (poll.code === 1) {
+                            this.$message.success('模拟取枪已确认（未连接硬件）');
+                            this.handleGunPipetteList();
+                            this.$emit('handle');
+                        } else {
+                            this.$message.error(poll.message);
+                        }
+                    });
+                });
+            },
+            handleDemoReturn() {
+                const used = (this.list || []).find(item => item.pipetteGunId && item.no !== 'null' && Number(item.homingStatus) !== 1);
+                if (!used) return this.$message.info('当前枪架没有使用中的移液枪');
+                postGunReturnPipette({gunId: used.pipetteGunId}).then(res => {
+                    if (res.code === 1) {
+                        this.$message.success('模拟归还成功（未连接硬件）');
+                        this.handleGunPipetteList();
+                        this.$emit('handle');
+                    } else {
+                        this.$message.error(res.message);
+                    }
+                });
             },
             // 负责人
             handleEquipmentUsers(){

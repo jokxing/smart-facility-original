@@ -1,0 +1,82 @@
+{
+  "testedAt": "2026-10-05T09:40:40.625Z",
+  "method": "Native WXML element input/tap, native Page/Element data, native wx API, IDE close/auto diagnostic",
+  "results": [
+    {
+      "name": "native input and wrong-password button tap",
+      "passed": true,
+      "details": {
+        "submitting": false
+      }
+    },
+    {
+      "name": "native login button tap and statistics",
+      "passed": true,
+      "details": {
+        "instrumentStatistics": {
+          "monitorCount": 12,
+          "normalCount": 11,
+          "alarmCount": 1,
+          "offLineCount": 0,
+          "runCount": 12,
+          "standbyCount": 0,
+          "closeCount": 0
+        },
+        "roomStatistics": {
+          "monitorCount": 3,
+          "normalCount": 2,
+          "alarmCount": 1,
+          "offLineCount": 0
+        }
+      }
+    },
+    {
+      "name": "native home refresh",
+      "passed": true
+    },
+    {
+      "name": "screenshot 06-native-home",
+      "passed": false,
+      "details": "{\"message\":\"timeout waiting for automator response\"}"
+    },
+    {
+      "name": "native home alarm-room card tap",
+      "passed": true,
+      "details": {
+        "dashboardType": 2,
+        "loadingNum": 0
+      }
+    },
+    {
+      "name": "native device status-filter tap",
+      "passed": true,
+      "details": {
+        "sensorStatus": 1,
+        "loadingNum": 0,
+        "listLength": 0
+      }
+    },
+    {
+      "name": "native logout button tap and storage isolation",
+      "passed": true
+    },
+    {
+      "name": "screenshot 07-native-logout",
+      "passed": true
+    },
+    {
+      "name": "runtime error log collection",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "IDE reopen storage diagnostic",
+      "passed": false,
+      "details": {
+        "markerPreserved": false,
+        "tokenPresent": false,
+        "route": "pages/tabBar/Home/Home"
+      }
+    }
+  ]
+}

@@ -347,3 +347,7 @@ export const getTransportOrderGps = data => {
 export const getTransportOrderGetStateInfo = data => {
     return get("/transportOrder/change/getStateInfo", data);
 };
+
+export const resetDemoTransport = () => post("/__demo/transport/reset", {}, {
+    headers: {"content-type": "application/json"}
+});

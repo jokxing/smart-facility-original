@@ -1,21 +1,22 @@
 # 智慧设施平台项目背景与接手约束
 
-最后更新：2026-09-23
+最后更新：2026-10-04
 
 ## 当前目录
 
 ```text
 smart-facility-original/
 ├─ smart-facility-platform/  Vue 2 第二版 Web 工程；包含 3D 楼宇、数据大屏和 SaaS 后台
-├─ facility-miniapp/         关联小程序，稍后放入
+├─ miniprogram/              已放入的关联 uni-app 小程序副本，可直接修改
 └─ docs/                     本项目组的审查、状态和交接文档
 ```
 
-当前 `facility-miniapp` 尚未放入。
+小程序已放入 `miniprogram`。建议产品名为“智慧设施助手”，英文名 Smart Facility Assistant；目录名可后续统一为 `smart-facility-miniapp`，本轮保持实际目录不移动。小程序接手先读 `docs/miniapp-audit.md` 和 `docs/miniapp-next-task-prompt.md`。
 
 ## 可修改范围
 
 - `smart-facility-platform` 是可直接修改、脱敏和 Mock 化的项目副本。
+- `miniprogram` 也是用户确认可直接修改的副本；小程序任务以独立交接文档为准，不受旧 Web 交接中“仅修改 Web”的范围限制。
 - 原公司原始项目保存在其他位置，本目录不是唯一原件。
 - 不需要再复制一份公开工程；后续直接在当前副本中修改。
 - 未经用户明确要求，不推送 Git、不连接原公司接口、不运行旧生产部署脚本。
@@ -64,4 +65,3 @@ docs/STATUS.md
 ```
 
 审查项必须给出真实文件依据，并按“保留 / 替换 / 删除 / 待核实”分类。第一轮完成审查后停止，不立即批量修改业务源码。
-

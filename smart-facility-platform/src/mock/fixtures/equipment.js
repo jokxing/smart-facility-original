@@ -1410,45 +1410,7 @@ export function getDeviceWifiEcho(deviceId) {
   };
 }
 
-/**
- * POST /gun/pipette/binding/list — GunRackDrawer 移液枪位列表。
- */
-export function listGunPipetteBindings(body = {}) {
-  const gunRackId = Number(body.gunRackId);
-  const pageNum = Math.max(1, Number(body.pageNum) || 1);
-  const pageSize = Math.max(1, Number(body.pageSize) || 10);
-  const rack = equipmentById(gunRackId);
-  if (!rack || Number(rack.equipmentTypeCode) !== 13) {
-    return {list: [], total: 0, pageNum, pageSize};
-  }
-  const seeds = gunRackId === 980023
-    ? [
-      {detent: 1, name: '演示移液枪 1', no: 'PG-001', homingStatus: 0},
-      {detent: 2, name: '演示移液枪 2', no: 'PG-002', homingStatus: 1},
-      {detent: 3, name: '演示移液枪 3', no: 'PG-003', homingStatus: 2},
-      {detent: 4, name: '', no: 'null', homingStatus: 0}
-    ]
-    : [
-      {detent: 1, name: '演示移液枪 4', no: 'PG-004', homingStatus: 0},
-      {detent: 2, name: '', no: 'null', homingStatus: 0}
-    ];
-  const list = seeds.map((item, index) => ({
-    id: gunRackId * 10 + index + 1,
-    detent: item.detent,
-    name: item.name,
-    no: item.no,
-    homingStatus: item.homingStatus,
-    gunRackId,
-    gunRackName: rack.name
-  }));
-  const start = (pageNum - 1) * pageSize;
-  return {
-    list: list.slice(start, start + pageSize),
-    total: list.length,
-    pageNum,
-    pageSize
-  };
-}
+export {listGunPipetteBindings} from './gun';
 
 /** GET /history/device/alarm、/history/my/alarm — 枪架/网关告警空列表桩。 */
 export function emptyDeviceHistoryAlarmPage(params = {}) {

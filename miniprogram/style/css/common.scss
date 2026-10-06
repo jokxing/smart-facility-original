@@ -1,0 +1,492 @@
+.float-left{
+	float: left;
+}
+.float-right{
+	float: right;
+}
+.flex-top {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	z-index: 1;
+}
+.h2-title {
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #333333;
+	line-height: 26rpx;
+	margin: 24rpx 0;
+}
+.flex-between {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.empty {
+	color: #777777;
+	text-align: center;
+}
+.list-default {
+	padding: 40rpx;
+	background: #FFFFFF;
+	border-radius: 10rpx;
+	margin-bottom: 32rpx;
+}
+
+.button{
+	height: 80rpx;
+	line-height: 80rpx;
+	font-size: 32rpx;
+}
+
+.content-padding {
+	padding: 40rpx 24rpx;
+	margin-top: 60rpx;
+}
+
+// 主色按钮统一
+.button-primary{
+	background-color: $primary!important;
+	border-radius: 40rpx;
+	color: #fff;
+}
+
+// 取消按钮统一
+.button-cancel{
+	background-color: #fff!important;
+	border: 1px solid $primary;
+	color: $primary!important;
+	border-radius: 40rpx;
+	&::after{
+		border: none
+	}
+}
+
+// 金色按钮统一
+.button-golden{
+	background-color: $golden!important;
+	color: #fff;
+}
+
+// 金色取消按钮统一
+.button-cancel-golden{
+	background-color: #fff!important;
+	border: 1px solid $golden;
+	color: $golden!important;
+}
+
+// disabled灰色
+.disabled{
+	background-color: #8a8a8a!important;
+}
+
+// 文字主色
+.text-primary{
+	color: $primary;
+}
+
+// textarea样式
+.uni-textarea{
+	width: calc(100% - 16px);
+	height: 80rpx;
+	border-radius: 4px;
+	padding: 8px;
+	background-color: #F5F5F5;
+	color: #333;
+}
+.submit-form{
+	.uni-textarea{
+		background-color: #fff;
+		border: 1px #F0F0F0 solid
+	}
+}
+
+// 选择器样式
+::v-deep .popup-picker{
+	height: 40px;
+	border-radius: 4px;
+	line-height: 40px;
+	padding: 0 10px;
+	background-color: #F5F5F5;
+	color: #333;
+	.uni-icons{
+		float: right;
+	}
+}
+
+// 日期
+::v-deep .uni-date__x-input{
+	background-color: #F5F5F5;
+	color: #333;
+}
+::v-deep .uni-date-x--border{
+	border: none!important
+}
+::v-deep .uni-date-x{
+	background-color: #F5F5F5!important;
+}
+
+// 标题和分割线
+.box-title-divider{
+	line-height: 30px;
+	border-bottom: $borderBottom;
+}
+
+// 弹出层头部和表单间距统一样式
+::v-deep .popup{
+	.title{
+		position: relative;
+		.uni-icons{
+			position: absolute;
+			top: 24rpx;
+			right: 24rpx;
+		}
+	}
+	.uni-title__box{
+		margin: 0 30rpx;
+	}
+	.uni-forms-item__inner{
+		padding-bottom: 0;
+		.uni-forms-item__content{
+			margin-bottom: 40rpx;
+		}
+		.uni-forms-item__label{
+			height: 72rpx;
+		}
+	}
+	.uni-checkbox{
+		.uni-forms-item__content{
+			margin-bottom: 0;
+		}
+	}
+	&.no-margin{
+		.uni-forms-item__content{
+			margin-bottom: 0;
+		}
+	}
+
+	.no-input{
+		.uni-forms-item__label{
+			display: block!important;
+			padding: 0!important;
+		}
+		.uni-forms-item__inner .uni-forms-item__content{
+			margin-bottom: 0;
+		}
+		.text{
+			color: #777;
+		}
+	}
+
+	.popup-content{
+		margin: 0 30rpx;
+		padding-bottom: 30rpx;
+	}
+
+	.uni-forms{
+		margin-bottom: 20rpx;
+	}
+
+	.footer{
+		margin-bottom: 20rpx;
+	}
+}
+
+//
+.popup-message{
+	::v-deep .uni-popup .uni-popup__wrapper{
+		padding: 44rpx 40rpx;
+		border-radius: 20rpx;
+	}
+	.content{
+		display: flex;
+		flex-direction: column;
+		align-content: center;
+		justify-content: center;
+		text-align: center;
+		.text{
+			margin-top: 20rpx;
+			width: 300rpx;
+		}
+	}
+}
+
+.submit-form{
+	::v-deep .uni-error-message{
+		left: 156rpx!important
+	}
+}
+
+.is-top{
+	::v-deep .uni-error-message{
+		left: 0!important
+	}
+}
+
+// 卡片统一样式
+.cardCommon{
+	::v-deep .uni-card{
+		padding: 0!important;
+		border-radius: 10rpx!important;
+		.uni-card__header{
+			border-bottom: 0;
+			padding-left: 32rpx;
+			position: relative;
+			&::before{
+				content: "";
+				width: 6rpx;
+				height: 32rpx;
+				background-color: $primary;
+				border-radius: 6rpx;
+				position: absolute;
+				top: 50%;
+				left: 0;
+				transform: translateY(-50%);
+			}
+			.uni-card__header-content-title{
+				font-size: $fontMid!important;
+				font-weight: bold;
+			}
+			.uni-card__header-content-subtitle{
+				line-height: 80rpx;
+				position: absolute;
+				top: 0;
+				right: 140rpx;
+				margin-top: 0!important;
+				font-size: 24rpx!important;
+				padding-left: 24rpx;
+				&::before{
+					content: "";
+					width: 8rpx;
+					height: 8rpx;
+					position: absolute;
+					top: 50%;
+					left: 0;
+					transform: translateY(-50%);
+					border-radius: 50%;
+				}
+			}
+			.uni-card__header-extra-text{
+				font-size: $fontSmall!important;
+				position: relative;
+				padding-left: 24rpx;
+				&::before{
+					content: "";
+					width: 8rpx;
+					height: 8rpx;
+					position: absolute;
+					top: 50%;
+					left: 0;
+					transform: translateY(-50%);
+					border-radius: 50%;
+				}
+			}
+		}
+
+		.uni-card__content{
+			padding-top: 0!important;
+		}
+	}
+	.sensors{
+		display: flex;
+		flex-wrap: wrap;
+		font-size: $fontSmall;
+		.text{
+			margin-right: 30rpx;
+		}
+		.normal{
+			color: $normal-color;
+		}
+		.abnormal{
+			color: $abnormal-color;
+		}
+		.offLine{
+			color: $offLine-color;
+		}
+	}
+	.card-items{
+		font-size: $fontSmall;
+		display: block;
+		&.right{
+			text-align: right;
+		}
+	}
+	// 正常的颜色
+	.normal{
+		::v-deep .uni-card__header-extra-text{
+			color: $normal-color!important;
+			&::before{
+				background-color: $normal-color;
+			}
+		}
+	}
+	// 报警的颜色
+	.abnormal{
+		::v-deep .uni-card__header{
+			&::before{
+				background-color: $abnormal-color;
+			}
+			.uni-card__header-content-title{
+				color: $abnormal-color!important;
+			}
+		}
+		::v-deep .uni-card__header-extra-text{
+			color: $abnormal-color!important;
+			&::before{
+				background-color: $abnormal-color;
+			}
+		}
+	}
+	// 离线的颜色
+	.offLine{
+		::v-deep .uni-card__header{
+			&::before{
+				background-color: $offLine-color;
+			}
+			.uni-card__header-content-title{
+				color: $offLine-color!important;
+			}
+		}
+		::v-deep .uni-card__header-extra-text{
+			color: $offLine-color!important;
+			&::before{
+				background-color: $offLine-color;
+			}
+		}
+	}
+	// 在枪架上的颜色
+	.noHoming{
+		::v-deep .uni-card__header-extra-text{
+			color: $noHoming-color!important;
+		}
+	}
+	// 在枪架上的颜色
+	.homing{
+		::v-deep .uni-card__header-extra-text{
+			color: $homing-color!important;
+		}
+	}
+	// 在枪架上的颜色
+	.errorHoming{
+		::v-deep .uni-card__header-extra-text{
+			color: $errorHoming-color!important;
+		}
+	}
+	// 已关机的颜色
+	.off{
+		::v-deep .uni-card__header-content-subtitle{
+			color: $off-color!important;
+			&::before{
+				background-color: $off-color;
+			}
+		}
+	}
+	// 运行中的颜色
+	.run{
+		::v-deep .uni-card__header-content-subtitle{
+			color: $run-color!important;
+			&::before{
+				background-color: $run-color;
+			}
+		}
+	}
+	// 待机中的颜色
+	.standby{
+		::v-deep .uni-card__header-content-subtitle{
+			color: $standby-color!important;
+			&::before{
+				background-color: $standby-color;
+			}
+		}
+	}
+	// 维护中的颜色
+	.maintain{
+		::v-deep .uni-card__header-content-subtitle{
+			color: $maintain-color!important;
+			&::before{
+				background-color: $maintain-color;
+			}
+		}
+	}
+}
+
+// 报警记录卡片样式统一
+.abnormalRecord-content{
+	::v-deep .uni-card{
+		padding: 0!important;
+		border-radius: 10rpx!important;
+		.uni-card__header{
+			border-bottom: 0;
+			padding-left: 32rpx;
+			position: relative;
+			.uni-card__header-content-title{
+				font-weight: bold;
+			}
+			.uni-card__header-extra-text{
+				font-size: 24rpx!important;
+				padding: 8rpx 12rpx;
+				border-radius: 30rpx;
+			}
+		}
+
+		.uni-card__content{
+			padding: 0 32rpx 14rpx!important;
+			color: #777;
+			font-size: 24rpx;
+			// .uni-row{
+			// 	margin-bottom: 10rpx;
+			// }
+		}
+	}
+	// 已处理
+	.normal{
+		.uni-card__header-extra-text{
+			background-color: #D9F8F0;
+			color: $normal-color!important;
+		}
+	}
+	// 未处理
+	.abnormal{
+		.uni-card__header-extra-text{
+			background-color: #FFE5E5;
+			color: $abnormal-color!important;
+		}
+	}
+}
+
+// tab统一样式
+.tab{
+	.demo-uni-col{
+		text-align: center;
+		line-height: 80rpx;
+		background-color: #fff;
+		color: #555555;
+		
+		&.active{
+			color: $primary;
+			position: relative;
+			&::before{
+				content: "";
+				width: 140rpx;
+				height: 6rpx;
+				position: absolute;
+				bottom: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				border-radius: 8rpx;
+				background-color: $primary;
+			}
+		}
+	}
+	::v-deep .uni-col:last-child{
+		border-right: 1px #eee solid;
+	}
+}
+
+// 预约时间-checkbox
+.time-checkbox{
+	::v-deep .uni-data-checklist .checklist-group .checklist-box{
+		width: 100%;
+	}
+}

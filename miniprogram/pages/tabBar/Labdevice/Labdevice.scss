@@ -1,0 +1,97 @@
+$color555: #555;
+$yellow: #D6AE7B;
+
+.labdevice{
+	padding-bottom: 160rpx;
+	.search{
+		display: block;
+	}
+	.gatherBox{
+		padding: 0 20rpx;
+		.box{
+			height: 138rpx;
+			background-size: cover;
+			background-repeat: no-repeat;
+			display: flex;
+			flex-direction: column;
+			&.total{
+				background-image: url(../../../static/images/lab-run-total.png);
+				.num{
+					color: #1B6FD5
+				}
+			}
+			&.run{
+				background-image: url(../../../static/images/normal-bg.png);
+				.num{
+					color: $run-color
+				}
+			}
+			&.off{
+				background-image: url(../../../static/images/offLine-bg.png);
+				.num{
+					color: $off-color
+				}
+			}
+			
+			.text{
+				margin-left: 30rpx;
+				font-size: 26rpx;
+				color: #888;
+				padding-top: 22rpx;
+				display: block;
+			}
+			
+			.num{
+				margin-left: 30rpx;
+				font-size: 32rpx;
+				font-weight: bold;
+				margin-top: 10rpx;
+			}
+		}
+	}
+
+	.tab-box{
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 20rpx;
+		.demo-uni-col{
+			padding: 0 24rpx;
+			margin-right: 30rpx;
+			background-color: #fff;
+			color: #888;
+			position: relative;
+			.num{
+				position: absolute;
+				top: -20rpx;
+				right: -20rpx;
+				color: #fff;
+				padding: 0 10rpx;
+				border-radius: 10rpx;
+				font-size: 26rpx;
+				&.total{
+					background-color: #D9B480;
+				}
+				&.normal{
+					background-color: $normal-color;
+				}
+				&.abnormal{
+					background-color: $abnormal-color;
+				}
+				&.offLine{
+					background-color: $offLine-color;
+				}
+				
+				&.noHoming{
+					background-color: $noHoming-color;
+				}
+				&.homing{
+					background-color: $homing-color;
+				}
+				&.errorHoming{
+					background-color: $errorHoming-color;
+				}
+			}
+		}
+	}
+}

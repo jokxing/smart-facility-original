@@ -1,0 +1,84 @@
+.pipetteGun-detail{
+	padding: 40rpx 20rpx;
+	.other-services{
+		margin-bottom: 50rpx;
+		.button{
+			border-color: $golden;
+			color: #555;
+		}
+	}
+	
+	.voice-picker{
+		position: relative;
+		.popup-picker{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			opacity: 0;
+		}
+	}
+	// .gun-list{
+	// 	padding-bottom: 80rpx;
+	// 	::v-deep .uni-h4{
+	// 		position: relative;
+	// 		padding-left: 28rpx;
+	// 		font-size: 32rpx;
+	// 		font-weight: 500;
+	// 		&::after{
+	// 			content: "";
+	// 			width: 8rpx;
+	// 			height: 34rpx;
+	// 			position: absolute;
+	// 			top: 50%;
+	// 			left: 0;
+	// 			transform: translateY(-50%);
+	// 			background-color: $golden;
+	// 			border-radius: 4rpx;
+	// 		}
+	// 	}
+	// 	.cardCommon {
+	// 		::v-deep.uni-card {
+	// 			margin-left: 0!important;
+	// 			margin-right: 0!important;
+	// 			margin-top: 0!important;
+	// 			.uni-card__header::before{
+	// 				background-color: $golden;
+	// 			}
+	// 			.uni-card__header-extra{
+	// 				height: 40rpx;
+	// 				line-height: 40rpx;
+	// 				padding: 0 16rpx;
+	// 				border-radius: 20rpx;
+	// 				.uni-card__header-extra-text{
+	// 					padding: 0;
+	// 				}
+	// 			}
+	// 		}
+	// 		.noHoming{
+	// 			::v-deep .uni-card__header-extra{
+	// 				background-color: $noHoming-bgColor;
+	// 				.uni-card__header-extra-text{
+	// 					color: $noHoming-color!important;
+	// 				}
+	// 			}
+	// 		}
+	// 		.homing{
+	// 			::v-deep .uni-card__header-extra{
+	// 				background-color: $homing-bgColor;
+	// 				.uni-card__header-extra-text{
+	// 					color: $homing-color!important;
+	// 				}
+	// 			}
+	// 		}
+	// 		.errorHoming{
+	// 			::v-deep .uni-card__header-extra{
+	// 				background-color: $errorHoming-bgColor;
+	// 				.uni-card__header-extra-text{
+	// 					color: $errorHoming-color!important;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+}

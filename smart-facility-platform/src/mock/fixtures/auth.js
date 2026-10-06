@@ -65,7 +65,12 @@ export const DEMO_MENUS = [
     {id: 'demo-maintenance', name: '维保管理', englishName: 'maintenance', path: '/ld/maintenance', icon: 'icon-icon-repair', subMenu: []}
   ]},
   {id: 'lhd', name: '智能硬件', englishName: 'hardware', path: '/lhd/hardware/home', subMenu: [
-    {id: 'demo-hardware-home', name: '主页', englishName: 'home', path: '/lhd/hardware/home', icon: 'icon-home1', subMenu: []}
+    {id: 'demo-hardware-home', name: '主页', englishName: 'home', path: '/lhd/hardware/home', icon: 'icon-home1', subMenu: []},
+    {id: 'demo-pipette-gun', name: '移液枪', englishName: 'pipetteGun', path: '/lhd/pipetteGun/pipetteGun', icon: 'icon-unbundle', subMenu: []}
+  ]},
+  {id: 'apply', name: '运输管理', englishName: 'transport', path: '/apply/transport', subMenu: [
+    {id: 'demo-transport-home', name: '主页', englishName: 'home', path: '/apply/transport', icon: 'icon-home1', subMenu: []},
+    {id: 'demo-waybill', name: '运单管理', englishName: 'waybill', path: '/apply/transport/waybill', icon: 'icon-document', subMenu: []}
   ]},
   {id: 'rm', name: '房间管理', englishName: 'room', path: '/rm/room', subMenu: [
     {id: 'demo-room', name: '房间', englishName: 'room', path: '/rm/room', icon: 'icon-home1', subMenu: []},

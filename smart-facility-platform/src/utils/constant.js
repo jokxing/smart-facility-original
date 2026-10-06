@@ -258,14 +258,14 @@ export const NETWORK = [
  */
  export const GUNSTATUS = [
     {
-        label: i18n.t('labDevice.onGunRack'),
+        label: i18n.t('labDevice.notGunRack'),
         code: 0,
-        value: "blueColor"
+        value: "withdraw"
     },
     {
-        label: i18n.t('labDevice.notGunRack'),
+        label: i18n.t('labDevice.onGunRack'),
         code: 1,
-        value: "withdraw",
+        value: "blueColor",
     },
     {
         label: i18n.t('labDevice.overTime'),

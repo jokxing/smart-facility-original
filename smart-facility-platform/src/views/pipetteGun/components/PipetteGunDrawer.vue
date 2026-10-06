@@ -20,6 +20,7 @@
                         ></el-switch>
                     </div>
                     <div style="margin-right: -10px">
+                        <el-button v-if="detail.homingStatus !== 1" type="primary" @click="handleDemoReturn">模拟归还</el-button>
                         <el-button @click="$refs.UpdateAlarmTime.open(0,detail,'GUN')">{{ $t('hardware.exportTime') }}</el-button>
                         <el-button class="margin-small-right" @click="$refs.UpdateAlarmRules.open(true,detail)">{{ $t('hardware.alarmTime') }}</el-button>
                     </div>
@@ -98,7 +99,7 @@
     import HistoryAlarmRecord from "./HistoryAlarmRecord";
     import UpdateAlarmRules from "./UpdateAlarmRules";
     import UpdateAlarmTime from "@/views/device/components/UpdateAlarmTime";
-    import { getGunPipetteDetail, getGunPipetteOpenAlarm } from "@/api/gun";
+    import { getGunPipetteDetail, getGunPipetteOpenAlarm, postGunReturnPipette } from "@/api/gun";
     import {getEquipmentUserList} from "@/api/user";
     import { GUNSTATUS, items } from "@/utils/constant";
     export default {
@@ -206,6 +207,17 @@
             // 关闭详情页
             handleClose() {
                 this.$emit("update:isDrawer", false);
+            },
+            handleDemoReturn() {
+                postGunReturnPipette({gunId: this.detail.pipetteGunId}).then(res => {
+                    if (res.code === 1) {
+                        this.$message.success('模拟归还成功（未连接硬件）');
+                        this.handleDetail();
+                        this.$emit('handle');
+                    } else {
+                        this.$message.error(res.message);
+                    }
+                });
             },
         },
     }

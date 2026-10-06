@@ -1,0 +1,187 @@
+.my{
+	padding-bottom: 100rpx;
+	::v-deep .uni-title__box{
+		padding: 0;
+	}
+	.head{
+		display: flex;
+		align-items: center;
+		margin-bottom: 30rpx;
+		background-color: #fff;
+		padding: 40rpx 24rpx;
+		position: relative;
+		.image{
+			width: 120rpx;
+			height: 120rpx;
+			border-radius: 50%;
+		}
+		.infor{
+			text-align: center;
+			margin-left: 40rpx;
+			text-align: center;
+			position: relative;
+			::v-deep .uni-h2{
+				line-height: 48rpx;
+			}
+			.text{
+				font-size: $fontSmall;
+				color: #666666;
+			}
+		}
+		::v-deep .uni-icons{
+			position: absolute;
+			top: 50%;
+			right: 0;
+			transform: translateY(-50%);
+		}
+	}
+	.box{
+		margin: 20rpx 24rpx 0;
+		background-color: #fff;
+		border-radius: 10rpx;
+		padding: 18rpx 24rpx 32rpx;
+		::v-deep .uni-h3{
+			margin-bottom: 10rpx;
+			color: #333;
+			font-size: 32rpx;
+			padding-left: 28rpx;
+			position: relative;
+			&::after{
+				content: '';
+				width: 8rpx;
+				height: 34rpx;
+				border-radius: 4rpx;
+				background-color: $primary;
+				position: absolute;
+				top: 50%;
+				left: 0;
+				transform: translateY(-50%);
+			}
+		}
+		.demo-uni-col{
+			padding-left: 32rpx;
+			padding-top: 22rpx;
+			.text{
+				font-size: $fontMid;
+				color: #555;
+			}
+			.num{
+				display: flex;
+				align-items: baseline;
+				::v-deep .uni-h2{
+					line-height: 80rpx;
+					font-size: 56rpx;
+					color: $blur!important;
+				}
+				.span{
+					margin-left: 18rpx;
+					font-size: $fontSmall;
+					color: #888;
+				}
+			}
+		}
+	}
+	// 我负责的
+	.my-responsible{
+		::v-deep .uni-col-11{
+			width: 320rpx;
+			height: 160rpx;
+			background-size: 100% 100%;
+			&:first-child{
+				background-image: url("@/static/images/my-equipment.png");
+			}
+			&:last-child{
+				background-image: url("@/static/images/my-room.png");
+				float: right;
+			}
+		}
+	}
+	// 我的任务
+	.my-task{
+		::v-deep .uni-col-11{
+			width: 320rpx;
+			height: 200rpx;
+			background-size: 100% 100%;
+			&:first-child{
+				background-image: url("@/static/images/my-task.png");
+			}
+			&:last-child{
+				background-image: url("@/static/images/my-appointment.png");
+				float: right;
+			}
+		}
+		.demo-uni-col{
+			.text{
+				padding-left: 20rpx;
+				padding-top: 40rpx;
+				color: #777;
+				font-size: 28rpx;
+			}
+			::v-deep .uni-h2{
+				font-size: 60rpx;
+				padding-left: 20rpx;
+				margin-top: 20rpx;
+			}
+		}
+	}
+	// 报警统计
+	.alarm-statistics{
+		margin-bottom: 40rpx;
+		display: block;
+		::v-deep .uni-col-12{
+			width: 49%;
+			background-color: #EEF4F9;
+			border-radius: 10rpx;
+			padding: 32rpx 0 24rpx;
+			&:last-child{
+				float: right;
+			}
+			.title{
+				font-size: 28rpx;
+				color: #555;
+				margin-left: 32rpx;
+			}
+			.num{
+				margin-left: 32rpx;
+				display: flex;
+				line-height: 80rpx;
+				align-items: baseline;
+				margin-top: 10rpx;
+				.uni-h2{
+					font-size: 56rpx;
+					color: $abnormal-color!important;
+				}
+				.unit{
+					font-size: 26rpx;
+					color: #888;
+					margin-left: 10rpx;
+				}
+			}
+			.handle-num{
+				display: flex;
+				justify-content: space-between;
+				margin: 0 32rpx;
+				.handle-num-box{
+					width: calc(48% - 28rpx);
+					padding: 14rpx;
+					text-align: center;
+					border-radius: 10rpx;
+					display: flex;
+					flex-direction: column;
+					.text{
+						font-size: 22rpx;
+					}
+					&.normal{
+						background-color: $normal-bg;
+						color: $normal-color;
+					}
+					&.abnormal{
+						background-color: $abnormal-bg;
+						color: $abnormal-color;
+					}
+				}
+			}
+		}
+	}
+	
+}

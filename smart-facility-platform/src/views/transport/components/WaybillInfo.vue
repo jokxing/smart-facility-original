@@ -164,7 +164,7 @@
             <div class="detail-padding-nocolor" v-loading="stateLoading">
                 <el-descriptions :column="4" :title="$t('hardware.newStatus')">
                     <template slot="extra">
-                        <el-button :disabled="[2,3].includes(details.state)"
+                        <el-button v-if="!isDemo" :disabled="[2,3].includes(details.state)"
                                    icon="icon-Audible-alarm"
                                    @click="$refs.AdvancedAlarmSet.open({...obj})">
                             {{ $t('hardware.alarmSystem') }}
@@ -345,6 +345,7 @@ export default {
     data() {
         const _this = this;
         return {
+            isDemo: process.env.VUE_APP_DEMO === 'true',
             dataType: [
                 {INTERVAL: 1, LABEL: _this.$t('common.day2')},
                 {INTERVAL: 2, LABEL: _this.$t('common.week')},
@@ -490,7 +491,7 @@ export default {
             this.sensorsFlag = []
             getOpenMonitorFlag(data).then(res => {
                 if (res.code === 1) {
-                    this.sensorsFlag = res.items;
+                    this.sensorsFlag = res.items.list || [];
                     store.commit('setSensorsFlag', this.sensorsFlag);
                 }
             })

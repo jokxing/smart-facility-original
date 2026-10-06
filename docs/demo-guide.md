@@ -2,7 +2,7 @@
 
 房间详情更新：设备分类随设备编辑生效；切分类、搜索或Tab会回第一页；设备卡片展示与平面图同源的本地SVG设备外观。
 
-当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）** + **部门与成员（6A–6D）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/sys/department`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ms/mapSet`、`/ds/statistics`。不开放 `/apply/maintenance`、`/asset/maintenance`、`/sys/user`（个人资料）、员工导入导出。
+当前演示链路：一层实验室平面 + 房间设备布局 + 设备只读详情/历史曲线 + 报警记录处理 + 共享场景 + 双大屏 + 告警排行 + 楼层设计器只读 + **智能硬件总览/详情（1A/1B）** + **设备管理仪器列表（2A）～解绑（2H）** + **房间管理列表/只读详情（3A）+ 关联硬件只读（3B）+ 筛选导出（3C）+ 未监测设备 Tab（3D）** + **数据统计总览与告警（4A）+ 状态饼图（4B）+ 使用统计（4C）+ 使用率排行（4D）** + **设备维保列表（5A）+ 申请（5B）+ 下次日期/完成确认（5C）** + **部门与成员（6A–6D）** + **移液枪（MP6）** + **运单（双端 Mock）**。开放：`/login`、`/dashboard`、`/building`、`/floor/view`、`/floor/designer`、`/room/view`、`/room/designer`、`/floorDataV`、`/roomDataV`、`/sys/a/log`、`/sys/department`、`/lhd/hardware/home`、`/ld/labdevice`、`/ld/maintenance`、`/rm/room`、`/ms/mapSet`、`/ds/statistics`、`/lhd/pipetteGun`、`/lhd/pipetteGun/pipetteGun`、`/apply/transport`、`/apply/transport/waybill`。不开放 `/apply/maintenance`、`/asset/maintenance`、`/sys/user`（个人资料）、员工导入导出、冷藏车/品名/收发单位管理页。
 
 首页「设备管理」进入实验室仪器列表：关键词/部门/分类/空间/状态筛选、分页、统计卡。点仪器名称打开详情；可编辑名称/部门/分类；可单条/批量删除（**已绑定智能硬件须先解绑**）；可手填新增；可 XLSX 导入（先预览再确认）；可导出。批量改部门等仍拒绝。
 
@@ -221,3 +221,11 @@ npm run test:demo:map:m3
 ### 跨模块一致性（6E）
 
 删除新建部门前检查活跃仪器与硬件引用（移出后方可删）；硬件列表/详情部门名随共享部门改名刷新；员工基本编辑未传角色保持原角色，演示登录不可借基本编辑改角色；离职确认文案去掉自动解绑承诺。
+
+### 移液枪与枪架（MP6）
+
+侧栏 **移液枪** `/lhd/pipetteGun`：列表与统计同源（4 把实体枪，空枪位不计）。点编号打开详情可模拟归还；点所属枪架打开枪位列表，可模拟取枪（申请后确认，**不是**硬件取走）。离线枪架 B 取还失败。使用记录随取还更新。与小程序契约一致、本地存储独立，见 `docs/pipette-gun-contract.md`。
+
+### 运单（双端 Mock）
+
+顶栏 **运输管理**：主页 `/apply/transport`（统计/模拟轨迹节点，不加载高德）、运单 `/apply/transport/waybill`。10 条合成运单；可创建/装车/发运/送达。车辆运输中不可再分配，送达后释放。重置按钮需确认。与小程序同 ID、独立存储，见 `docs/transport-demo-contract.md`。
