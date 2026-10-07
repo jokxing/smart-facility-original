@@ -66,10 +66,12 @@
 
 列表走 `/gun/pipette/listV1`（与小程序 list 字段对齐）。另开放 statistics、detail、binding/list、history、take/return、使用/超时统计桩、mouseInfo。编辑/删除/改部门/改规则/导出 **明确拒绝**。
 
+枪架页另走设备接口：`POST /device/list`（`equipmentType=13`）、`GET /equipment/dashboard?equipmentType=13`（与列表同源计数）、`GET /device/detail`。查询 `status=0` 表示全部。未开放枪架增删改导/语音下发 **明确拒绝**。
+
 ## 页面
 
 - 小程序：设备 Tab 切换移液枪；列表筛选分页；详情归还；枪架枪位列表与模拟取枪。
-- Web：`/lhd/pipetteGun` 列表统计筛选；详情模拟归还；枪架抽屉模拟取枪/归还在用枪。
+- Web：`/lhd/pipetteGun` 列表统计筛选；详情模拟归还；「枪架管理」Tab 列表/统计/详情槽位与模拟取还。
 
 ## 未开放
 

@@ -47,7 +47,7 @@ export default {
         unwatchlabdevice: "IT设备",
         administration: "行政设备",
         pipetteGun: "移液枪",
-        pipetteGunRack: "移液枪管理",
+        pipetteGunRack: "枪架管理",
         orderManager: "预约管理",
         assetStatistics: "资产统计",
         assetProcess: "资产流程管理",

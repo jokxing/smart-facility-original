@@ -2745,3 +2745,11 @@
 - 两端独立本地存储，不声称跨端实时同步。地图为模拟轨迹，蓝牙/真实打印未接入。
 - 验证：`tests/unit/demo/pipette-gun.spec.js`、`transport.spec.js`；`node scripts/check-mp1-demo.cjs` 至 `check-mp7-transport.cjs`、`check-miniapp-gun-return-list.cjs`。未做 Edge/微信模拟器点击截图，未重编译微信。
 - 契约：`docs/transport-demo-contract.md`，复盘：`docs/transport-demo-review.md`。
+
+## 2026-10-07 SaaS 枪架管理核心 Mock
+
+- 范围：`smart-facility-platform` + 本批 docs。执行 `docs/pipette-rack-next-task-prompt.md`。未 commit/push。小程序未改。
+- `POST /device/list`（type=13）与 `GET /equipment/dashboard?equipmentType=13` 同源统计；去掉默认占位数；关键词/状态筛选与分页复位；失败也结束 loading。
+- 详情槽位复用枪仓库；模拟取还闭环；演示隐藏增删改导/语音等未开放操作。Tab 文案「枪架管理」，前进后退同步，保留侧栏选中修复。
+- 验证：`npm run test:demo` 285 通过；`pipette-rack.spec.js` / `pipette-sidebar.spec.js`。Edge 点击截图本轮未跑（脚本 `scripts/check-demo-pipette-rack.cjs` 已备）。
+- 复盘：`docs/pipette-rack-demo-review.md`。

@@ -41,18 +41,18 @@
                             <el-descriptions-item :label="$t('common.reportDate')">{{ powerOutage.reportDate |localToUtc }}</el-descriptions-item>
                             <el-descriptions-item :label="$t('common.owningDepartment')">{{ powerOutage.departmentName }}</el-descriptions-item>
                             <el-descriptions-item :label="$t('common.creatDate')">{{ powerOutage.createDate | localToUtc }}</el-descriptions-item>
+                            <el-descriptions-item :label="$t('common.principal')">{{ powerOutage.userName }}</el-descriptions-item>
                             <el-descriptions-item :label="$t('common.remark')">{{ powerOutage.remark }}</el-descriptions-item>
                             <el-descriptions-item :label="$t('common.companyName')">{{ powerOutage.companyName }}</el-descriptions-item>
                         </el-descriptions>
                     </div>
                 </div>
             </div>
-
             <div class="detail-padding">
                 <el-descriptions :title="$t('labDevice.gunList')">
                     <template v-if="isDemo" #extra>
-                        <el-button size="mini" @click="handleDemoTake">模拟取枪</el-button>
-                        <el-button size="mini" @click="handleDemoReturn">模拟归还在用枪</el-button>
+                        <el-button size="mini" :loading="demoBusy" @click="handleDemoTake">模拟取枪</el-button>
+                        <el-button size="mini" :loading="demoBusy" @click="handleDemoReturn">模拟归还在用枪</el-button>
                     </template>
                 </el-descriptions>
                 <Table :data="list" :tableData="tableData" v-loading="pipetteGunLoading">
@@ -61,6 +61,8 @@
                         <div v-if="data.prop === 'homingStatus'" :class="statusColor(data.data.homingStatus, GUNSTATUS)">
                             {{ data.data.no === 'null' ? '' : statusText(data.data.homingStatus, GUNSTATUS) }}
                         </div>
+                        <div v-if="data.prop === 'takeOutTime'">{{ data.data.no === 'null' || !data.data.takeOutTime ? '' : data.data.takeOutTime }}</div>
+                        <div v-if="data.prop === 'homingTime'">{{ data.data.no === 'null' || !data.data.homingTime ? '' : data.data.homingTime }}</div>
                     </template>
                 </Table>
                 <div class="paging">
@@ -72,7 +74,6 @@
                         @pagination="handleGunPipetteList"/>
                 </div>
             </div>
-
             <div class="detail-padding-nocolor">
                 <el-descriptions :title="$t('hardware.users')">
                     <template v-if="$store.state.level && !isDemo" slot="extra">
@@ -95,20 +96,18 @@
                         @pagination="handleEquipmentUsers"/>
                 </div>
             </div>
-
             <div class="detail-padding">
                 <el-descriptions :title="$t('hardware.historyAlarmLog')"></el-descriptions>
                 <HistoryAlarmRecord :id.sync="id" />
             </div>
         </div>
     
-        <return-command ref="ReturnCommand"/>
-        <UpdateDepartment ref="UpdateDepartment" @handle="handleDetail"/>
-        <SetPrincipal ref="SetPrincipal" @handle="handleEquipmentUsers"/>
-        <VoiceReminderSet ref="voiceReminderSet" :type="1" :selectArr="[powerOutage]" @handle="handleDetail" />
+        <return-command v-if="!isDemo" ref="ReturnCommand"/>
+        <UpdateDepartment v-if="!isDemo" ref="UpdateDepartment" @handle="handleDetail"/>
+        <SetPrincipal v-if="!isDemo" ref="SetPrincipal" @handle="handleEquipmentUsers"/>
+        <VoiceReminderSet v-if="!isDemo" ref="voiceReminderSet" :type="1" :selectArr="[powerOutage]" @handle="handleDetail" />
     </el-drawer>
 </template>
-
 <script>
     import DrawerNav from "@c/DrawerNav/index";
     import DetailStatusGarden from "@c/DetailStatusGarden";
@@ -128,9 +127,7 @@
     import {getEquipmentUserList} from "@/api/user";
     import { statusText, statusColor } from "@/utils/methods";
     import { GUNRACKSTATUS,GUNSTATUS,items } from "@/utils/constant"
-
     const isDemo = process.env.VUE_APP_DEMO === "true";
-
     export default {
         name: "GunRackDrawer",
         components: {
@@ -168,6 +165,8 @@
                 GUNRACKSTATUS,
                 GUNSTATUS,
                 loading: false,
+                demoBusy: false,
+                takeToken: 0,
                 powerOutage: {},
                 closeAlarmFlag: false,
                 pipetteGunLoading: true,
@@ -198,26 +197,26 @@
                         label: _this.$t('hardware.status'),
                         prop: "homingStatus",
                         isSlot: true,
-                        // judgeField: 'no'
-                        // field: "homingStatus",
-                        // class:{
-                        //     2: {
-                        //         name: "abnormal",
-                        //         text: "超时未归还"
-                        //     },
-                        //     1: {
-                        //         name: "normal",
-                        //         text: "使用中"
-                        //     },
-                        //     0: {
-                        //         name: "blue",
-                        //         text: "闲置"
-                        //     },
-                        // }
                     },
                     {
                         label: _this.$t('labDevice.gunRackName'),
                         prop: "gunRackName",
+                    },
+                    {
+                        label: '位置',
+                        prop: "position",
+                    },
+                    {
+                        label: '取出时间',
+                        prop: "takeOutTime",
+                        isSlot: true,
+                        width: "164"
+                    },
+                    {
+                        label: '归还时间',
+                        prop: "homingTime",
+                        isSlot: true,
+                        width: "164"
                     },
                 ],
                 // 负责人
@@ -234,8 +233,15 @@
             isDrawer(val){
                 if(val){
                     this.handleInit()
+                } else {
+                    this.takeToken += 1;
+                    this.demoBusy = false;
                 }
             },
+        },
+        beforeDestroy() {
+            this.takeToken += 1;
+            this.demoBusy = false;
         },
         methods: {
             handleInit() {
@@ -244,17 +250,28 @@
             handleDetail() {
                 this.loading = true;
                 getDeviceDetail({deviceId: this.strId}).then(res => {
-                    this.loading = false;
-                    if (res.code) {
+                    if (res.code === 1 && res.items) {
                         this.powerOutage = res.items;
                         this.closeAlarmFlag = !this.powerOutage.closeSoundLightAlarm;
                         this.handleGunPipetteList();
                         this.handleEquipmentUsers()
+                    } else {
+                        this.powerOutage = {};
+                        this.list = [];
+                        this.total = 0;
+                        this.pipetteGunLoading = false;
+                        this.$message.error(res.message || '枪架详情加载失败');
                     }
+                }).catch(() => {
+                    this.$message.error('枪架详情加载失败');
+                }).finally(() => {
+                    this.loading = false;
                 })
             },
             // 关闭详情页
             handleClose() {
+                this.takeToken += 1;
+                this.demoBusy = false;
                 this.$emit("update:isDrawer", false);
             },
             // 声光报警
@@ -298,31 +315,55 @@
                 this.pipetteGunLoading = true;
                 this.pipetteGunItems.gunRackId = this.powerOutage.id
                 postGunPipetteBindingList(this.pipetteGunItems).then(res => {
-                    this.pipetteGunLoading = false;
                     if(res.code == 1){
                         this.list = res.items.list;
                         this.total = res.items.total
+                    } else {
+                        this.list = [];
+                        this.total = 0;
+                        this.$message.error(res.message || '枪位列表加载失败');
                     }
+                }).catch(() => {
+                    this.list = [];
+                    this.total = 0;
+                }).finally(() => {
+                    this.pipetteGunLoading = false;
                 })
             },
             handleDemoTake() {
+                if (this.demoBusy) return;
+                this.demoBusy = true;
+                const token = ++this.takeToken;
                 postGunTakePipette({gunRackId: this.powerOutage.id, userId: 900001}).then(res => {
-                    if (res.code !== 1) return this.$message.error(res.message);
-                    getGunTake({gunRackId: this.powerOutage.id}).then(poll => {
-                        if (poll.code === 1) {
+                    if (token !== this.takeToken) return;
+                    if (res.code !== 1) {
+                        this.$message.error(res.message);
+                        return;
+                    }
+                    return getGunTake({gunRackId: this.powerOutage.id}).then(poll => {
+                        if (token !== this.takeToken) return;
+                        if (poll.code === 1 && poll.items && poll.items.status === 1) {
                             this.$message.success('模拟取枪已确认（未连接硬件）');
                             this.handleGunPipetteList();
                             this.$emit('handle');
                         } else {
-                            this.$message.error(poll.message);
+                            this.$message.error(poll.message || '模拟取枪尚未确认，请重试');
                         }
                     });
+                }).catch(() => {
+                    if (token === this.takeToken) this.$message.error('模拟取枪失败');
+                }).finally(() => {
+                    if (token === this.takeToken) this.demoBusy = false;
                 });
             },
             handleDemoReturn() {
+                if (this.demoBusy) return;
                 const used = (this.list || []).find(item => item.pipetteGunId && item.no !== 'null' && Number(item.homingStatus) !== 1);
                 if (!used) return this.$message.info('当前枪架没有使用中的移液枪');
+                this.demoBusy = true;
+                const token = ++this.takeToken;
                 postGunReturnPipette({gunId: used.pipetteGunId}).then(res => {
+                    if (token !== this.takeToken) return;
                     if (res.code === 1) {
                         this.$message.success('模拟归还成功（未连接硬件）');
                         this.handleGunPipetteList();
@@ -330,6 +371,10 @@
                     } else {
                         this.$message.error(res.message);
                     }
+                }).catch(() => {
+                    if (token === this.takeToken) this.$message.error('模拟归还失败');
+                }).finally(() => {
+                    if (token === this.takeToken) this.demoBusy = false;
                 });
             },
             // 负责人
@@ -341,9 +386,13 @@
                     equipmentId: this.powerOutage.id,
                     equipmentType: "PIPETTE_GUN",
                 }).then((res) => {
+                    this.equipmentUsers = (res.items && res.items.list) || [];
+                    this.principalTotal = (res.items && res.items.total) || 0;
+                }).catch(() => {
+                    this.equipmentUsers = [];
+                    this.principalTotal = 0;
+                }).finally(() => {
                     this.principalLoading = false;
-                    this.equipmentUsers = res.items.list;
-                    this.principalTotal = res.items.total;
                 });
             },
         },

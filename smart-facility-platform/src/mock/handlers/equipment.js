@@ -5,6 +5,7 @@ import {
   getAlertorBeepTime,
   getDeviceWifiEcho,
   getEquipmentDashboardOverview,
+  listDevices,
   getEquipmentDetail,
   getEquipmentDeviceMonitorFlag,
   getEquipmentSingleMonitorFlag,
@@ -39,7 +40,14 @@ export default [
     return success(listBindableCatalog(params.kind));
   }),
   protectedRoute('POST', '/equipment/sort/list', ({body}) => success(listEquipmentSort(body || {}))),
-  protectedRoute('GET', '/equipment/dashboard', () => success(getEquipmentDashboardOverview())),
+  protectedRoute('GET', '/equipment/dashboard', ({params}) => success(getEquipmentDashboardOverview(params || {}))),
+  protectedRoute('POST', '/device/list', ({body}) => success(listDevices(body || {}))),
+  protectedRoute('POST', '/device/remove/batch', () => failure('本阶段演示未开放枪架批量删除。')),
+  protectedRoute('GET', '/device/output/equipment', () => failure('本阶段演示未开放枪架导出。')),
+  protectedRoute('POST', '/device/room', () => failure('本阶段演示未开放批量修改房间。')),
+  protectedRoute('POST', '/device/add', () => failure('本阶段演示未开放新增枪架。')),
+  protectedRoute('POST', '/device/openGun/remind', () => failure('本阶段演示未开放语音提醒下发（需真实枪架）。')),
+  protectedRoute('POST', '/device/import/batch/equipment', () => failure('本阶段演示未开放枪架导入。')),
 
   protectedRoute('GET', '/device/detail', ({params}) => {
     const detail = getEquipmentDetail(params && params.deviceId);

@@ -208,12 +208,15 @@ export function listGunPipetteBindings(body = {}) {
     if (gun) {
       slots.push({
         id: rackId * 10 + detent, detent, name: gun.name, no: gun.no, homingStatus: gun.homingStatus,
-        gunRackId: rackId, gunRackName: rack.name, pipetteGunId: gun.pipetteGunId
+        gunRackId: rackId, gunRackName: rack.name, pipetteGunId: gun.pipetteGunId,
+        takeOutTime: gun.takeOutTime || '', homingTime: gun.homingTime || '',
+        position: gun.preciseLocation || `${detent}号位`, endUser: gun.endUser || ''
       });
     } else {
       slots.push({
         id: rackId * 10 + detent, detent, name: '', no: 'null', homingStatus: 0,
-        gunRackId: rackId, gunRackName: rack.name, pipetteGunId: 0
+        gunRackId: rackId, gunRackName: rack.name, pipetteGunId: 0,
+        takeOutTime: '', homingTime: '', position: '', endUser: ''
       });
     }
   }

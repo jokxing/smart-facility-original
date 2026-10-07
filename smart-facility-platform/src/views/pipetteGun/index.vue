@@ -16,17 +16,26 @@
             }
         },
         mounted() {
-            if(this.$route.name === 'PipetteGun'){
-                this.activeName = "pipetteGun";
-            }else{
-                this.activeName = "pipetteGunRack"
+            this.syncTabFromRoute();
+        },
+        watch: {
+            '$route.path'() {
+                this.syncTabFromRoute();
             }
-            this.$router.push('/lhd/pipetteGun/' + this.activeName)
         },
         methods: {
+            syncTabFromRoute() {
+                const path = this.$route.path || '';
+                const name = path.indexOf('pipetteGunRack') !== -1 ? 'pipetteGunRack' : 'pipetteGun';
+                if (this.activeName !== name) {
+                    this.activeName = name;
+                }
+            },
             handleClick() {
-                console.log('/ld/pipetteGun/' + this.activeName)
-                this.$router.push('/lhd/pipetteGun/' + this.activeName)
+                const target = '/lhd/pipetteGun/' + this.activeName;
+                if (this.$route.path !== target) {
+                    this.$router.push(target);
+                }
             }
         },
     }

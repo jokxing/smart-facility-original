@@ -48,7 +48,7 @@ export default {
         unwatchlabdevice: "IT device",
         administration: "Administrative Equipment",
         pipetteGun: "Pipette gun",
-        pipetteGunRack: "Pipette Organizer",
+        pipetteGunRack: "Gun Rack",
         orderManager: "Appointment",
         assetStatistics: "Asset Statistics",
         assetProcess: "Asset Process",

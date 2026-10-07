@@ -18,7 +18,7 @@
                         <el-button slot="append" icon="icon-search1" class="el-button-host" @click="handleQuery($STATUS.ALL)"></el-button>
                     </el-input>
                 </div>
-                <div>
+                <div v-if="!isDemo">
                     <el-button @click="multiSelect = !multiSelect">
                         {{ multiSelect ? $t('common.cancelMultiSelect') : $t('common.multiSelect') }}
                     </el-button>
@@ -27,7 +27,7 @@
                     <el-button @click="handleExport">{{ $t('common.export') }}</el-button>
                 </div>
             </div>
-            <div v-if="multipleSelection.length || multiSelect" class="choose-bar">
+            <div v-if="!isDemo && (multipleSelection.length || multiSelect)" class="choose-bar">
                 <template>
                     <div class="checked">
                         {{ $t('common.multipleSelection') }}<span>{{ multipleSelection.length }}</span>{{ $t('common.item') }}
@@ -67,20 +67,20 @@
             </div>
         </div>
 
-        <UpdateGunRack ref="UpdateGunRack" @handleInit="handleInit"></UpdateGunRack>
-        <UpdateDepartment ref="UpdateDepartment" :departments="$store.state.departments" @handle="getList"/>
-        <BatchSetPerson ref="BatchSetPerson" @handle="getList" />
-        <BatchUpdateRoomModal ref="BatchUpdateRoomModal" @handle="handleBatchUpdateRoom" />
-        <VoiceReminderSet ref="voiceReminderSet" :selectArr="selectArr" />
-        <SetPrincipal ref="SetPrincipal" @handle="getList"/>
+        <UpdateGunRack v-if="!isDemo" ref="UpdateGunRack" @handleInit="handleInit"></UpdateGunRack>
+        <UpdateDepartment v-if="!isDemo" ref="UpdateDepartment" :departments="$store.state.departments" @handle="getList"/>
+        <BatchSetPerson v-if="!isDemo" ref="BatchSetPerson" @handle="getList" />
+        <BatchUpdateRoomModal v-if="!isDemo" ref="BatchUpdateRoomModal" @handle="handleBatchUpdateRoom" />
+        <VoiceReminderSet v-if="!isDemo" ref="voiceReminderSet" :selectArr="selectArr" />
+        <SetPrincipal v-if="!isDemo" ref="SetPrincipal" @handle="getList"/>
 
         <ImportFile
-            v-if="importFileVisible"
+            v-if="!isDemo && importFileVisible"
             :title="importTitle"
             @handleUpdateInit="handleUpdateInit"
             @hiddenModalVisible="hiddenModalVisible"></ImportFile>
 
-        <Drawer :is-drawer.sync="isDrawer" :strId="strId" :id="id" @handle="getList"/>
+        <Drawer :is-drawer.sync="isDrawer" :strId="strId" :id="id" @handle="handleInit"/>
     </div>
 </template>
 
@@ -101,10 +101,79 @@
     import { getDeviceList, getEquipmentDashboard, removeBatchDevice, outputEquipmentDevice, postDeviceRoom } from '@/api/device'
     import mixin from "@/utils/mixin";
     import moment from "moment";
+
+    const isDemo = process.env.VUE_APP_DEMO === "true";
+
     export default {
         data() {
             const _this = this;
+            const handleColumn = isDemo ? null : {
+                label: _this.$t('common.handle'),
+                isButton: true,
+                width: "150",
+                clickList: [
+                    {
+                        text: _this.$t('common.edit'),
+                        click: "handleEdit",
+                    },
+                    {
+                        text: _this.$t('common.principal'),
+                        click: "handleUser",
+                    },
+                    {
+                        text: _this.$t('common.delete'),
+                        click: "handleDelete",
+                        class: 'abnormal'
+                    }
+                ]
+            };
+            const cols = [
+                ...(isDemo ? [] : [{type: "selection", width: "55"}]),
+                {
+                    label: "#",
+                    type: "index",
+                    width: "60"
+                },
+                {
+                    label: _this.$t('common.name'),
+                    prop: "name",
+                    isButton: true,
+                    click: "handleShowDrawer"
+                },
+                {
+                    label:_this.$t('common.no'),
+                    prop: "no",
+                    width: "170",
+                    isButton: true,
+                    click: "handleShowDrawer"
+                },
+                {
+                    label: _this.$t('common.owningDepartment'),
+                    prop: "departmentName",
+                },
+                {
+                    label: _this.$t('common.owningRoom'),
+                    prop: "roomName",
+                },
+                {
+                    label: _this.$t('common.principal'),
+                    prop: "userName",
+                },
+                {
+                    label: _this.$t('hardware.lineStatus'),
+                    prop: "status",
+                    isSlot: true
+                },
+                {
+                    label: _this.$t('common.creatDate'),
+                    prop: "createDate",
+                    width: "164",
+                    isSlot: true
+                }
+            ];
+            if (handleColumn) cols.push(handleColumn);
             return {
+                isDemo,
                 onLineStatus,
                 statusColor,
                 GUNRACKSTATUS,
@@ -125,73 +194,7 @@
                     equipmentType: 13
                 },
                 total: 0,
-                tableData: [
-                    {
-                        type: "selection",
-                        width: "55"
-                    },
-                    {
-                        label: "#",
-                        type: "index",
-                        width: "60"
-                    },
-                    {
-                        label: _this.$t('common.name'),
-                        prop: "name",
-                        isButton: true,
-                        click: "handleShowDrawer"
-                    },
-                    {
-                        label:_this.$t('common.no'),
-                        prop: "no",
-                        width: "170",
-                        isButton: true,
-                        click: "handleShowDrawer"
-                    },
-                    {
-                        label: _this.$t('common.owningDepartment'),
-                        prop: "departmentName",
-                    },
-                    {
-                        label: _this.$t('common.owningRoom'),
-                        prop: "roomName",
-                    },
-                    {
-                        label: _this.$t('common.principal'),
-                        prop: "userName",
-                    },
-                    {
-                        label: _this.$t('hardware.lineStatus'),
-                        prop: "status",
-                        isSlot: true
-                    },
-                    {
-                        label: _this.$t('common.creatDate'),
-                        prop: "createDate",
-                        width: "164",
-                        isSlot: true
-                    },
-                    {
-                        label: _this.$t('common.handle'),
-                        isButton: true,
-                        width: "150",
-                        clickList: [
-                            {
-                                text: _this.$t('common.edit'),
-                                click: "handleEdit",
-                            },
-                            {
-                                text: _this.$t('common.principal'),
-                                click: "handleUser",
-                            },
-                            {
-                                text: _this.$t('common.delete'),
-                                click: "handleDelete",
-                                class: 'abnormal'
-                            }
-                        ]
-                    },
-                ],
+                tableData: cols,
                 multiSelect: false,
                 multipleSelection: [],
                 selectArr: [],
@@ -207,7 +210,7 @@
         mounted() {
             const pageSize = localStorage.getItem("pageSize");
             if (pageSize) {
-                this.pageSize = pageSize * 1;
+                this.items.pageSize = pageSize * 1;
             }
             this.handleInit()
         },
@@ -225,22 +228,38 @@
                 }).then(res => {
                     if(res.code == 1){
                         const {normalCount, offLineCount, total,noActivatedCount} = res.items;
-                        this.totalObject.total.num = total;
-                        this.totalObject.overview[0].num = normalCount;
-                        this.totalObject.overview[1].num = offLineCount;
-                        this.totalObject.overview[2].num = noActivatedCount;
+                        this.totalObject.total.num = total || 0;
+                        this.totalObject.overview[0].num = normalCount || 0;
+                        this.totalObject.overview[1].num = offLineCount || 0;
+                        this.totalObject.overview[2].num = noActivatedCount || 0;
                     }
+                }).catch(() => {
+                    this.totalObject.total.num = 0;
+                    this.totalObject.overview[0].num = 0;
+                    this.totalObject.overview[1].num = 0;
+                    this.totalObject.overview[2].num = 0;
                 })
             },
             getList() {
+                const seq = (this._listSeq || 0) + 1;
+                this._listSeq = seq;
                 this.loading = true;
-                getDeviceList(this.items).then(res => {
-                    if (!res.code) {
+                getDeviceList({...this.items}).then(res => {
+                    if (seq !== this._listSeq) return;
+                    if (res.code !== 1 || !res.items || !Array.isArray(res.items.list)) {
+                        this.pipetteGun = [];
+                        this.total = 0;
                         return this.$message.error(res.message);
                     }
                     this.pipetteGun = res.items.list;
                     this.total = res.items.total;
-                    this.loading = false;
+                }).catch(() => {
+                    if (seq !== this._listSeq) return;
+                    this.pipetteGun = [];
+                    this.total = 0;
+                    this.$message.error('枪架列表加载失败');
+                }).finally(() => {
+                    if (seq === this._listSeq) this.loading = false;
                 })
             },
             getRowKey(row) {
@@ -258,6 +277,9 @@
             },
             // 导出
             handleExport() {
+                if (isDemo) {
+                    return this.$message.info('本阶段演示未开放枪架导出。');
+                }
                 new Promise(resolve => {
                     this.$message.warning(this.$t('common.exportMessage'));
                     setTimeout(() => {
@@ -280,6 +302,7 @@
             // 查询
             handleQuery (item,type) {
                 this.items.status = item;
+                this.items.pageNum = 1;
                 if(this.keyword != ""){
                     this.items['keyword'] = this.keyword
                 }else{
@@ -307,14 +330,23 @@
             },
             // 编辑
             handleEdit(row){
+                if (isDemo) {
+                    return this.$message.info('本阶段演示未开放枪架编辑。');
+                }
                 this.$refs.UpdateGunRack.open(2,row)
             },
             // 负责人
             handleUser(row){
+                if (isDemo) {
+                    return this.$message.info('本阶段演示未开放修改负责人。');
+                }
                 this.$refs.SetPrincipal.open(0, row.id, 'PIPETTE_GUN')
             },
             // 删除
             handleDelete(row) {
+                if (isDemo) {
+                    return this.$message.info('本阶段演示未开放枪架删除。');
+                }
                 this.$confirm(this.$t('common.deletePrincipalMessage1') + row.name + ">？", this.$t('labDevice.gunBackDelete'), {
                     confirmButtonText: this.$t('common.confirm'),
                     cancelButtonText: this.$t('common.cancel'),
@@ -353,6 +385,8 @@
                         this.$refs.BatchUpdateRoomModal.handleModalClose();
                         this.$message.success(this.$t('common.editSuccess'));
                         this.getList()
+                    } else {
+                        this.$message.error(res.message || '修改失败');
                     }
                 })
             },
@@ -380,6 +414,8 @@
                     } else {
                         this.$message.error(res.message);
                     }
+                }).finally(() => {
+                    this.loading = false;
                 })
             },
         },

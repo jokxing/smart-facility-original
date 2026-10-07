@@ -259,11 +259,72 @@ export function listEquipmentSort(body = {}) {
   };
 }
 
-/** Dashboard disc: same equipment universe; alarm = status -1 only (not offline). */
-export function getEquipmentDashboardOverview() {
-  const total = DEMO_EQUIPMENTS.length;
-  const alarmCount = DEMO_EQUIPMENTS.filter(item => Number(item.status) === -1).length;
-  return {total, alarmCount};
+/**
+ * Dashboard disc. No equipmentType → full universe {total, alarmCount} (alarm = status -1).
+ * With equipmentType (incl. 0) → same filter as device list + gun-rack style counts.
+ */
+export function getEquipmentDashboardOverview(params = {}) {
+  const typeRaw = params && params.equipmentType;
+  const hasType = typeRaw != null && typeRaw !== '' && typeRaw !== 'null';
+  let list = DEMO_EQUIPMENTS.map(applyEquipmentMeta);
+  if (hasType) {
+    list = list.filter(item => Number(item.equipmentTypeCode) === Number(typeRaw));
+  }
+  const total = list.length;
+  const alarmCount = list.filter(item => Number(item.status) === -1).length;
+  if (!hasType) {
+    return {total, alarmCount};
+  }
+  return {
+    total,
+    alarmCount,
+    normalCount: list.filter(item => Number(item.status) === 1).length,
+    offLineCount: list.filter(item => Number(item.status) === -100).length,
+    noActivatedCount: list.filter(item => Number(item.status) === 0).length
+  };
+}
+
+/**
+ * POST /device/list — gun rack page (equipmentType 13) and other typed device lists.
+ * Query status 0 / empty = all; -99 maps to entity status 0 (not activated).
+ */
+export function listDevices(body = {}) {
+  const pageValue = Number(body.pageNum);
+  const sizeValue = Number(body.pageSize);
+  const pageNum = Number.isFinite(pageValue) ? Math.max(1, Math.floor(pageValue)) : 1;
+  const pageSize = Number.isFinite(sizeValue) && sizeValue > 0 ? Math.min(50, Math.floor(sizeValue) || 1) : 10;
+  const statusRaw = body.status;
+  const filterAll = statusRaw === '' || statusRaw == null || Number(statusRaw) === 0;
+  const filterStatus = filterAll
+    ? null
+    : (Number(statusRaw) === -99 ? 0 : Number(statusRaw));
+
+  let list = DEMO_EQUIPMENTS.map(applyEquipmentMeta)
+    .filter(item => matchEquipmentType(item, body.equipmentType))
+    .filter(item => hasKeyword(item, body.keyword))
+    .filter(item => matchDepartment(item, body.departmentId));
+
+  if (filterStatus != null && !Number.isNaN(filterStatus)) {
+    list = list.filter(item => Number(item.status) === filterStatus);
+  }
+
+  list = list.map(item => {
+    const row = clone(item);
+    if (Number(row.equipmentTypeCode) === 13) {
+      row.roomName = row.departmentId === DEPT_RD ? '演示房间 B' : '演示房间 A';
+      row.userName = '演示用户';
+      row.companyName = '演示科技有限公司';
+    }
+    return row;
+  });
+
+  const start = (pageNum - 1) * pageSize;
+  return {
+    list: list.slice(start, start + pageSize),
+    total: list.length,
+    pageNum,
+    pageSize
+  };
 }
 
 /** 1B+: DeviceDrawerNew / AlerterDrawer / PowerDrawerNew / SignalSourceDrawer */
@@ -449,6 +510,7 @@ export function getEquipmentDetail(deviceId) {
     detail.roomName = entity.departmentId === DEPT_RD ? '演示房间 B' : '演示房间 A';
     detail.remark = '演示移液枪架（只读）';
     detail.companyName = '演示科技有限公司';
+    detail.userName = '演示用户';
     detail.closeSoundLightAlarm = 0;
   }
   if (code === 16) {

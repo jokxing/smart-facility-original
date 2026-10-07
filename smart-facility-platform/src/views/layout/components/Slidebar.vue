@@ -73,8 +73,12 @@ export default {
             if (path.indexOf("/apply/approval/process") !== -1) {
                 str = "/apply/approval/process";
             }
-            if (path.indexOf("/lhd/pipetteGun") !== -1) {
-                str = "/lhd/pipetteGun";
+            if (path === "/lhd/pipetteGun" || path.startsWith("/lhd/pipetteGun/")) {
+                // 两个 Tab 共用侧栏入口；演示与原菜单的入口路径可能不同。
+                const entries = (this.subMenu || []).reduce((all, item) => all.concat(item, item.subMenu || []), []);
+                const entry = entries.find(item => item.path === "/lhd/pipetteGun")
+                    || entries.find(item => item.path === "/lhd/pipetteGun/pipetteGun");
+                str = entry ? entry.path : "/lhd/pipetteGun";
             }
             if (path.indexOf("/apply/assetCount") !== -1) {
                 str = "/apply/assetCount";
