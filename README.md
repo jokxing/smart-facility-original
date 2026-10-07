@@ -44,6 +44,10 @@
 
 以下为本地验证时保存的截图，可先了解界面；具体交互以当前源码运行结果为准。
 
+**Three.js 楼宇可视化**
+
+![Three.js 楼宇可视化](docs/evidence/brand-ui/04-building.png)
+
 **楼层房间布局配置**
 
 ![楼层房间布局配置](docs/evidence/map-settings-floor/02-floor-designer.png)
@@ -51,6 +55,19 @@
 **设备监控大屏**
 
 ![设备监控大屏](docs/evidence/datav-review/01-device-screen.png)
+
+<details>
+<summary>查看房间设备状态与运单详情</summary>
+
+**房间设备状态：正常与报警设备共存**
+
+![房间设备状态](docs/evidence/map-m6-status/01-room-b-mixed.png)
+
+**运单详情：进度、温湿度与模拟轨迹**
+
+![运单详情](docs/evidence/transport-review/saas-waybill-detail.png)
+
+</details>
 
 ## 本地运行
 

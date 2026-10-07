@@ -39,3 +39,12 @@ Desktop.ini
 
 # Legacy backup utilities are not part of the demo source
 /smart-facility-platform/public/backupSuite/
+
+# Keep curated screenshots; browser and miniapp checks may regenerate other evidence.
+/docs/evidence/**
+!/docs/evidence/**/
+!/docs/evidence/brand-ui/04-building.png
+!/docs/evidence/map-settings-floor/02-floor-designer.png
+!/docs/evidence/datav-review/01-device-screen.png
+!/docs/evidence/map-m6-status/01-room-b-mixed.png
+!/docs/evidence/transport-review/saas-waybill-detail.png
