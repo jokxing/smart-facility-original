@@ -2,6 +2,8 @@
 
 这是智慧设施平台的 uni-app 小程序副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts 和微信能力；当前为 HBuilderX 工程，没有根目录 package.json，不适用直接执行 npm run dev。
 
+原小程序由本人从 0 搭建，并开发首页、预约、数据图表、移液枪等部分模块，其他功能按团队协作说明。当前副本使用 AI 辅助脱敏、Mock 化及修复，原开发职责与展示整理分别介绍。
+
 当前默认开启**本地演示模式**：请求不访问旧服务，登录账号 `demo` / `Demo1234`。展示名：智慧设施助手 / Smart Facility Assistant。源码目录为 `miniprogram`。
 
 **已开放**：本地登录、首页统计、设备列表/详情监测、房间列表/详情、设备预约、告警处理、我的负责范围、消息已读/清空、告警待办、**移液枪列表/详情/枪架查看与模拟取还**、**运单列表/统计/详情/发运/送达**。
@@ -16,6 +18,8 @@
 
 - [项目介绍、个人贡献与启动步骤](../README.md)
 - [小程序模块、存储与验收范围](../docs/miniapp-business.md)
+- [小程序面试路线与代码入口](../docs/miniapp-business.md#面试阅读与职责边界)
+- [检查脚本用途与运行条件](../scripts/README.md)
 - [预约与告警规则](../docs/reservation-and-alarm.md)
 - [移液枪与枪架](../docs/pipette-gun.md)
 - [运单与状态流转](../docs/transport.md)
