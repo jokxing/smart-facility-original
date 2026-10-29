@@ -1,0 +1,14 @@
+{
+  "name": "smart-facility-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vue 2 uni-app cross-platform demo, built with the installed HBuilderX compiler",
+  "scripts": {
+    "build:h5": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/build-miniapp.ps1 -Platform h5",
+    "build:mp-weixin": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/build-miniapp.ps1 -Platform mp-weixin",
+    "build:app": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/build-miniapp.ps1 -Platform app-plus",
+    "preview:h5": "node ../scripts/serve-miniapp-h5.cjs",
+    "test:h5": "node ../scripts/check-miniapp-h5.cjs"
+  },
+  "devDependencies": { "playwright": "1.62.1" }
+}

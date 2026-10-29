@@ -243,7 +243,7 @@
 				deviceTypeChangeIds: []
 			}
 		},
-		onReady() {
+		mounted() {
 			uni.getSystemInfo({
 				success: (res) => {
 					this.windowHeight = res.windowHeight;

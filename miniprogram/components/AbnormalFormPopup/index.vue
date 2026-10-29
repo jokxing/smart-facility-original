@@ -79,10 +79,6 @@
 				type: null
 			}
 		},
-		onReady() {
-			// ios的rules生效
-			this.$refs.form.setRules(this.rules)
-		},
 		methods: {
 			alarmErrorList() {
 				if(this.type){
@@ -102,7 +98,7 @@
 			},
 			open(item, type) {
 				//重置
-				this.formData = this.$options.data().formData; 
+				this.formData = this.$options.data.call(this).formData;
 				
 				this.data = item;
 				this.type = type;

@@ -61,7 +61,7 @@
 				time: ""
 			}
 		},
-		onReady() {
+		mounted() {
 			const myDate = new Date().getTime();
 			var dateArr = [];
 			var a = new Array(this.$t('other.sunday'), this.$t('other.monday'), this.$t('other.tuesday'), this.$t('other.wednesday'), this.$t('other.thursday'), this.$t('other.friday'), this.$t('other.saturday'));  

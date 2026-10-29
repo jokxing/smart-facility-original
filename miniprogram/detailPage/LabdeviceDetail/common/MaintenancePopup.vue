@@ -76,10 +76,6 @@
 				}
 			}
 		},
-		onReady() {
-			// ios的rules生效
-			this.$refs.form.setRules(this.rules)
-		},
 		methods: {
 			showMaintenancePopup() {
 				this.$refs.maintenancePopup.open('bottom')

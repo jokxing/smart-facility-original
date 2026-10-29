@@ -71,7 +71,7 @@
 				isAbnormalFormPopup: false
 			}
 		},
-		onReady() {
+		mounted() {
 			this.init()
 		},
 		methods: {
@@ -233,6 +233,13 @@
 		margin: 16rpx 20rpx 0;
 		.abnormalRecord-card{
 			margin-bottom: 20rpx;
+			/* #ifdef H5 */
+			// 覆盖 uni-card 的内联 margin: 0，统一报警列表卡片间距。
+			margin-bottom: 24rpx !important;
+			&:last-child{
+				margin-bottom: 0 !important;
+			}
+			/* #endif */
 			display: block;
 			.uni-card .uni-card__content{
 				padding: 10px 0!important;

@@ -44,7 +44,7 @@
 			</uni-card>
 		</view>
 		
-		<uni-load-more :status="moreStatus" v-show="isList"></uni-load-more>
+		<uni-load-more :status="moreStatus" v-if="isList && list.length > 0"></uni-load-more>
 		
 		<uni-popup ref="alertDialog" type="dialog">
 			<uni-popup-dialog :type="msgType" :cancelText="$t('common.cancel')" :confirmText="$t('common.confirm')" :title="$t('other.hint')" :content="$t('my.cancelOrderHint')" @confirm="handleCancelReservation"

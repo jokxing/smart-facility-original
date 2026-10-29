@@ -8,7 +8,7 @@
 					:class="item.activateFlag === 1 ? 'abnormal' : 'normal'" >
 					<image 
 						class="icon-image" 
-						:src="'../../../static/images/' + (item.activateFlag === 1 ? 'icon-abnormal' : 'icon-normal') + '.png'">
+						:src="'/static/images/' + (item.activateFlag === 1 ? 'icon-abnormal' : 'icon-normal') + '.png'">
 					</image>
 					<view class="text">
 						<text class="text-time text-top">{{ item.sensorAlias }}</text>

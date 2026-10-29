@@ -1,7 +1,7 @@
 <template>
 	<page-meta :page-style="'overflow:'+(popupShow?'hidden':'visible')"></page-meta>
 	<view>
-		<navbar ref="headers" class="header" :title="isGun ? $t('labDevice.labDeviceGun') : $t('tabBar.labDevice')" :color="'#333'" :background="'#fff'">
+		<navbar ref="headers" class="header device-header" :title="isGun ? $t('labDevice.labDeviceGun') : $t('tabBar.labDevice')" :color="'#333'" :background="'#fff'">
 			<view class="nav-left-btn" @click="handleToggleModule">
 				<i class="iconfont" :class="isGun ? 'icon-shiyanshi' : 'icon-pipette'"></i>
 				{{ isGun ? $t('labDevice.equipment') : $t('labDevice.gun') }}
@@ -43,17 +43,13 @@
 				success: function(res) { 
 					let info = uni.createSelectorQuery().select(".header");
 					info.boundingClientRect(function(data) { 
-						if(data.height > 80){
-							_this.height = "182rpx"
-						}else{
-							_this.height = "132rpx"
-						}
+						_this.height = (data ? data.height : 44) + 'px';
 					}).exec()
 				}
 			});
 		},
 		onShow() {
-			let curRoute = (this.$mp && this.$mp.page && this.$mp.page.route) || '';
+			let curRoute = 'pages/tabBar/Labdevice/index';
 			this.tabBarIndex = curRoute;
 			if (storage.getDemo('openGunList')) {
 				this.isGun = true;
@@ -65,6 +61,7 @@
 				if (this.isGun && guns && guns._booted) {
 					guns.handlePullDownRefresh();
 				}
+				if (!this.isGun && this.$refs.labdevice) this.$refs.labdevice.handlePullDownRefresh();
 			});
 			if(storage.getDemo('labStatus')){
 				this.noHomeTo = false;

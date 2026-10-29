@@ -116,7 +116,7 @@
 			detailsPopup,
 			BindHardware
 		},
-		onReady() {
+		mounted() {
 			this.init()
 		},
 		onShow() {

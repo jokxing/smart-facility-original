@@ -32,7 +32,7 @@
 				</view>
 				<uni-forms class="formW" ref="form" labelWidth="120px">
 					<uni-forms-item :label="$t('home.isAddressAdjust')" required>
-						<picker class="popup-picker w95" @change="removeChange" :value="form.status" :range-key="index"
+					<picker class="popup-picker w95" @change="removeChange" :value="form.status"
 							:range="range">
 							<view class="uni-input">{{range[form.status]}}</view>
 						</picker>
@@ -137,6 +137,7 @@
 					roomName: "",
 					msgIdList: []
 				},
+				formData: { remark: '' },
 				range: [_this.$t('other.no'), _this.$t('other.yes')],
 				rooms: [],
 				roomIndex: 0,
@@ -423,6 +424,16 @@
 				color: $primary;
 				margin: 0;
 				border-radius: 30rpx;
+				/* #ifdef H5 */
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				line-height: normal;
+				::v-deep .uni-icons{
+					margin-right: 6rpx;
+					line-height: 1;
+				}
+				/* #endif */
 				&:first-child{
 					margin-right: 20rpx;
 				}

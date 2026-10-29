@@ -46,7 +46,7 @@ export default {
 		runCount: "Running",
 		standbyCount: "Standby",
 		closeCount: "Off",
-		demoEmptyHint: "Messages and to-dos come from local demo alarms. Scan and waybill writes are not open yet.",
+		demoEmptyHint: "Local demo data; changes stay on this client. No real notifications, scanning, Bluetooth or printing.",
 		scanUnsupported: "Scan is not supported in this client",
 		handleExport: "Event Report",
 		disconnect: "lost connection to all gateways",

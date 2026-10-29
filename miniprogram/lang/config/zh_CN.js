@@ -45,7 +45,7 @@ export default {
 		runCount: "运行",
 		standbyCount: "待机",
 		closeCount: "关机",
-		demoEmptyHint: "消息与待办来自本地演示告警，不发送真实通知。扫码、运单写操作尚未开放。",
+		demoEmptyHint: "本地演示数据，修改仅保存在当前端；消息不发送真实通知。扫码、蓝牙与真实打印未接入。",
 		scanUnsupported: "当前端不支持扫码",
 		handleExport: "事件报告",
 		disconnect: "与所有网关失去连接",

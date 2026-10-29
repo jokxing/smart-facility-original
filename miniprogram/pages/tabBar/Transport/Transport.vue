@@ -97,7 +97,7 @@
 		<depar-hint @show="change" ref='deparHint' @change="setState"></depar-hint>
 		<uni-popup ref="alertDialog" type="dialog">
 			<uni-popup-dialog :type="msgType" :cancelText="$t('common.cancel')" :confirmText="$t('common.confirm')"
-				:content="sendTitle" @confirm.stop="dialogConfirm"></uni-popup-dialog>
+				:content="sendTitle" @confirm="dialogConfirm"></uni-popup-dialog>
 		</uni-popup>
 	</view>
 </template>
@@ -184,7 +184,7 @@
 			};
 		},
 		onShow() {
-			let curRoute = (this.$mp && this.$mp.page && this.$mp.page.route) || '';
+			let curRoute = 'pages/tabBar/Transport/Transport';
 			this.tabBarIndex = curRoute;
 			this.init();
 

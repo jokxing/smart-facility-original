@@ -118,7 +118,9 @@ npm run demo
 4. 手动导入时选择编译目录 **`miniprogram/unpackage/dist/dev/mp-weixin`**，该目录包含生成的 `app.json`。
 5. 使用 `demo` / `Demo1234` 登录本地演示。
 
-源码目录不能作为原生微信小程序直接运行。小程序没有根目录 `package.json`，使用 HBuilderX 编译；H5 预览不能替代微信环境验证。更多说明见 [小程序 README](miniprogram/README.md)。
+源码目录不能作为原生微信小程序直接运行。工程复用 HBuilderX Vue 2 编译器，通过 `miniprogram/package.json` 提供 H5、微信及 App 资源编译命令；H5 验证不能替代微信环境或 App 真机验证。更多说明见 [小程序 README](miniprogram/README.md)和[跨端验证记录](docs/cross-platform-validation.md)。
+
+本项目以源码及本地运行方式展示。H5 跨端适配属于当前 AI 辅助整理阶段，曾另行尝试第三方静态托管，但用户实际访问被托管域名的安全服务拦截，不作为面试展示入口，也不代表原项目曾有线上演示。Android / iOS 尚未生成安装包，不能据此描述为已验证三端 App。
 
 ## 技术栈与目录
 

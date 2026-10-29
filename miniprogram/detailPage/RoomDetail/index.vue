@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="room-detail-page">
 		<view class="tab">
 			<uni-row>
 				<uni-col :span="12" v-for="(item,index) in tab" :key="index">
@@ -104,4 +104,9 @@
 
 <style scoped lang="scss">
 	@import "../../style/css/tab.scss";
+	/* #ifdef H5 */
+	.room-detail-page .tab-box{
+		width: calc(100% - 40rpx);
+	}
+	/* #endif */
 </style>

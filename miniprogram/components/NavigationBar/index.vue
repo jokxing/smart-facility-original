@@ -55,13 +55,15 @@
 		},
 		
 		created() {
-			var demo = {top: 0, height: 32}
+			var demo = {top: uni.getSystemInfoSync().statusBarHeight || 0, height: 44}
+			// #ifdef MP-WEIXIN
 			try {
 				if (typeof uni.getMenuButtonBoundingClientRect === 'function') {
 					var rect = uni.getMenuButtonBoundingClientRect()
 					if (rect && rect.height) demo = rect
 				}
 			} catch (e) {}
+			// #endif
 			if(this.isHeight){
 				this.height = "calc(" + this.isHeight + " - " + demo.top + "px)"
 			}else{
@@ -99,7 +101,7 @@
 		.title {
 			text-align: center;
 			line-height: 66rpx;
-			width: 700rpx;
+			width: calc(100% - 32rpx);
 			margin: 0 auto;
 			&.title-left{
 				text-align: left;

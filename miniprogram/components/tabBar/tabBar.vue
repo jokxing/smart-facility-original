@@ -4,8 +4,8 @@
 			<view class="navigator">
 				<view class="navigator-item" v-for="(item,index) in list" :key="item.pagePath"
 					@click="switchTab(index,item)">
-					<img :src="item.iconPath" class="icon" v-if="selectedIndex !== item.pagePath">
-					<img :src="item.selectedIconPath" class="icon" v-else>
+					<image :src="item.iconPath" class="icon" v-if="selectedIndex !== item.pagePath" />
+					<image :src="item.selectedIconPath" class="icon" v-else />
 					<text :class="['item-text',{'text-active':selectedIndex === item.pagePath}]">{{item.text}}</text>
 				</view>
 			</view>
@@ -106,11 +106,13 @@
 		display: flex;
 		align-items: center;
 		flex-direction: column;
-		width: 50rpx;
-		height: 100%;
+		flex: 1;
+		min-width: 0;
+		height: auto;
 	}
 
 	.item-text {
+		white-space: nowrap;
 		margin-top: 6rpx;
 		color: #777E86;
 		font-size: 24rpx;

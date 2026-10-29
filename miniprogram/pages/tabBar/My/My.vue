@@ -96,7 +96,7 @@
 			}
 		},
 		onShow() {
-			let curRoute = (this.$mp && this.$mp.page && this.$mp.page.route) || '';
+			let curRoute = 'pages/tabBar/My/My';
 			this.tabBarIndex = curRoute;
 			uni.setNavigationBarTitle({
 				title: this.$t('tabBar.user')

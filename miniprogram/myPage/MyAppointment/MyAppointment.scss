@@ -5,6 +5,9 @@
 	.remind-time{
 		padding: 0 34rpx;
 		margin-top: 34rpx;
+		/* #ifdef H5 */
+		margin-top: 16rpx;
+		/* #endif */
 		line-height: 60rpx;
 		color: #555;
 		display: flex;

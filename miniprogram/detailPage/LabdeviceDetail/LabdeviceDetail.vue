@@ -190,7 +190,7 @@
 			TimeSelect,
 			Toast
 		},
-		onReady() {
+		mounted() {
 			this.init()
 		},
 		methods: {

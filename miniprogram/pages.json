@@ -233,6 +233,8 @@
 		}
 	],
 	"globalStyle": {
+		"rpxCalcMaxDeviceWidth": 480,
+		"rpxCalcBaseDeviceWidth": 480,
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "智慧设施助手",
 		"navigationBarBackgroundColor": "#ffffff",

@@ -51,7 +51,6 @@
 			<uni-popup-dialog ref="inputClose" mode="input" :title="$t('transport.interVal')"
 				:value="historyTimeInterval" @confirm="dialogInputConfirm"></uni-popup-dialog>
 		</uni-popup>
-		<SearchBluetooh ref="searchBluetooh" />
 	</view>
 </template>
 
@@ -59,11 +58,7 @@
 	import {
 		getTransportOrderPrintView
 	} from "@/utils/api.js"
-	import SearchBluetooh from "@/detailPage/components/SearchBluetooh/SearchBluetooh.vue"
 	export default {
-		components: {
-			SearchBluetooh
-		},
 		data() {
 			return {
 			print: {sensorData: [{values: []}]},

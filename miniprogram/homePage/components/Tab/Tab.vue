@@ -30,7 +30,7 @@
 			},
 			statisticalVO: {
 				type: Object,
-				default: () => {}
+				default: () => ({})
 			}
 		},
 		data() {

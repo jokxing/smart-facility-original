@@ -126,7 +126,7 @@
 				title: this.$t('route.hardwareDetail')
 			});
 		},
-		onReady() {
+		mounted() {
 			this.deviceDetail()
 		},
 		methods: {

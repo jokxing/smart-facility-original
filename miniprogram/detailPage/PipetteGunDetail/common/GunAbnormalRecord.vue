@@ -73,7 +73,7 @@
 				isAbnormalFormPopup: false
 			}
 		},
-		onReady() {
+		mounted() {
 			this.init()
 		},
 		methods: {

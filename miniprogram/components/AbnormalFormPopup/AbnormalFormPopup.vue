@@ -80,13 +80,9 @@
 				type: null
 			}
 		},
-		onReady() {
-			// ios的rules生效
-			this.$refs.form.setRules(this.rules)
-		},
 		methods: {
 			open(item, type) {
-				this.formData = this.$options.data().formData;
+				this.formData = this.$options.data.call(this).formData;
 				this.data = item || {};
 				this.type = type;
 				this.formData.process = item && item.process;

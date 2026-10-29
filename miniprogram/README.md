@@ -1,6 +1,6 @@
 # 智慧设施助手（关联小程序）
 
-这是智慧设施平台的 uni-app 小程序副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts 和微信能力；当前为 HBuilderX 工程，没有根目录 package.json，不适用直接执行 npm run dev。
+这是智慧设施平台的 uni-app 副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts，保留微信小程序能力，并适配 H5。构建复用本机安装的 HBuilderX Vue 2 编译器，`package.json` 提供统一命令入口。
 
 原小程序由本人从 0 搭建，并开发首页、预约、数据图表、移液枪等部分模块，其他功能按团队协作说明。当前副本使用 AI 辅助脱敏、Mock 化及修复，原开发职责与展示整理分别介绍。
 
@@ -12,7 +12,25 @@
 
 两端属于同一业务系统，**演示使用独立本地存储**（小程序 `sf-mini-demo:`，Web `smart-facility-demo:v1:`）。真实联动需要共享后端及枪架反馈，当前小程序取枪后 Web 不会自动变化。
 
-微信开发者工具需自行安装，并在 `manifest.json` 的 `mp-weixin.appid` 填入有权限的测试 AppID（不要使用旧标识）。H5 只能预览登录和首页布局，不能代替微信模拟器或真机。
+微信开发者工具需自行安装，并在 `manifest.json` 的 `mp-weixin.appid` 填入有权限的测试 AppID。已移除带旧 AppID 的重复 `project.config.json`；编译器根据 manifest 生成微信配置，未配置账号时为游客标识。H5 的验证结果不能代替微信模拟器或 App 真机验收。
+
+## H5 运行
+
+以源码及下述本地运行方式展示，账号 `demo` / `Demo1234`。原项目没有线上演示；本次另行尝试的第三方静态托管存在用户访问拦截，不作为可靠的面试访问入口。各端实际验证范围及该限制见[跨端验证记录](../docs/cross-platform-validation.md)。
+
+安装 HBuilderX 及 uni-app Vue 2 编译插件。脚本支持本机路径自动发现，也可设置环境变量 `HBUILDERX_ROOT`。
+
+```powershell
+cd E:\project\smart-facility-original\miniprogram
+npm run build:h5
+npm run preview:h5
+```
+
+访问 `http://127.0.0.1:8188`，登录 `demo` / `Demo1234`。输出为 `unpackage/dist/build/h5`，使用 hash 路由，可部署到静态托管。H5、微信小程序、原 SaaS 各自保存本地数据，不会自动同步。
+
+浏览器自动化在预览服务启动后运行 `npm run test:h5`。先执行 `npm install` 和 `npx playwright install chromium` 安装测试工具；已有浏览器时可使用 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 指定，`H5_URL` 可指向已部署站点。测试会修改其新建浏览器上下文的演示数据。
+
+`npm run build:mp-weixin` 编译微信目标；`npm run build:app` 仅编译 App 资源，**不生成 APK / IPA 安装包**。详细范围、证据与打包限制见[跨端验证记录](../docs/cross-platform-validation.md)。
 
 ## 运行与阅读
 

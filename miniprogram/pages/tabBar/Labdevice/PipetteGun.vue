@@ -56,7 +56,7 @@
 				gunTab: [
 					{
 						text: _this.$t('common.all'),
-						status: null,
+						status: 'all',
 						num: 0,
 						class: "total"
 					},
@@ -79,7 +79,7 @@
 						class: GUNSTATUS[2].value
 					},
 				],
-				gunStatus: null,
+				gunStatus: 'all',
 				// 列表
 				list: [],
 				// 分页
@@ -130,7 +130,8 @@
 				var data = {
 					pageNum: this.pageNum,
 					pageSize: this.pageSize,
-					status: this.gunStatus,
+					// 全部使用明确的视图键，接口仍以 null 表示不限状态。
+					status: this.gunStatus === 'all' ? null : this.gunStatus,
 					keyword: this.keyword
 				}
 				postGunPipetteList(data).then(res => {

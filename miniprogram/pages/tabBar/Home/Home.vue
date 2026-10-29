@@ -5,34 +5,34 @@
 
 		<view class="search" @click="handleGoSearch">
 			<text class="text">{{ $t('home.searchNameNo') }}...</text>
-			<uni-icons slot="searchIcon" color="#D6AE7B" size="22" type="search" />
+			<uni-icons class="search-icon" color="#D6AE7B" size="22" type="search" />
 		</view>
 
 		<view class="more-features">
-			<uni-grid :column="3" :show-border="false" :square="false">
-				<uni-grid-item>
+			<view class="feature-grid">
+				<view class="feature-cell">
 					<view class="grid-item-box" @click="handleGoNewsInform">
 						<view :class="{'ring':items.notifyUnread}">
 						</view>
 						<image class="image" src="../../../static/images/icon-message.png" />
 						<text class="text">{{ $t('home.messageCenter') }}</text>
 					</view>
-				</uni-grid-item>
-				<uni-grid-item>
+				</view>
+				<view class="feature-cell">
 					<view class="grid-item-box" @click="goPipetteGunRackDetail">
 						<image class="image" src="../../../static/images/icon-scan.png" />
 						<text class="text">{{ $t('home.qrCode') }}</text>
 					</view>
-				</uni-grid-item>
-				<uni-grid-item>
+				</view>
+				<view class="feature-cell">
 					<view class="grid-item-box" @click="handleGoBackLog">
 						<view :class="{'ring':items.activitiUnread}">
 						</view>
 						<image class="image" src="../../../static/images/icon-toDoList.png" />
 						<text class="text">{{ $t('home.todoList') }}</text>
 					</view>
-				</uni-grid-item>
-			</uni-grid>
+				</view>
+			</view>
 		</view>
 		<view class="demo-hint">{{ $t('home.demoEmptyHint') }}</view>
 		<view class="statistics equipment-overview">
@@ -117,10 +117,12 @@
 			</uni-row>
 		</view>
 		<tab-bar :selectedIndex='tabBarIndex'></tab-bar>
-		<uni-popup class="popup-message" ref="popup" background-color="#fff" :mask-click="false">
-			<view class="content">
-				<uni-icons type="info-filled" size="60" color="#F76260"></uni-icons>
-				<text class="text">{{ errorText }}</text>
+		<uni-popup class="home-notice" ref="popup" background-color="transparent" :mask-click="false">
+			<view class="notice-content">
+				<view class="notice-icon">
+					<uni-icons type="info-filled" size="36" color="#B2704E"></uni-icons>
+				</view>
+				<text class="notice-text">{{ errorText }}</text>
 			</view>
 		</uni-popup>
 	</view>
@@ -171,7 +173,7 @@
 		},
 		onShow() {
 
-			let curRoute = (this.$mp && this.$mp.page && this.$mp.page.route) || '';
+			let curRoute = 'pages/tabBar/Home/Home';
 			this.tabBarIndex = curRoute;
 			this.handleActiveUnread();
 		},
@@ -304,4 +306,6 @@
 
 <style scoped lang="scss">
 	@import "./Home.scss";
+	.feature-grid { display: flex; width: 100%; }
+	.feature-cell { flex: 1; min-width: 0; }
 </style>

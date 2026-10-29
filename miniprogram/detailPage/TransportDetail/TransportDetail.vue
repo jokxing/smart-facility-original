@@ -106,9 +106,8 @@
 		<depar-hint @show="change" ref='deparHint' @change="setState"></depar-hint>
 		<uni-popup ref="alertDialog" type="dialog">
 			<uni-popup-dialog :type="msgType" :cancelText="$t('common.cancel')" :confirmText="$t('common.confirm')"
-				:content="sendTitle" @confirm.stop="dialogConfirm"></uni-popup-dialog>
+				:content="sendTitle" @confirm="dialogConfirm"></uni-popup-dialog>
 		</uni-popup>
-		<SearchBluetooh ref="searchBluetooh" />
 	</view>
 </template>
 
@@ -120,10 +119,8 @@
 		changeTransportOrderState
 	} from "@/utils/api.js"
 	import DeparHint from "@/pages/tabBar/Transport/deparHint.vue"
-	import SearchBluetooh from "@/detailPage/components/SearchBluetooh/SearchBluetooh.vue"
 	export default {
 		components: {
-			SearchBluetooh,
 			DeparHint
 		},
 		options: {
@@ -220,7 +217,7 @@
 				}
 				this.$refs.popup.close()
 				this.interVal = parseInt(e * 1);
-				this.$refs.searchBluetooh.open(this.detailId, parseInt(this.interVal * 1));
+				this.handleShowSearchBlue();
 			},
 			getDetail(id) {
 				const seq = (this._detailSeq = (this._detailSeq || 0) + 1);

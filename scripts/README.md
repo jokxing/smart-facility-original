@@ -1,5 +1,7 @@
 # 小程序检查脚本
 
+2026-10-28 新增跨端入口：`build-miniapp.ps1 -Platform h5|mp-weixin|app-plus`、`serve-miniapp-h5.cjs`、`check-miniapp-h5.cjs` 和 `stage-miniapp-h5.cjs`。H5 浏览器检查使用 Playwright，输出到 `docs/evidence/cross-platform-h5`；只对新建的测试浏览器上下文执行写入。阶段与结果见[跨端验证记录](../docs/cross-platform-validation.md)。
+
 2026-10-14 核对：目录中 15 个现有脚本均有用途，未确认可删除的废弃文件。脚本不在应用启动时执行，供维护和回归使用，不需要面试官逐个阅读。
 
 ## 业务与专项检查

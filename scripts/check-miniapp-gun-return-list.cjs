@@ -21,7 +21,7 @@ function component(file, context) {
   return sandbox.module.exports;
 }
 const definition = component('pages/tabBar/Labdevice/PipetteGun.vue', {
-  PipetteGunCard: {}, GUNSTATUS: [{}, {}, {}], statusColor() {}, statusText() {}, columns: {},
+  PipetteGunCard: {}, GUNSTATUS: [{code: 0}, {code: 1}, {code: 2}], statusColor() {}, statusText() {}, columns: {},
   postGunPipetteStatistics: () => Promise.resolve(request('POST', '/api/gun/pipette/statistics', {})),
   postGunPipetteList: data => Promise.resolve(request('POST', '/api/gun/pipette/list', data))
 });
@@ -34,6 +34,18 @@ const view = { isGun: true, $refs: { pipetteGun: list }, $nextTick: fn => fn() }
 async function settle() { await Promise.resolve(); await Promise.resolve(); }
 (async () => {
   list.init(); await settle();
+  assert.strictEqual(list.gunStatus, 'all');
+  assert.strictEqual(list.gunTab.filter(tab => tab.status === list.gunStatus).length, 1);
+  assert.strictEqual(list.gunTab[0].status, list.gunStatus);
+  assert.strictEqual(list.list.length, 4);
+  for (const status of [0, 1, 2]) {
+    list.handleStatus(status); await settle();
+    assert.strictEqual(list.gunTab.filter(tab => tab.status === list.gunStatus).length, 1);
+    assert.ok(list.list.length > 0);
+    assert.ok(list.list.every(gun => gun.homingStatus === status));
+  }
+  list.handleStatus('all'); await settle();
+  assert.strictEqual(list.list.length, 4);
   assert.strictEqual(list.list.find(g => g.pipetteGunId === 991001).homingStatus, 0);
   assert.strictEqual(request('POST', '/api/gun/return/pipette', { gunId: 991001 }).code, 1);
   // 调用实际页面 onShow，验证缓存子组件刷新而非只验证仓库。

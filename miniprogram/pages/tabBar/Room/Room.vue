@@ -114,7 +114,7 @@
 			this.init()
 		},
 		onShow() {
-			let curRoute = (this.$mp && this.$mp.page && this.$mp.page.route) || '';
+			let curRoute = 'pages/tabBar/Room/Room';
 			this.tabBarIndex = curRoute;
 			uni.setNavigationBarTitle({
 				title: this.$t('tabBar.room')
