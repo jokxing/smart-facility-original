@@ -8,7 +8,7 @@
 
 [面试阅读导览](docs/PROJECT_GUIDE.md)将本人职责、Three.js 生命周期、Konva 坐标与预约统计组织为一条阅读路线。原工作项目为楚秀项目，当前名称为脱敏作品名。
 
-**沟通方式：**我是一名听障人，面试中希望以文字提问与回答。请尽量一次写完整问题，涉及代码时注明文件或功能入口；我可以结合代码说明实现、边界和取舍。本 README 提前介绍项目，减少现场反复确认背景的时间。
+关注 uni-app 与多端开发时，先按[小程序导览](docs/miniapp-business.md#先看这条链路)阅读“首页 → 设备 → 图表 → 预约”主线，再查看 H5 适配与安卓扩展方向。
 
 ## 项目背景与我的角色
 
@@ -61,8 +61,6 @@
 
 ### 已有演示截图
 
-以下为本地验证时保存的截图，可先了解界面；具体交互以当前源码运行结果为准。
-
 **Three.js 楼宇可视化**
 
 ![Three.js 楼宇可视化](docs/evidence/brand-ui/04-building.png)
@@ -87,6 +85,16 @@
 ![运单详情](docs/evidence/transport-review/saas-waybill-detail.png)
 
 </details>
+
+### 微信小程序
+
+从[首页 → 设备 → 图表 → 预约](docs/miniapp-business.md#先看这条链路)了解功能与对应实现。
+
+**微信小程序首页**
+
+![微信小程序首页](docs/images/miniapp/wechat-home-20261005.png)
+
+H5 适配及安卓扩展方向见[多端补充](docs/miniapp-business.md#h5-跨端补充)。
 
 ## 本地运行
 
@@ -120,7 +128,7 @@ npm run demo
 
 源码目录不能作为原生微信小程序直接运行。工程复用 HBuilderX Vue 2 编译器，通过 `miniprogram/package.json` 提供 H5、微信及 App 资源编译命令；H5 验证不能替代微信环境或 App 真机验证。更多说明见 [小程序 README](miniprogram/README.md)和[跨端验证记录](docs/cross-platform-validation.md)。
 
-本项目以源码及本地运行方式展示。H5 跨端适配属于当前 AI 辅助整理阶段，曾另行尝试第三方静态托管，但用户实际访问被托管域名的安全服务拦截，不作为面试展示入口，也不代表原项目曾有线上演示。Android / iOS 尚未生成安装包，不能据此描述为已验证三端 App。
+本项目以源码及本地运行方式展示。此前脱敏展示副本未提供公网入口；原工作中的小程序有部署上线经验。H5 跨端适配属于当前 AI 辅助整理阶段，曾另行尝试第三方静态托管，但实际访问出现托管域名安全服务拦截，当前不作为面试展示入口。Android / iOS 尚未生成安装包。
 
 ## 技术栈与目录
 

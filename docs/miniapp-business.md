@@ -1,81 +1,67 @@
-# 关联微信小程序
+# 智慧设施助手小程序导览
 
-小程序「智慧设施助手」面向现场查看、预约及设备操作，SaaS 面向管理和配置。两端同属一个业务系统，演示使用一致的主要 ID 和规则，各自保存本地数据，没有自动同步。
+基于 uni-app Vue 2、uni-ui 和 uCharts，展示设备查看、图表、预约与消息处理。本人从 0 搭建原小程序，负责首页、预约、数据图表、移液枪等部分模块，并有部署上线经验；当前脱敏作品通过 AI 协作完成 Mock 整理与 H5 适配。
 
-## 面试阅读与职责边界
+优先阅读微信小程序业务链路；H5 用于补充跨端适配，安卓为后续扩展方向。
 
-原项目中，本人从 0 搭建配套 uni-app 小程序，并负责首页、预约、数据图表、移液枪等部分模块；其他模块不整体归为本人独立完成。Web 另负责中控地图、设备管理含预约、房间地图设置、数据统计与公共组件，完整范围见[仓库首页](../README.md)。原开发阶段以手写实现为主，当前小程序脱敏、Mock 规则及修复按 AI 辅助整理阶段说明。
+## 先看这条链路
 
-### 三到五分钟路线
+**首页 → 设备列表 → 设备详情 → 数据图表 → 预约申请 → 我的预约**
 
-1. 登录后从首页统计进入设备列表，选择异常设备查看读数，说明参数状态与运行状态是不同维度。
-2. 从设备详情新增未来预约，再到“我的预约”和日历查看同一记录；尝试衔接或重叠时段，说明区间、所有权和状态约束。
-3. 如有时间，演示枪架模拟取枪后进入详情，再返回列表观察刷新；区分模拟操作与真实硬件反馈。
-4. 退出并重新登录说明会话与业务数据分开保存；微信工具冷启动与重开持久化仍按后文边界，不现场承诺全部通过。
+| 步骤 | 看什么 | 对应代码 |
+| --- | --- | --- |
+| 首页进入设备 | 统计卡筛选、状态与读数 | [首页](../miniprogram/pages/tabBar/Home/Home.vue) → [设备入口](../miniprogram/pages/tabBar/Labdevice/index.vue) → [详情组件](../miniprogram/detailPage/LabdeviceDetail/LabdeviceDetail.vue) |
+| 查看历史图表 | 温湿度曲线、时间跨度切换 | [图表页面](../miniprogram/detailPage/HistoryDataChart/HistoryDataChart.vue) |
+| 创建并管理预约 | 选时、冲突校验、刷新回填与取消 | [选时组件](../miniprogram/components/AppointmentTime/index.vue) → [预约规则](../miniprogram/utils/demo/reservation.js) → [我的预约](../miniprogram/myPage/MyAppointment/MyAppointment.vue) |
+| 按提问补充 | 消息已读、移液枪模拟取还、运单流转 | [消息中心](../miniprogram/homePage/NewsInform/NewsInform.vue) · [移液枪](pipette-gun.md) · [运单](transport.md) |
 
-### 关键代码入口
+## 微信小程序
 
-| 入口 | 讨论重点 |
+**首页**
+
+![微信小程序首页](images/miniapp/wechat-home-20261005.png)
+
+**登录**
+
+![微信小程序登录](images/miniapp/wechat-login-20261005.png)
+
+## 沿链路阅读实现
+
+| 关注点 | 阅读入口 |
 | --- | --- |
-| [请求适配](../miniprogram/utils/request.js) | 演示请求入口、会话失效跳转及禁止回落旧服务 |
-| [会话](../miniprogram/utils/demo/session.js)、[存储](../miniprogram/utils/demo/storage.js) | 退出清会话键而保留业务记录，命名空间限制清理范围 |
-| [预约规则](../miniprogram/utils/demo/reservation.js) | 本地时间、记录归属、冲突及取消约束 |
-| [设备页入口](../miniprogram/pages/tabBar/Labdevice/index.vue) | onShow 返回刷新，子组件不会自动获得页面生命周期 |
-| [取枪导航](../miniprogram/utils/gunNavigation.js) | 整理返回栈，已有列表时保留，无列表时先进入对应 Tab |
-| [检查脚本说明](../scripts/README.md) | 区分逻辑检查与微信工具自动化 |
+| 页面与接口分离 | [请求适配](../miniprogram/utils/request.js) → [Mock 入口](../miniprogram/utils/demo/index.js) → [业务规则](../miniprogram/utils/demo/reservation.js) |
+| 登录和持久化 | [会话](../miniprogram/utils/demo/session.js) → [存储](../miniprogram/utils/demo/storage.js)，退出清理会话，保留本地业务记录 |
+| 返回刷新与跨端组件 | [设备页 onShow](../miniprogram/pages/tabBar/Labdevice/index.vue) → [列表组件](../miniprogram/pages/tabBar/Labdevice/Labdevice.vue)；[导航适配](../miniprogram/components/NavigationBar/index.vue) |
+| 移液枪导航 | [详情组件](../miniprogram/detailPage/PipetteGunDetail/GunDetail.vue) → [Mock 规则](../miniprogram/utils/demo/gun.js) → [返回栈处理](../miniprogram/utils/gunNavigation.js) |
 
-**为什么返回页面后需要重新读状态？** 小程序可能保留页面与子组件实例，不能只靠首次挂载读取。当前设备入口通过页面 onShow 通知刷新列表与统计；这不等于后端实时推送。
+## H5 跨端补充
 
-**为什么退出登录不清空所有存储？** 当前演示把会话键与业务键分开，退出只清登录状态，不误删本地预约和操作记录。这个保留策略不等于生产多用户数据隔离，不能仅凭本地 token 判断权限可靠。
+复用小程序业务与 Mock，补充浏览器布局、导航和弹窗适配。
 
-**取枪完成为什么不简单再 navigateTo 一个详情？** 那样可能积累旧详情、枪架与取枪页，返回会回到已完成操作。当前导航保留列表作为返回目标；这是当前展示实现，不称为已验证的原项目线上故障案例。
+**首页**
 
-## 运行
+![H5 首页](images/miniapp/h5-home.png)
 
-使用 HBuilderX 导入 `miniprogram`，Vue 2 编译目标为微信小程序。微信开发者工具导入生成目录 `miniprogram/unpackage/dist/dev/mp-weixin`，不能导入 `.vue` 源码作为原生微信项目。
+**我的预约**
 
-自动打开需在微信工具开启「设置 → 安全设置 → 服务端口」，并在 HBuilderX 配好工具路径。AppID 应使用自己有权限的测试标识；登录为 `demo` / `Demo1234`。完整步骤见 [仓库首页](../README.md)。
+![H5 我的预约](images/miniapp/h5-reservation.png)
 
-## 模块与数据
+## 安卓扩展
 
-| 模块 | 功能及规则 |
-| --- | --- |
-| 登录与首页 | 本地会话守卫、统计、下拉刷新与 Tab 导航 |
-| 设备 | 共享仪器池、分页筛选、详情与监测；默认 970008 报警 |
-| 房间 | 业务归属设备、统计与详情；房间 B 含异常设备，走廊无仪器时业务统计按正常处理 |
-| 预约 | 同一仓库驱动日历、我的预约和统计，冲突与所有权校验 |
-| 告警与消息 | 人工处理、我的负责范围、待办数、消息已读及清空 |
-| 移液枪 | 列表、枪架槽位、模拟取还、超时与记录 |
-| 运单 | 列表、统计、详情、发运和送达；创建由 SaaS 承担 |
+后续沿用 uni-app 工程，验证启动、导航、设备详情、图表与预约链路。目前未提供安卓安装包。
 
-列表统计按位置、关键字等业务范围计算，状态 Tab 不应把总览计数缩小成当前列表长度。首页传入的状态筛选在进入对应页面后消费，避免残留影响后续导航。切换/返回相关页面后重新读取业务状态，保持记录与统计一致。
+## 本地体验
 
-## Mock 与持久化
-
-[config.js](../miniprogram/utils/config.js) 默认开启本地演示，命名空间为 `sf-mini-demo:`。请求经过 [request.js](../miniprogram/utils/request.js) 与 [Mock 入口](../miniprogram/utils/demo/index.js)，未知接口明确失败，不回退原服务。
-
-业务存储与会话分开，退出不删除预约、枪状态和运单操作记录。设备、房间和告警共享本端实体规则，不在各页面分别复制一份数据。两端同 ID 不表示存储已经联网。
-
-真实微信登录、扫码取枪、蓝牙、真实打印、真实通知、硬件控制、资产审批及完整 BPM 未接入。运单轨迹为模拟；H5 不能代替微信 API 和真机环境验证。
-
-## 检查入口
-
-在仓库根目录运行：
+安装 HBuilderX 及 uni-app Vue 2 编译插件，在仓库根目录执行：
 
 ```powershell
-node scripts/check-mp1-demo.cjs
-node scripts/check-mp2-demo.cjs
-node scripts/check-mp3-demo.cjs
-node scripts/check-mp4-demo.cjs
-node scripts/check-mp5-demo.cjs
-node scripts/check-mp6-demo.cjs
-node scripts/check-mp7-transport.cjs
+cd miniprogram
+npm run build:h5
+npm run preview:h5
 ```
 
-脚本保留原有编号命名，分别覆盖登录、设备、房间、预约、告警、移液枪与运单，不代表历史批次说明需要逐篇阅读。
+打开 `http://127.0.0.1:8188`，账号 `demo` / `Demo1234`。微信小程序通过 HBuilderX 运行到微信开发者工具，步骤见[运行指南](demo-guide.md#微信小程序启动)。
 
-2026-10-14 本轮重新执行上述 7 个业务检查及取枪导航、返回列表、状态颜色 3 个专项检查，10 个脚本均通过。模拟器驱动、GUI 及本机编译工具本轮未运行；全部文件用途见[脚本目录说明](../scripts/README.md)。
+演示使用本地 Mock，各端数据独立；真实微信授权、通知、蓝牙、打印及硬件控制未接入。Android / iOS 尚未交付安装包。
 
-已有微信模拟器记录覆盖登录、首页、刷新、部分导航与退出；这些记录不等同于最新全部功能已做 GUI 验收。冷启动、跨开发工具重开持久化和完整真机流程未完成全面验收；自动化重开曾出现环境读数不稳定，不能据此判定源码持久化必然错误或宣布通过。
-
-更多业务规则见 [预约与告警](reservation-and-alarm.md)、[移液枪](pipette-gun.md)、[运单](transport.md)。
+需要深入时再看：[预约与告警](reservation-and-alarm.md) · [验证记录](cross-platform-validation.md) · [检查脚本](../scripts/README.md) · [完整项目导览](PROJECT_GUIDE.md)。

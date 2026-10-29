@@ -1,6 +1,6 @@
 # 本地演示指南
 
-项目背景、原项目手写开发经历和文字面试沟通方式见 [仓库首页](../README.md)。本页说明如何运行与体验当前演示。
+项目背景与原项目开发经历见 [仓库首页](../README.md)。本页说明如何运行与体验当前演示。
 
 ## Web 启动
 
@@ -30,7 +30,19 @@ npm run demo
 
 可选择仓库中的 `smart-facility-platform/public/demo/floors/floor-a-1f.png`、`room-a.png`、`room-b.png` 体验上传。图片只包含空间，名称和设备由数据动态绘制。
 
-## 小程序启动
+## H5 本地启动
+
+安装 HBuilderX 及 uni-app Vue 2 编译插件，在仓库根目录执行：
+
+```powershell
+cd miniprogram
+npm run build:h5
+npm run preview:h5
+```
+
+访问 `http://127.0.0.1:8188`，使用 `demo` / `Demo1234` 登录。无法自动发现编译器时设置 `HBUILDERX_ROOT`。截图、移动端体验路线与源码入口见[小程序与 H5 导览](miniapp-business.md)。当前以本地方式展示，历史第三方托管不作为可靠面试入口。
+
+## 微信小程序启动
 
 1. HBuilderX 导入 `miniprogram`，使用 uni-app Vue 2 工程。
 2. `manifest.json` 配置自己有权限的微信 AppID。
@@ -38,7 +50,9 @@ npm run demo
 4. 运行到微信开发者工具；手动导入选择 `miniprogram/unpackage/dist/dev/mp-weixin`。
 5. 使用 `demo` / `Demo1234` 登录，体验设备、房间、预约及移液枪。
 
-`app.json` 由编译生成，不能把 `.vue` 源码目录作为原生微信项目运行。小程序没有根 `package.json`，不适用直接 `npm run dev`。H5 不能代替微信环境验证。
+`app.json` 由编译生成，不能把 `.vue` 源码目录作为原生微信项目运行。当前 `miniprogram/package.json` 提供编译、预览及浏览器检查命令，不提供 `npm run dev`。运行到微信工具的开发输出为 `unpackage/dist/dev/mp-weixin`；执行 `npm run build:mp-weixin` 的生产输出为 `unpackage/dist/build/mp-weixin`。H5 不能代替微信环境验证。
+
+`npm run build:app` 只生成 App 编译资源，不是 APK / IPA 安装包。各端实际进展见[跨端验证记录](cross-platform-validation.md)。
 
 ## 数据与验证
 
