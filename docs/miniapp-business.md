@@ -66,15 +66,15 @@
 
 **设备预约弹窗**
 
-![Android 设备预约弹窗](images/miniapp/android-reservation.jpg)
+[![Android 设备预约弹窗](images/miniapp/preview/android-reservation.png)](images/miniapp/android-reservation.jpg)
 
 **报警记录与分类统计**
 
-![Android 报警记录与分类统计](images/miniapp/android-alarms.jpg)
+[![Android 报警记录与分类统计](images/miniapp/preview/android-alarms.png)](images/miniapp/android-alarms.jpg)
 
 **运单详情与操作记录**
 
-![Android 运单详情与操作记录](images/miniapp/android-waybill.jpg)
+[![Android 运单详情与操作记录](images/miniapp/preview/android-waybill.png)](images/miniapp/android-waybill.jpg)
 
 ## iOS 真机落地
 
@@ -82,15 +82,15 @@ Windows 下完成免费签名基座安装与 HBuilderX 项目同步，在 iPhone
 
 **首页**
 
-![iOS 首页](images/miniapp/ios-home.png)
+[![iOS 首页](images/miniapp/preview/ios-home.png)](images/miniapp/ios-home.png)
 
 **历史曲线**
 
-![iOS 历史曲线](images/miniapp/ios-chart-1h.png)
+[![iOS 历史曲线](images/miniapp/preview/ios-chart-1h.png)](images/miniapp/ios-chart-1h.png)
 
 **我的预约**
 
-![iOS 我的预约](images/miniapp/ios-reservation.png)
+[![iOS 我的预约](images/miniapp/preview/ios-reservation.png)](images/miniapp/ios-reservation.png)
 
 ## 本地体验
 
