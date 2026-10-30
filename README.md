@@ -128,7 +128,7 @@ npm run demo
 
 源码目录不能作为原生微信小程序直接运行。工程复用 HBuilderX Vue 2 编译器，通过 `miniprogram/package.json` 提供 H5、微信及 App 资源编译命令；H5 验证不能替代微信环境或 App 真机验证。更多说明见 [小程序 README](miniprogram/README.md)和[跨端验证记录](docs/cross-platform-validation.md)。
 
-本项目以源码及本地运行方式展示。此前脱敏展示副本未提供公网入口；原工作中的小程序有部署上线经验。H5 跨端适配属于当前 AI 辅助整理阶段，曾另行尝试第三方静态托管，但实际访问出现托管域名安全服务拦截，当前不作为面试展示入口。Android / iOS 尚未生成安装包。
+本项目以源码及本地运行方式展示，原工作中的小程序具有部署上线经验。当前展示阶段完成 H5 适配、Android 独立 APK 打包与 MuMu 安装验证，并通过签名调试基座在 iPhone 真机跑通业务主线。H5 以本地演示交付，各端范围集中见[小程序导览](docs/miniapp-business.md#验证范围)。
 
 ## 技术栈与目录
 

@@ -1,6 +1,6 @@
 # Android 独立 APK 验收记录
 
-日期：2026-10-30（Asia/Shanghai）。已完成独立 APK 打包、签名检查、MuMu 安装和下列实际操作；不代表 Android 真机或 iOS 验收。
+日期：2026-10-30（Asia/Shanghai）。已完成独立 APK 打包、签名检查及 MuMu 核心流程验收，并补充用户确认的 Android 真机业务页面展示。两部分覆盖分别记录。
 
 ## 交付文件
 
@@ -41,9 +41,21 @@ Windows、HBuilderX 5.33、MuMu Android 15，720×1280。模拟器上报 HUAWEI 
 
 最新源码 H5 生产编译及核心浏览器回归通过，运行错误和失败资源请求均为 0，结果为 `docs/evidence/android-h5-regression/results.json`。微信小程序生产编译通过；未新增微信真机或发布验证。Moment locale、资源体积及子包建议等已有编译提示保留。
 
+## Android 真机业务页面
+
+用户确认提供的安卓图片来自真机，已纳入[小程序面试导览](miniapp-business.md)。
+
+| 页面 | 图片显示内容 |
+| --- | --- |
+| [设备预约弹窗](images/miniapp/android-reservation.jpg) | 设备详情、预约选时及已选时段 |
+| [报警分类统计](images/miniapp/android-alarms.jpg) | 全部、未处理、已处理数量及报警记录 |
+| [运单详情](images/miniapp/android-waybill.jpg) | 已送达状态、运单资料及操作记录 |
+
+上述内容按真机页面展示记录；独立冷启动、曲线切换与本地状态保留等完整操作，仍以上方 MuMu 验收范围为准。设备型号和系统版本不从图片推断。
+
 ## 限制和已知现象
 
-- 只验证上述 MuMu Android 15；未验证 Android 真机、其他系统版本、厂商 ROM。小屏和系统返回等此前标准基座结果见 [基座验收记录](android-core-validation.md)，没有全部在最终独立包重跑。
+- 核心流程验收环境为 MuMu Android 15，真机展示范围见上表；其他机型、系统版本及厂商 ROM 按后续测试补充。小屏和系统返回等此前标准基座结果见 [基座验收记录](android-core-validation.md)，没有全部在最终独立包重跑。
 - 首页冷启动截图仍出现深色状态栏图标，浅色切换效果不稳定；不能声明已解决。内容与状态栏未重叠。
 - 输入及提交完成；真实软键盘面板未在模拟器完整截图中确认，遮挡和键盘收起行为仍待真机补验。
 - 真实蓝牙、打印、枪架硬件、微信授权和真实消息推送均未接入；所有业务修改使用本端本地演示数据。
