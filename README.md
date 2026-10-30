@@ -8,7 +8,7 @@
 
 [面试阅读导览](docs/PROJECT_GUIDE.md)将本人职责、Three.js 生命周期、Konva 坐标与预约统计组织为一条阅读路线。原工作项目为楚秀项目，当前名称为脱敏作品名。
 
-关注 uni-app 与多端开发时，先按[小程序导览](docs/miniapp-business.md#先看这条链路)阅读“首页 → 设备 → 图表 → 预约”主线，再查看 H5 适配与 [Android 独立 APK 验收](docs/android-apk-validation.md)。Android 已在 MuMu 安装验证，iOS 尚未打包。
+关注 uni-app 与多端开发时，先按[小程序导览](docs/miniapp-business.md#先看这条链路)阅读“首页 → 设备 → 图表 → 预约”主线，再查看 H5 适配、[Android 独立 APK 验收](docs/android-apk-validation.md)及 [iOS 真机验证](docs/ios-device-validation.md)。Android 已在 MuMu 安装验证，iOS 通过签名基座在 iPhone 跑通曲线与预约主线，并确认断开电脑运行及本地状态保留。
 
 ## 项目背景与我的角色
 

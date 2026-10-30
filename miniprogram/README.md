@@ -1,10 +1,10 @@
 # 智慧设施助手（关联小程序）
 
-这是智慧设施平台的 uni-app 副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts，保留微信小程序能力，并适配 H5 与 Android。构建复用本机安装的 HBuilderX Vue 2 编译器，`package.json` 提供统一命令入口。
+这是智慧设施平台的 uni-app 副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts，保留微信小程序能力，并适配 H5、Android 与 iOS。构建复用本机安装的 HBuilderX Vue 2 编译器，`package.json` 提供统一命令入口。
 
 原小程序由本人从 0 搭建，并开发首页、预约、数据图表、移液枪等部分模块，其他功能按团队协作说明。当前副本使用 AI 辅助脱敏、Mock 化及修复，原开发职责与展示整理分别介绍。
 
-先按[小程序主线：首页 → 设备 → 图表 → 预约](../docs/miniapp-business.md#先看这条链路)查看界面、体验流程与对应代码；H5 用于浏览器体验，Android 独立 APK 已在 MuMu Android 15 安装并验证核心操作。具体范围与待验证项见 [APK 验收记录](../docs/android-apk-validation.md)，iOS 未生成 IPA。
+先按[小程序主线：首页 → 设备 → 图表 → 预约](../docs/miniapp-business.md#先看这条链路)查看界面、体验流程与对应代码；H5 用于浏览器体验，Android 独立 APK 已在 MuMu Android 15 安装并验证核心操作，iOS 已通过签名基座在 iPhone 真机验证登录、导航、曲线、预约及退出重进持久化。分端范围见 [APK 验收记录](../docs/android-apk-validation.md)与 [iOS 真机记录](../docs/ios-device-validation.md)。
 
 当前默认开启**本地演示模式**：请求不访问旧服务，登录账号 `demo` / `Demo1234`。展示名：智慧设施助手 / Smart Facility Assistant。源码目录为 `miniprogram`。
 

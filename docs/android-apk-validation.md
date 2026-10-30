@@ -47,7 +47,7 @@ Windows、HBuilderX 5.33、MuMu Android 15，720×1280。模拟器上报 HUAWEI 
 - 首页冷启动截图仍出现深色状态栏图标，浅色切换效果不稳定；不能声明已解决。内容与状态栏未重叠。
 - 输入及提交完成；真实软键盘面板未在模拟器完整截图中确认，遮挡和键盘收起行为仍待真机补验。
 - 真实蓝牙、打印、枪架硬件、微信授权和真实消息推送均未接入；所有业务修改使用本端本地演示数据。
-- iOS 未生成 IPA，缺少 Mac / Xcode、Apple 签名材料及 iPhone。
+- 本文为 Android 验收；后续 iOS 已通过免费签名基座在 iPhone 真机验证核心主线，见 [iOS 真机记录](ios-device-validation.md)。未制作项目独立发行 IPA。
 - DCloud 所有权和手机号验证已由用户完成，使用云端证书；没有读取或记录证书密码。未支付排队加速或其他费用。
 - ADB 曾 offline；MuMu 重启后恢复。此连接限制与应用业务结果分别记录。
 - 没有新增安装 Android Studio / SDK。项目、APK、截图在 E 盘；HBuilderX 快速打包仍使用工具默认的 C 盘用户缓存 `AppData/Local/HBuilder X/AndroidPackWork`。
