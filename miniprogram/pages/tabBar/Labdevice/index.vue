@@ -29,7 +29,7 @@
 		},
 		data() {
 			return {
-				height: 0,
+				height: '0px',
 				isGun: false,
 				noHomeTo: false,
 				tabBarIndex: "",

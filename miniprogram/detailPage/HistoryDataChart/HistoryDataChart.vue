@@ -26,6 +26,7 @@
 			<view v-if="isType">
 				<qiun-data-charts
 					v-show="!isHorizontal"
+					style="width: 100%; height: 500rpx;"
 					type="line"
 					:chartData="historicalData"
 					background="#ffffff"
@@ -41,6 +42,7 @@
 			<view v-else>
 				<qiun-data-charts
 					v-show="!isHorizontal"
+					style="width: 100%; height: 500rpx;"
 					type="line"
 					:chartData="historicalTypeData"
 					background="#ffffff"
@@ -63,6 +65,7 @@
 				<uni-icons class="icon" type="clear" size="30" @click="closeHorizontal"></uni-icons>
 				<qiun-data-charts
 					type="line"
+					style="width: 100%; height: 100%;"
 					:chartData="horizontalData"
 					background="#ffffff"
 					:canvas2d="true"
@@ -75,6 +78,7 @@
 				<uni-icons class="icon" type="clear" size="30" @click="closeHorizontal"></uni-icons>
 				<qiun-data-charts
 					type="line"
+					style="width: 100%; height: 100%;"
 					:chartData="typeHorizontalData"
 					background="#ffffff"
 					:canvas2d="true"

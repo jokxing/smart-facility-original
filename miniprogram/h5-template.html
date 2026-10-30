@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="智慧设施助手跨端核心演示：设备监测、房间、预约、告警与运单，使用当前浏览器本地数据。" />
     <link rel="icon" href="/static/images/tabBar-home-on.png" />
-    <link rel="stylesheet" href="/static/index.css" />
     <style>
-      uni-page-head .uni-page-head-shadow-grey::after {
+      /* uni-app 默认用 body 伪元素预加载远程导航阴影；演示使用本地渐变。 */
+      body::after { animation: none !important; -webkit-animation: none !important; }
+      .uni-page-head-shadow-grey::after {
         background-image: linear-gradient(to bottom, rgba(0, 0, 0, .08), transparent) !important;
       }
     </style>
+    <link rel="stylesheet" href="/static/index.css" />
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>

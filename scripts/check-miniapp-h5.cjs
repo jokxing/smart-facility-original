@@ -95,6 +95,16 @@ const back = async () => {
   await page.locator('canvas').first().waitFor({ state: 'visible' });
   await page.getByText('24h', { exact: true }).click();
   await page.waitForTimeout(800);
+  const plotted = await page.locator('.data-chart canvas').first().evaluate(canvas => {
+    const rect = canvas.getBoundingClientRect();
+    const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    let bluePixels = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] < 100 && pixels[i + 1] > 80 && pixels[i + 1] < 210 && pixels[i + 2] > 160 && pixels[i + 3] > 100) bluePixels++;
+    }
+    return {height: rect.height, bluePixels};
+  });
+  assert.ok(plotted.height > 100 && plotted.bluePixels > 20, `Chart curve is not visible: ${JSON.stringify(plotted)}`);
   await screenshot('03-chart');
   record('historical chart canvas and period switch');
   await back();

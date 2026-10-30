@@ -1,10 +1,10 @@
 # 智慧设施助手（关联小程序）
 
-这是智慧设施平台的 uni-app 副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts，保留微信小程序能力，并适配 H5。构建复用本机安装的 HBuilderX Vue 2 编译器，`package.json` 提供统一命令入口。
+这是智慧设施平台的 uni-app 副本。源码使用 Vue 2、uni-ui、自定义 TabBar、uCharts，保留微信小程序能力，并适配 H5 与 Android。构建复用本机安装的 HBuilderX Vue 2 编译器，`package.json` 提供统一命令入口。
 
 原小程序由本人从 0 搭建，并开发首页、预约、数据图表、移液枪等部分模块，其他功能按团队协作说明。当前副本使用 AI 辅助脱敏、Mock 化及修复，原开发职责与展示整理分别介绍。
 
-先按[小程序主线：首页 → 设备 → 图表 → 预约](../docs/miniapp-business.md#先看这条链路)查看界面、体验流程与对应代码；H5 用于跨端补充，安卓为后续扩展方向。
+先按[小程序主线：首页 → 设备 → 图表 → 预约](../docs/miniapp-business.md#先看这条链路)查看界面、体验流程与对应代码；H5 用于浏览器体验，Android 独立 APK 已在 MuMu Android 15 安装并验证核心操作。具体范围与待验证项见 [APK 验收记录](../docs/android-apk-validation.md)，iOS 未生成 IPA。
 
 当前默认开启**本地演示模式**：请求不访问旧服务，登录账号 `demo` / `Demo1234`。展示名：智慧设施助手 / Smart Facility Assistant。源码目录为 `miniprogram`。
 
@@ -42,6 +42,12 @@ npm run test:h5
 已有浏览器时可使用 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 指定，`H5_URL` 可指向自选站点。测试会修改其新建浏览器上下文的演示数据。此命令说明仅补齐依赖位置，本次文档整理未重新安装工具或运行测试；移液枪详情的现有断言偏弱，不能仅凭脚本整体通过判定详情数据加载完成。
 
 `npm run build:mp-weixin` 编译微信目标；`npm run build:app` 仅编译 App 资源，**不生成 APK / IPA 安装包**。详细范围、证据与打包限制见[跨端验证记录](../docs/cross-platform-validation.md)。
+
+## Android 打包与提交约定
+
+在 HBuilderX 中使用“发行 → App-Android/iOS-云打包”，选择 Android 正式包。需要使用自己的 DCloud 账号、应用权限及签名配置；仓库中的 AppID 和包名是本次演示构建的标识，不是可复用的账号授权或签名材料。微信运行也需使用自己有权限的 AppID。
+
+`unpackage/`（含 APK、云证书缓存和构建输出）、本地微信私有配置、`.tmp/`、日志及批量验收截图不提交 Git。APK 如需分享，应单独分发或使用仓库 Release 附件；不要上传 keystore、证书密码或打包账号信息。源码提交保留适配实现、回归脚本与分端验收说明。
 
 ## 运行与阅读
 

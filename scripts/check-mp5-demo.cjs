@@ -144,4 +144,30 @@ check('logout keeps handles', function () {
 	assert.ok(row.items.processDate);
 });
 
+check('alarm tabs keep scoped counts across filters, pages and processing', function () {
+	var scope = {objId: 950001, objType: 3, pageNum: 1, pageSize: 10};
+	var initial = alarm.historyForObj(scope);
+	assert.strictEqual(initial.alarmStat.total, 3);
+	assert.deepStrictEqual(alarm.historyForObj(Object.assign({}, scope, {process: 1})).alarmStat, initial.alarmStat);
+	assert.strictEqual(alarm.historyForObj(Object.assign({}, scope, {process: 1})).total, 0);
+	var id = initial.list[0].alarmInfo[0].id;
+	assert.strictEqual(alarm.applyProcess({alarmId: id, errorType: 1, processDate: '2026-10-06 13:00:00'}, false).ok, true);
+	var expected = {total: 3, noProcessedCount: 2, processedCount: 1};
+	[2, 0, 1, 0, 2].forEach(function (process) {
+		var result = alarm.historyForObj(Object.assign({}, scope, {process: process}));
+		assert.deepStrictEqual(result.alarmStat, expected);
+		assert.deepStrictEqual(result.list[0].alarmStat, expected);
+		assert.strictEqual(result.total, process === 2 ? 3 : (process === 0 ? 2 : 1));
+		assert.strictEqual(result.list[0].alarmInfo.length, result.total);
+	});
+	var emptyPage = alarm.historyForObj(Object.assign({}, scope, {process: 1, pageNum: 2, pageSize: 1}));
+	assert.deepStrictEqual(emptyPage.list, []);
+	assert.deepStrictEqual(emptyPage.alarmStat, expected);
+	assert.strictEqual(emptyPage.total, 1);
+	var mission = alarm.historyForMission({type: 11, isHead: 1, process: 2, pageSize: 20});
+	[0, 1].forEach(function (process) {
+		assert.deepStrictEqual(alarm.historyForMission({type: 11, isHead: 1, process: process, pageSize: 1}).alarmStat, mission.alarmStat);
+	});
+});
+
 console.log('MP5 checks passed');

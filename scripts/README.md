@@ -1,6 +1,6 @@
 # 小程序检查脚本
 
-更新：2026-10-29。图文阅读入口见[小程序与 H5 导览](../docs/miniapp-business.md)，分端结果见[跨端验证记录](../docs/cross-platform-validation.md)。本次只整理文档及已有图片，未重新运行检查。
+更新：2026-10-30。图文阅读入口见[小程序与 H5 导览](../docs/miniapp-business.md)，分端结果见[跨端验证记录](../docs/cross-platform-validation.md)。本轮补充 Android 启动、弹窗返回和报警分类计数检查，并完成 H5 核心回归；独立 APK 的实际覆盖见 [APK 验收记录](../docs/android-apk-validation.md)。
 
 2026-10-28 新增跨端入口：`build-miniapp.ps1 -Platform h5|mp-weixin|app-plus`、`serve-miniapp-h5.cjs`、`check-miniapp-h5.cjs` 和 `stage-miniapp-h5.cjs`。H5 浏览器检查使用 Playwright，输出到 `docs/evidence/cross-platform-h5`；只对新建的测试浏览器上下文执行写入。阶段与结果见[跨端验证记录](../docs/cross-platform-validation.md)。
 
@@ -22,6 +22,8 @@
 | check-miniapp-gun-navigation.cjs | 取枪完成后的返回栈 |
 | check-miniapp-gun-return-list.cjs | 返回列表时的刷新及状态读取 |
 | check-miniapp-status-color.cjs | 状态颜色及未知/空值 |
+| check-miniapp-startup.cjs | 页面就绪后的登录跳转、共享导航锁及未登录请求拦截 |
+| check-miniapp-popup-back.cjs | App 系统返回时关闭可见弹窗，避免直接离开页面 |
 
 2026-10-14 与 2026-10-28 的历史记录为上述 10 个脚本通过。通过的只是脚本覆盖的逻辑，不扩大为全部小程序流程验收。
 

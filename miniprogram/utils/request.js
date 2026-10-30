@@ -9,6 +9,14 @@ var jumpingLogin = false
 function toLogin() {
 	logOutNum++
 	session.logout()
+	// 与应用生命周期共用跳转锁，避免并发请求重复 reLaunch。
+	if (typeof getApp === 'function') {
+		var application = getApp()
+		if (application && application.applySessionRoute) {
+			application.applySessionRoute()
+			return
+		}
+	}
 	if (logOutNum === 1 && !jumpingLogin) {
 		jumpingLogin = true
 		uni.reLaunch({

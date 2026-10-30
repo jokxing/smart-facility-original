@@ -4,7 +4,6 @@
 	export default {
 		onLaunch() {
 			uni.hideTabBar()
-			this.applySessionRoute()
 			this.versionUpdate()
 		},
 		globalData: {
@@ -52,6 +51,8 @@
 				if (this._sessionJumping) return
 				var token = storage.getDemo('token')
 				var route = this.currentRoute()
+				// App 首屏尚未建立时不能发起 reLaunch，等待页面 onReady。
+				if (!route) return
 				if (!session.isDemoToken(token)) {
 					if (!this.isLoginRoute(route)) {
 						this._sessionJumping = true
@@ -105,7 +106,7 @@
 			}
 		},
 		onShow() {
-			this.applySessionRoute()
+			if (this._sessionReady) this.applySessionRoute()
 		},
 		onHide: function() {
 		}
@@ -131,6 +132,10 @@
 		margin: 0 auto;
 		background: #e6eaf0;
 	}
+	body::after {
+		animation: none !important;
+		-webkit-animation: none !important;
+	}
 	.uni-page-head, .tab-bar, .device-header, .back-log .flex-top, .news-inform .flex-top {
 		width: 100%;
 		max-width: 480px;
@@ -144,7 +149,7 @@
 		background-color: #F3F5F9;
 	}
 	.back-log .flex-top, .news-inform .flex-top { top: var(--window-top, 0px); }
-	uni-page-head .uni-page-head-shadow-grey::after {
+	.uni-page-head-shadow-grey::after {
 		background-image: linear-gradient(to bottom, rgba(0, 0, 0, .08), transparent) !important;
 	}
 	.uni-popup [name="content"] {

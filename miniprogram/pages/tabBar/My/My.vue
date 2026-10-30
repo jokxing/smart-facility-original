@@ -15,7 +15,7 @@
 					<view class="demo-uni-col" @click="handleGoMyResponsible(2)">
 						<text class="text">{{$t('labDevice.equipment')}}</text>
 						<view class="num">
-							<uni-title type="h2" :title="thingsUser.instrumentCount"></uni-title>
+							<uni-title type="h2" :title="String(thingsUser.instrumentCount)"></uni-title>
 							<!-- <text class="span"></text> -->
 						</view>
 					</view>
@@ -24,7 +24,7 @@
 					<view class="demo-uni-col" @click="handleGoMyResponsible(3)">
 						<text class="text">{{$t('room.room')}}</text>
 						<view class="num">
-							<uni-title type="h2" :title="thingsUser.roomCount"></uni-title>
+							<uni-title type="h2" :title="String(thingsUser.roomCount)"></uni-title>
 							<!-- <text class="span">间</text> -->
 						</view>
 					</view>
@@ -37,13 +37,13 @@
 				<uni-col :span="11">
 					<view class="demo-uni-col" @click="handleGoBacklog">
 						<text class="text">{{$t('my.myTodoList')}}</text>
-						<uni-title type="h2" :title="thingsUser.waitHandleNum" color="#5896D3"></uni-title>
+						<uni-title type="h2" :title="String(thingsUser.waitHandleNum)" color="#5896D3"></uni-title>
 					</view>
 				</uni-col>
 				<uni-col :span="11">
 					<view class="demo-uni-col" @click="handleGoMyAppointment">
 						<text class="text">{{$t('my.myOrder')}}</text>
-						<uni-title type="h2" :title="thingsUser.reservationStatistics.noStartNum" color="#42C2A9"></uni-title>
+						<uni-title type="h2" :title="String(thingsUser.reservationStatistics.noStartNum)" color="#42C2A9"></uni-title>
 					</view>
 				</uni-col>
 			</uni-row>
@@ -55,7 +55,7 @@
 					<view @click="handleGoMyMission(item.thingsType)">
 						<text class="title">{{ item.thingsType === 4 ? $t('my.equipmentAlarm') : $t('my.roomAlarm') }}</text>
 						<view class="num">
-							<uni-title type="h2" :title="item.total"></uni-title>
+							<uni-title type="h2" :title="String(item.total)"></uni-title>
 							<!-- <text class="unit">次</text> -->
 						</view>
 						<view class="handle-num">

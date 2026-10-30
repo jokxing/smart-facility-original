@@ -229,7 +229,7 @@ function matchProcess(row, process) {
 	return Number(row.process) === Number(process);
 }
 
-function scopedEvents(data) {
+function scopedEvents(data, ignoreProcess) {
 	var isHead = data && (data.isHead === 1 || data.isHead === '1');
 	var user = session.currentUser() || seeds.DEMO_USER;
 	var objId = data && (data.objId != null ? data.objId : data.thingsId);
@@ -240,22 +240,26 @@ function scopedEvents(data) {
 		if (objType != null && !Number.isNaN(objType) && Number(row.objType) !== objType) return false;
 		if (miniType != null && !Number.isNaN(miniType) && Number(row.miniType) !== miniType) return false;
 		if (isHead && !isResponsible(row.miniType === 4 ? 'instrument' : 'room', row.thingsId, user.id)) return false;
-		if (!matchProcess(row, data && data.process)) return false;
+		if (!ignoreProcess && !matchProcess(row, data && data.process)) return false;
 		return true;
 	});
 }
 
 function wrapPage(rows, data) {
+	// 分类标签统计整个对象/负责人范围；列表 total 仍使用筛选后的数量供分页。
+	var scoped = rows;
+	rows = scoped.filter(function (row) { return matchProcess(row, data && data.process); });
 	var page = parsePage(data);
 	var start = (page.pageNum - 1) * page.pageSize;
 	var slice = start >= rows.length ? [] : rows.slice(start, start + page.pageSize);
-	var processed = rows.filter(function (row) { return row.process; }).length;
+	var processed = scoped.filter(function (row) { return row.process; }).length;
 	var alarmStat = {
-		total: rows.length,
-		noProcessedCount: rows.length - processed,
+		total: scoped.length,
+		noProcessedCount: scoped.length - processed,
 		processedCount: processed
 	};
 	return {
+		alarmStat: alarmStat,
 		list: slice.length ? [{alarmStat: alarmStat, alarmInfo: slice}] : [],
 		total: rows.length,
 		pageNum: page.pageNum,
@@ -264,11 +268,11 @@ function wrapPage(rows, data) {
 }
 
 function historyForObj(data) {
-	return wrapPage(scopedEvents(data), data);
+	return wrapPage(scopedEvents(data, true), data);
 }
 
 function historyForMission(data) {
-	return wrapPage(scopedEvents(data), data);
+	return wrapPage(scopedEvents(data, true), data);
 }
 
 function findEvent(id) {

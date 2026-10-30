@@ -272,6 +272,11 @@
 			}
 			.scroll-Y {
 				height: 800rpx;
+				/* #ifdef APP-PLUS */
+				// 小屏仍需完整显示日期、关闭入口和底部操作按钮。
+				height: 40vh;
+				max-height: 600rpx;
+				/* #endif */
 			}
 		}
 		.footer{

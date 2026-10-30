@@ -107,9 +107,11 @@
 					this.isList = true;
 					this.pageSize = res.items.pageSize;
 					this.total = res.items.total;
+					// 空筛选结果也需更新全范围统计，不能从当前列表计算数量。
+					if (res.items.alarmStat) this.$emit('handleAlarmStat', res.items.alarmStat)
 					if(res.items.list && res.items.list.length > 0){
 						const { alarmStat, alarmInfo } = res.items.list[0];
-						this.$emit('handleAlarmStat', alarmStat)
+						if (!res.items.alarmStat) this.$emit('handleAlarmStat', alarmStat)
 						var info = alarmInfo || []
 						for(var i = 0; i < info.length; i++){
 							this.list.push(info[i])
@@ -189,7 +191,7 @@
 		margin: 16rpx 20rpx 0;
 		.abnormalRecord-card{
 			margin-bottom: 20rpx;
-			/* #ifdef H5 */
+			/* #ifdef H5 || APP-PLUS */
 			// uni-card 的内联 margin: 0 会覆盖普通外边距。
 			margin-bottom: 24rpx !important;
 			&:last-child{

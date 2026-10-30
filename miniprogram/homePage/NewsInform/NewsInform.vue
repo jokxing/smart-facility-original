@@ -424,7 +424,7 @@
 				color: $primary;
 				margin: 0;
 				border-radius: 30rpx;
-				/* #ifdef H5 */
+				/* #ifdef H5 || APP-PLUS */
 				display: flex;
 				align-items: center;
 				justify-content: center;

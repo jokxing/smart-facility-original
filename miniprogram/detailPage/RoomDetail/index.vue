@@ -104,7 +104,7 @@
 
 <style scoped lang="scss">
 	@import "../../style/css/tab.scss";
-	/* #ifdef H5 */
+	/* #ifdef H5 || APP-PLUS */
 	.room-detail-page .tab-box{
 		width: calc(100% - 40rpx);
 	}

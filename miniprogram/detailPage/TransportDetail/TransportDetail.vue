@@ -105,7 +105,7 @@
 		</uni-popup>
 		<depar-hint @show="change" ref='deparHint' @change="setState"></depar-hint>
 		<uni-popup ref="alertDialog" type="dialog">
-			<uni-popup-dialog :type="msgType" :cancelText="$t('common.cancel')" :confirmText="$t('common.confirm')"
+			<uni-popup-dialog type="info" :cancelText="$t('common.cancel')" :confirmText="$t('common.confirm')"
 				:content="sendTitle" @confirm="dialogConfirm"></uni-popup-dialog>
 		</uni-popup>
 	</view>

@@ -126,4 +126,13 @@
 		width: 20px;
 		height: 20px;
 	}
+	/* #ifdef APP-PLUS */
+	.tab-bar{ height: auto; }
+	.navigator{
+		box-sizing: border-box;
+		width: 100%;
+		min-height: 100rpx;
+		padding: 12rpx 24rpx;
+	}
+	/* #endif */
 </style>

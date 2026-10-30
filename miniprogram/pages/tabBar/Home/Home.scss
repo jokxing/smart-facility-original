@@ -116,7 +116,7 @@ $fontsSmall: 28rpx;
 		background: #fff;
 		border-radius: 12rpx;
 	}
-	/* #ifdef H5 */
+	/* #ifdef H5 || APP-PLUS */
 	.header{
 		::v-deep .demo{
 			height: 300rpx !important;
@@ -148,6 +148,14 @@ $fontsSmall: 28rpx;
 	.more-features{
 		top: 216rpx;
 	}
+	/* #endif */
+	/* #ifdef APP-PLUS */
+	.header ::v-deep .demo{
+		height: calc(300rpx + var(--status-bar-height)) !important;
+		padding-top: calc(20rpx + var(--status-bar-height)) !important;
+	}
+	.search{ top: calc(100rpx + var(--status-bar-height)); }
+	.more-features{ top: calc(216rpx + var(--status-bar-height)); }
 	/* #endif */
 	.run-line{
 		margin: 0 8rpx 16rpx 34rpx;

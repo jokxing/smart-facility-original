@@ -23,7 +23,18 @@ unpackage/
 *.pfx
 *.jks
 *.keystore
+*.p8
+*.mobileprovision
+*.provisionprofile
 project.private.config.json
+
+# Installers and app update packages are distributed separately from source
+*.apk
+*.aab
+*.apks
+*.ipa
+*.wgt
+.hbuilderx/
 
 # Logs and local editor / OS metadata
 *.log

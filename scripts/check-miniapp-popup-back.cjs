@@ -1,0 +1,18 @@
+const assert = require('node:assert/strict');
+const {closeTopPopup} = require('../miniprogram/utils/app-popup-back.js');
+let closed = [];
+const popup = name => ({$options: {name: 'uniPopup'}, showTrans: true, type: 'bottom', close: () => closed.push(name)});
+const first = popup('outer');
+const second = popup('inner');
+assert.equal(closeTopPopup({$children: [first, {$children: [second]}]}), true);
+assert.deepEqual(closed, ['inner']);
+second.showTrans = false;
+assert.equal(closeTopPopup({$children: [second]}), false);
+first.type = 'message';
+assert.equal(closeTopPopup({$children: [first]}), false);
+const form = popup('form');
+const owner = {$children: [form], $refs: {popup: form}, handleClose: () => closed.push('reset-selection')};
+assert.equal(closeTopPopup({$children: [owner]}), true);
+assert.equal(closed.at(-1), 'reset-selection');
+assert.equal(closeTopPopup({}), false);
+console.log('Popup back: topmost, hidden/message exclusion and form cleanup passed');

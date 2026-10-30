@@ -136,6 +136,7 @@
 		getActivitiUnread,
 		postInstrumentSearch
 	} from '@/utils/api.js';
+	const session = require('@/utils/demo/session.js');
 	export default {
 		components: {
 			navbar
@@ -172,6 +173,7 @@
 			}
 		},
 		onShow() {
+			if (!session.isLoggedIn()) return;
 
 			let curRoute = 'pages/tabBar/Home/Home';
 			this.tabBarIndex = curRoute;
@@ -181,6 +183,7 @@
 			this.init()
 		},
 		onReady() {
+			if (!session.isLoggedIn()) return;
 
 			var _this = this;
 			uni.getStorage({
